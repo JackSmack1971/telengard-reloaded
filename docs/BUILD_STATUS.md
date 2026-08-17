@@ -13,8 +13,9 @@ Phase 2 acceptance review completed 2026-08-16 and failed. The implemented
 slice covers the successful inn → expedition → carried gold → safety → secured
 gold → completion → next expedition loop, plus dedicated suspension/save
 resume. TEL-037 now supplies the renderer-independent death/failure transition,
-and TEL-080 adds the Classic character-deletion policy; Legacy/Adventure death
-wealth and legacy policies remain later work. Runtime
+TEL-080 adds the Classic character-deletion policy, and TEL-081 adds the
+Legacy death policy; Adventure death wealth and dead-hero legacy records remain
+later work. Runtime
 producers for the remaining expedition counters also remain absent; see [the
 Phase 2 gate](gates/PHASE-2.md).
 
@@ -42,8 +43,8 @@ the generic feature definition/runtime/activation foundation, TEL-041 adds
 deterministic weighted outcome selection, TEL-042 adds fountain outcomes,
 TEL-043 adds altar outcome resolution, TEL-044 adds configured pit drops, and
 TEL-045 adds configured teleporter relocation; feature-specific knowledge,
-enemy-damage production, canonical encounter balance, and mode-specific death
-loss remain later scope.
+enemy-damage production, canonical encounter balance, and remaining
+Adventure-mode death loss remain later scope.
 
 ## Core Alpha gap review — 2026-08-17
 
@@ -1927,6 +1928,36 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
   `./eng/verify.ps1 -Mode Full` all passed. The verification script required a
   process-scoped PowerShell execution-policy bypass because the host policy
   rejected unsigned local scripts.
+
+## TEL-081 verification
+
+- Status: implemented and verified; Legacy death now preserves the dead hero's identity and
+  character progression, preserves persistent map/journal state and secured
+  wealth, and loses unsecured gold and carried equipment/loot references.
+- Tests added: Legacy death state/policy coverage and deterministic replay;
+  existing death event ordering, save round-trip, and dead-state movement
+  restrictions remain covered.
+- Files/modules affected: `src/Telengard.Core/combat/Death.cs`,
+  `tests/Telengard.Architecture.Tests/DeathTests.cs`, and this status document.
+- New public APIs: none; the existing `PlayerDeathCommand`,
+  `PlayerDeathResolver`, `PlayerDiedEvent`, and `ExpeditionFailedEvent` remain
+  the command/event boundary.
+- New events: none.
+- Save-schema impact: none; the existing explicit player and expedition DTOs
+  already persist the resulting dead-hero and unsecured-asset state. Save,
+  simulation, generator, and content versions remain unchanged.
+- Known follow-up work: the specification leaves the exact retained-equipment
+  and heirloom policy as a `CONFIGURATION/TUNING DECISION REQUIRED`; this slice
+  does not invent that policy. Dead-hero records, graves, heirlooms, and
+  Adventure death remain TEL-082–TEL-085. No next TEL ticket was started.
+- Invariants: validation remains in the simulation; persistent knowledge and
+  secured wealth are unchanged; carried/unsecured wealth is not secured by
+  death; no randomness, hidden-information disclosure, or presentation
+  authority was added.
+- Acceptance: focused `DeathTests` (9 passed), formatter verification,
+  zero-warning Release build, and full verification passed with 293 Release
+  tests using the repository-local SDK and a process-scoped Git line-ending
+  warning suppression for the unrelated dirty `CHANGELOG.md`.
 
 ## Mutation baseline
 

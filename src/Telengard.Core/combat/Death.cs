@@ -1,3 +1,4 @@
+using Telengard.Core.Items;
 using Telengard.Core.Simulation;
 
 namespace Telengard.Core.Combat;
@@ -34,16 +35,24 @@ public static class PlayerDeathResolver
             throw new InvalidOperationException("The player cannot die while hit points remain.");
         }
 
+        var losesUnsecuredAssets = state.CurrentMode is GameMode.Classic or GameMode.Legacy;
         var next = state with
         {
-            Player = state.CurrentMode == GameMode.Classic
-                ? DeleteClassicCharacter()
-                : state.Player with { Alive = false, HitPoints = 0 },
+            Player = state.CurrentMode switch
+            {
+                GameMode.Classic => DeleteClassicCharacter(),
+                GameMode.Legacy => ResolveLegacyDeath(state.Player),
+                _ => (state.Player with { Alive = false, HitPoints = 0 })
+            },
             Expedition = state.Expedition with
             {
                 Active = false,
-                CarriedGold = state.CurrentMode == GameMode.Classic ? 0 : state.Expedition.CarriedGold,
-                AcquiredItems = state.CurrentMode == GameMode.Classic ? [] : state.Expedition.AcquiredItems
+                CarriedGold = losesUnsecuredAssets
+                    ? 0
+                    : state.Expedition.CarriedGold,
+                AcquiredItems = losesUnsecuredAssets
+                    ? Array.Empty<string>()
+                    : state.Expedition.AcquiredItems
             },
             Inn = state.Inn with { IsAtInn = true },
             Combat = null
@@ -61,5 +70,16 @@ public static class PlayerDeathResolver
     {
         Level = 0,
         Alive = false
+    };
+
+    private static PlayerState ResolveLegacyDeath(PlayerState player) => player with
+    {
+        Alive = false,
+        HitPoints = 0,
+        CarriedGold = 0,
+        Inventory = [],
+        EquipmentSlots = player.EquipmentSlots
+            .Select(slot => new EquipmentSlotState(slot.SlotId))
+            .ToArray()
     };
 }
