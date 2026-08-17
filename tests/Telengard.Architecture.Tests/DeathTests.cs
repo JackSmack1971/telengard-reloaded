@@ -67,6 +67,54 @@ public sealed class DeathTests
     }
 
     [Fact]
+    public void Legacy_death_preserves_the_dead_hero_and_persistent_knowledge_but_loses_unsecured_assets()
+    {
+        var state = ActiveState() with { CurrentMode = GameMode.Legacy };
+
+        var result = PlayerDeathResolver.Resolve(state, new PlayerDeathCommand());
+
+        Assert.False(result.State.Player.Alive);
+        Assert.Equal(0, result.State.Player.HitPoints);
+        Assert.Equal(state.Player.Id, result.State.Player.Id);
+        Assert.Equal(state.Player.Attributes, result.State.Player.Attributes);
+        Assert.Equal(state.Player.Level, result.State.Player.Level);
+        Assert.Equal(state.Player.Experience, result.State.Player.Experience);
+        Assert.Equal(state.Player.Talents, result.State.Player.Talents);
+        Assert.Equal(state.Player.Spells, result.State.Player.Spells);
+        Assert.Equal(0, result.State.Player.CarriedGold);
+        Assert.Empty(result.State.Player.Inventory);
+        Assert.Equal(state.Player.EquipmentSlots.Select(slot => slot.SlotId), result.State.Player.EquipmentSlots.Select(slot => slot.SlotId));
+        Assert.All(result.State.Player.EquipmentSlots, slot => Assert.Null(slot.ItemInstanceId));
+        Assert.False(result.State.Expedition.Active);
+        Assert.Equal(0, result.State.Expedition.CarriedGold);
+        Assert.Empty(result.State.Expedition.AcquiredItems);
+        Assert.Equal(state.SecuredProgress, result.State.SecuredProgress);
+        Assert.Equal(state.Legacy, result.State.Legacy);
+        Assert.Equal(state.Knowledge, result.State.Knowledge);
+
+        Assert.Collection(
+            result.Events,
+            domainEvent => Assert.IsType<PlayerDiedEvent>(domainEvent),
+            domainEvent => Assert.IsType<ExpeditionFailedEvent>(domainEvent));
+    }
+
+    [Fact]
+    public void Legacy_death_replays_to_the_same_state_and_events()
+    {
+        var first = PlayerDeathResolver.Resolve(
+            ActiveState() with { CurrentMode = GameMode.Legacy },
+            new PlayerDeathCommand());
+        var second = PlayerDeathResolver.Resolve(
+            ActiveState() with { CurrentMode = GameMode.Legacy },
+            new PlayerDeathCommand());
+
+        Assert.Equal(
+            SaveGameSerializer.Serialize(first.State),
+            SaveGameSerializer.Serialize(second.State));
+        Assert.Equal(first.Events, second.Events);
+    }
+
+    [Fact]
     public void Death_requires_a_live_expedition_and_depleted_hit_points()
     {
         var command = new PlayerDeathCommand();
@@ -91,10 +139,14 @@ public sealed class DeathTests
         Assert.Equal(first.Events, second.Events);
     }
 
-    [Fact]
-    public void Dead_state_round_trips_through_the_explicit_save_contract()
+    [Theory]
+    [InlineData(GameMode.Classic)]
+    [InlineData(GameMode.Legacy)]
+    public void Dead_state_round_trips_through_the_explicit_save_contract(GameMode mode)
     {
-        var result = PlayerDeathResolver.Resolve(ActiveState(), new PlayerDeathCommand());
+        var result = PlayerDeathResolver.Resolve(
+            ActiveState() with { CurrentMode = mode },
+            new PlayerDeathCommand());
 
         var restored = SaveGameSerializer.Deserialize(SaveGameSerializer.Serialize(result.State));
 
