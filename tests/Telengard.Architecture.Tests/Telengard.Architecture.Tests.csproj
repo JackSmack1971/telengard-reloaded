@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <RootNamespace>Telengard.Architecture.Tests</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="coverlet.collector" Version="6.0.4" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/Telengard.Content/Telengard.Content.csproj" />
+    <ProjectReference Include="../../src/Telengard.Core/Telengard.Core.csproj" />
+    <ProjectReference Include="../../src/Telengard.Save/Telengard.Save.csproj" />
+    <ProjectReference Include="../../src/Telengard.Terminal/Telengard.Terminal.csproj" />
+    <ProjectReference Include="../../tools/Telengard.TestHarness/Telengard.TestHarness.csproj" />
+  </ItemGroup>
+</Project>

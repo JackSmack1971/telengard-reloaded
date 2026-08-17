@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Telengard.Terminal</RootNamespace>
+    <AssemblyName>Telengard.Terminal</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Telengard.Core/Telengard.Core.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,17 @@
+{
+  "stryker-config": {
+    "solution": "../../Telengard.sln",
+    "test-projects": ["../../tests/Telengard.Architecture.Tests/Telengard.Architecture.Tests.csproj"],
+    "mutation-level": "Standard",
+    "configuration": "Release",
+    "target-framework": "net8.0",
+    "language-version": "Csharp12",
+    "test-runner": "vstest",
+    "reporters": ["progress", "json", "html", "markdown"],
+    "coverage-analysis": "perTest",
+    "additional-timeout": 10000,
+    "concurrency": 1,
+    "disable-bail": true,
+    "thresholds": { "high": 80, "low": 0, "break": 0 }
+  }
+}

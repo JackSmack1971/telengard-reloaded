@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>Telengard.Core</RootNamespace>
+    <AssemblyName>Telengard.Core</AssemblyName>
+  </PropertyGroup>
+</Project>
