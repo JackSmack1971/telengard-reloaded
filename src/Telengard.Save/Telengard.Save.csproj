@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>Telengard.Save</RootNamespace>
+    <AssemblyName>Telengard.Save</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Telengard.Core/Telengard.Core.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Telengard.TestHarness</RootNamespace>
+    <AssemblyName>Telengard.TestHarness</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/Telengard.Core/Telengard.Core.csproj" />
+    <ProjectReference Include="../../src/Telengard.Save/Telengard.Save.csproj" />
+  </ItemGroup>
+</Project>

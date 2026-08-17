@@ -1,0 +1,15 @@
+# Local Codex and repository-control files
+/.agents/
+/.codex/
+/.changelog/
+AGENTS.md
+
+# Bundled local SDK
+/.dotnet/
+
+# Build, test, mutation, and coverage output
+**/bin/
+**/obj/
+/TestResults/
+**/StrykerOutput/
+**/.godot/
