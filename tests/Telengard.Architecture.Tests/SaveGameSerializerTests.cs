@@ -37,6 +37,12 @@ public sealed class SaveGameSerializerTests
                         Guid.Parse("00000000-0000-0000-0000-000000000002"),
                         new DungeonPosition(4, 5, 6),
                         Guid.Parse("00000000-0000-0000-0000-000000000003"))
+                ],
+                Heirlooms =
+                [
+                    new HeirloomRecord(
+                        Guid.Parse("00000000-0000-0000-0000-000000000002"),
+                        "ember-blade")
                 ]
             },
             Player = new PlayerState
@@ -76,12 +82,13 @@ public sealed class SaveGameSerializerTests
         Assert.Equal(state.Legacy.PersistentMap.VisitedPositions, roundTrip.Legacy.PersistentMap.VisitedPositions);
         Assert.Equal(state.Legacy.PreviousHeroes, roundTrip.Legacy.PreviousHeroes);
         Assert.Equal(state.Legacy.Graves, roundTrip.Legacy.Graves);
+        Assert.Equal(state.Legacy.Heirlooms, roundTrip.Legacy.Heirlooms);
     }
 
     [Fact]
     public void Deserialize_rejects_unsupported_save_versions()
     {
-        var json = SaveGameSerializer.Serialize(GameState.Create(1234)).Replace("\"saveVersion\": 12", "\"saveVersion\": 13");
+        var json = SaveGameSerializer.Serialize(GameState.Create(1234)).Replace("\"saveVersion\": 13", "\"saveVersion\": 14");
 
         Assert.Throws<SaveFormatException>(() => SaveGameSerializer.Deserialize(json));
     }
@@ -89,7 +96,7 @@ public sealed class SaveGameSerializerTests
     [Fact]
     public void Deserialize_migrates_version_one_saves_with_an_empty_persistent_map()
     {
-        var json = SaveGameSerializer.Serialize(GameState.Create(1234)).Replace("\"saveVersion\": 12", "\"saveVersion\": 1");
+        var json = SaveGameSerializer.Serialize(GameState.Create(1234)).Replace("\"saveVersion\": 13", "\"saveVersion\": 1");
 
         var state = SaveGameSerializer.Deserialize(json);
 
@@ -122,6 +129,19 @@ public sealed class SaveGameSerializerTests
 
         Assert.Equal(GameState.CurrentSaveVersion, state.SaveVersion);
         Assert.Empty(state.Legacy.Graves);
+    }
+
+    [Fact]
+    public void Deserialize_migrates_version_twelve_saves_without_heirlooms()
+    {
+        var document = JsonNode.Parse(SaveGameSerializer.Serialize(GameState.Create(1234)))!.AsObject();
+        document["saveVersion"] = 12;
+        document["legacy"]!.AsObject().Remove("heirlooms");
+
+        var state = SaveGameSerializer.Deserialize(document.ToJsonString());
+
+        Assert.Equal(GameState.CurrentSaveVersion, state.SaveVersion);
+        Assert.Empty(state.Legacy.Heirlooms);
     }
 
     [Fact]
@@ -365,6 +385,24 @@ public sealed class SaveGameSerializerTests
         }));
         Assert.Throws<SaveFormatException>(() => SaveMigrations.Validate(save with
         {
+            Legacy = save.Legacy with { Heirlooms = null }
+        }));
+        Assert.Throws<SaveFormatException>(() => SaveMigrations.Validate(save with
+        {
+            Legacy = save.Legacy with
+            {
+                Heirlooms = [new HeirloomRecordDto { HeroId = Guid.Empty, ItemId = "item" }]
+            }
+        }));
+        Assert.Throws<SaveFormatException>(() => SaveMigrations.Validate(save with
+        {
+            Legacy = save.Legacy with
+            {
+                Heirlooms = [new HeirloomRecordDto { HeroId = Guid.NewGuid(), ItemId = " " }]
+            }
+        }));
+        Assert.Throws<SaveFormatException>(() => SaveMigrations.Validate(save with
+        {
             Legacy = save.Legacy with
             {
                 PersistentMap = save.Legacy.PersistentMap with { ObservedPositions = null! }
@@ -424,7 +462,7 @@ public sealed class SaveGameSerializerTests
         Assert.Throws<ArgumentNullException>(() => SaveMigrations.Validate(null!));
 
         Assert.Throws<SaveFormatException>(() => SaveMigrations.Validate(
-            GameStateSaveDto.FromState(GameState.Create(1234)) with { SaveVersion = 13 }));
+            GameStateSaveDto.FromState(GameState.Create(1234)) with { SaveVersion = 14 }));
     }
 
     [Fact]

@@ -123,6 +123,10 @@ public sealed record GraveRecord(
     DungeonPosition Position,
     Guid? ExpeditionId);
 
+public sealed record HeirloomRecord(
+    Guid HeroId,
+    string ItemId);
+
 public sealed record ExpeditionState
 {
     public Guid? ExpeditionId { get; init; }
@@ -262,6 +266,7 @@ public sealed record LegacyState
 {
     private IReadOnlyList<DeadHeroRecord> _previousHeroes = Array.Empty<DeadHeroRecord>();
     private IReadOnlyList<GraveRecord> _graves = Array.Empty<GraveRecord>();
+    private IReadOnlyList<HeirloomRecord> _heirlooms = Array.Empty<HeirloomRecord>();
 
     public PersistentMapState PersistentMap { get; init; } = new();
 
@@ -296,6 +301,22 @@ public sealed record LegacyState
             _graves = Array.AsReadOnly(graves);
         }
     }
+
+    public IReadOnlyList<HeirloomRecord> Heirlooms
+    {
+        get => _heirlooms;
+        init
+        {
+            ArgumentNullException.ThrowIfNull(value);
+            var heirlooms = value.ToArray();
+            if (heirlooms.Any(heirloom => heirloom is null))
+            {
+                throw new ArgumentException("Heirlooms cannot contain null values.", nameof(value));
+            }
+
+            _heirlooms = Array.AsReadOnly(heirlooms);
+        }
+    }
 }
 public sealed record InnState
 {
@@ -309,7 +330,7 @@ public sealed record SettingsState;
 
 public sealed record GameState
 {
-    public const int CurrentSaveVersion = 12;
+    public const int CurrentSaveVersion = 13;
 
     public int SaveVersion { get; init; } = CurrentSaveVersion;
     public required GameVersions Versions { get; init; }

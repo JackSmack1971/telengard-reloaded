@@ -4,7 +4,7 @@ namespace Telengard.Save;
 
 public static class SaveMigrations
 {
-    public const int CurrentSaveVersion = 12;
+    public const int CurrentSaveVersion = 13;
 
     public static GameStateSaveDto Migrate(GameStateSaveDto save)
     {
@@ -26,6 +26,7 @@ public static class SaveMigrations
         if (save.SaveVersion <= 10) migrated = MigrateVersionTen(migrated);
         if (save.SaveVersion <= 11) migrated = MigrateVersionEleven(migrated);
         if (save.SaveVersion <= 12) migrated = MigrateVersionTwelve(migrated);
+        if (save.SaveVersion <= 13) migrated = MigrateVersionThirteen(migrated);
         return migrated;
     }
 
@@ -96,7 +97,9 @@ public static class SaveMigrations
         if (save.Legacy.PersistentMap is null || save.Legacy.PersistentMap.ObservedPositions is null ||
             save.Legacy.PersistentMap.VisitedPositions is null || save.Legacy.PreviousHeroes is null ||
             save.Legacy.PreviousHeroes.Any(hero => hero is null || hero.Attributes is null || hero.DeathPosition is null) ||
-            save.Legacy.Graves is null || save.Legacy.Graves.Any(grave => grave is null || grave.Position is null))
+            save.Legacy.Graves is null || save.Legacy.Graves.Any(grave => grave is null || grave.Position is null) ||
+            save.Legacy.Heirlooms is null || save.Legacy.Heirlooms.Any(heirloom =>
+                heirloom is null || heirloom.HeroId == Guid.Empty || string.IsNullOrWhiteSpace(heirloom.ItemId)))
         {
             throw new SaveFormatException("Save document is missing legacy state.");
         }
@@ -191,6 +194,14 @@ public static class SaveMigrations
         Legacy = save.Legacy is null
             ? new LegacyStateDto { PersistentMap = EmptyMap(), PreviousHeroes = [], Graves = [] }
             : save.Legacy with { Graves = save.Legacy.Graves ?? [] }
+    };
+
+    private static GameStateSaveDto MigrateVersionThirteen(GameStateSaveDto save) => save with
+    {
+        SaveVersion = CurrentSaveVersion,
+        Legacy = save.Legacy is null
+            ? new LegacyStateDto { PersistentMap = EmptyMap(), PreviousHeroes = [], Graves = [], Heirlooms = [] }
+            : save.Legacy with { Heirlooms = save.Legacy.Heirlooms ?? [] }
     };
 
     private static bool HasValidValues(IReadOnlyList<string>? values) =>
