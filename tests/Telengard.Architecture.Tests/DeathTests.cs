@@ -102,6 +102,9 @@ public sealed class DeathTests
         Assert.Equal(state.Player.Id, grave.HeroId);
         Assert.Equal(state.Player.Position, grave.Position);
         Assert.Equal(state.Expedition.ExpeditionId, grave.ExpeditionId);
+        var heirloom = Assert.Single(result.State.Legacy.Heirlooms);
+        Assert.Equal(state.Player.Id, heirloom.HeroId);
+        Assert.Equal("potion", heirloom.ItemId);
         Assert.Equal(state.Knowledge, result.State.Knowledge);
 
         Assert.Collection(
@@ -141,6 +144,7 @@ public sealed class DeathTests
             prior.HeroId,
             prior.DeathPosition,
             prior.ExpeditionId);
+        var priorHeirloom = new HeirloomRecord(prior.HeroId, "prior-item");
         var state = ActiveState() with
         {
             CurrentMode = GameMode.Legacy,
@@ -148,7 +152,8 @@ public sealed class DeathTests
             {
                 PersistentMap = ActiveState().Legacy.PersistentMap,
                 PreviousHeroes = [prior],
-                Graves = [priorGrave]
+                Graves = [priorGrave],
+                Heirlooms = [priorHeirloom]
             }
         };
 
@@ -158,6 +163,8 @@ public sealed class DeathTests
         Assert.Equal(2, result.State.Legacy.PreviousHeroes.Count);
         Assert.Equal([priorGrave], result.State.Legacy.Graves.Take(1));
         Assert.Equal(2, result.State.Legacy.Graves.Count);
+        Assert.Equal([priorHeirloom], result.State.Legacy.Heirlooms.Take(1));
+        Assert.Equal(2, result.State.Legacy.Heirlooms.Count);
     }
 
     [Fact]

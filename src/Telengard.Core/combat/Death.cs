@@ -61,7 +61,9 @@ public static class PlayerDeathResolver
                         new GraveRecord(
                             state.Player.Id,
                             state.Player.Position,
-                            state.Expedition.ExpeditionId)).ToArray()
+                            state.Expedition.ExpeditionId)).ToArray(),
+                    Heirlooms = state.Legacy.Heirlooms.Concat(
+                        state.Player.Inventory.Select(itemId => new HeirloomRecord(state.Player.Id, itemId))).ToArray()
                 }
                 : state.Legacy,
             Expedition = state.Expedition with

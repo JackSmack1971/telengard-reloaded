@@ -15,13 +15,17 @@ gold → completion → next expedition loop, plus dedicated suspension/save
 resume. TEL-037 now supplies the renderer-independent death/failure transition,
 TEL-080 adds the Classic character-deletion policy, TEL-081 adds the Legacy
 death policy, TEL-082 adds the Adventure return-to-inn policy, TEL-083
-persists Legacy dead-hero records, and TEL-084 persists Legacy grave markers.
-Heirlooms remain later work.
+persists Legacy dead-hero records, TEL-084 persists Legacy grave markers, and
+TEL-085 persists Legacy heirlooms.
 Runtime
 producers for the remaining expedition counters also remain absent; see [the
 Phase 2 gate](gates/PHASE-2.md).
 
 TEL-030 through TEL-037 are complete as the initial Phase 3 encounter slices.
+
+TEL-085 now persists inventory-derived Legacy heirlooms through the explicit
+save contract. Equipment-instance recovery, heirloom selection/balance rules,
+and future dungeon retrieval remain intentionally undefined follow-up work.
 
 Phase 4 acceptance review passed 2026-08-16; see [the Phase 4 gate](gates/PHASE-4.md).
 The review verified the shared generic feature activation/event path, weighted
@@ -2066,6 +2070,49 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
   `core.autocrlf=false` override for unrelated dirty files and a
   process-scoped execution-policy bypass because the host rejects unsigned
   local scripts.
+
+## TEL-085 verification
+
+- Status: implemented and verified; Legacy death now appends one persistent
+  heirloom record for each existing inventory identifier before the current
+  character's inventory is cleared.
+- Tests added: Legacy heirloom creation and append behavior, explicit save
+  round trip, version-12 migration to an empty heirloom collection, invalid
+  heirloom DTO validation, and existing deterministic death/save coverage.
+- Files/modules affected: `src/Telengard.Core/Simulation/GameState.cs`,
+  `src/Telengard.Core/combat/Death.cs`,
+  `src/Telengard.Save/Dto/GameStateSaveDto.cs`,
+  `src/Telengard.Save/Migrations/SaveMigrations.cs`,
+  `tests/Telengard.Architecture.Tests/DeathTests.cs`,
+  `tests/Telengard.Architecture.Tests/SaveGameSerializerTests.cs`,
+  `docs/tasks/README.md`, `CHANGELOG.md`, and this status/plan documentation.
+- New public APIs: `HeirloomRecord`, `LegacyState.Heirlooms`, and
+  `HeirloomRecordDto`.
+- New events: none; the existing committed death/failure event sequence
+  remains the command boundary.
+- Save-schema impact: current save version advanced from 12 to 13. Explicit
+  heirloom DTOs are persisted, and version-12-and-earlier saves migrate to an
+  empty heirloom collection. Simulation, generator, and content versions are
+  unchanged.
+- Design choice: the current runtime exposes carried inventory as string
+  identifiers but has no authoritative item-instance collection. The slice
+  therefore preserves those identifiers, including duplicates, keyed to the
+  dead hero. Equipment-instance retention, rarity/selection policy, and
+  retrieval encounters remain `CONFIGURATION/TUNING DECISION REQUIRED` or
+  later scope; no formula was invented.
+- Known follow-up work: equipment-instance item storage, heirloom encounters,
+  retrieval, and character replacement remain later work. No next TEL ticket
+  was started.
+- Invariants: validation occurs before mutation; persistent map, dead-hero
+  records, graves, and secured wealth remain unchanged; carried/unsecured
+  wealth is not secured by death; equal inputs reproduce equal state/events;
+  no randomness, hidden-information disclosure, or presentation authority was
+  added.
+- Acceptance: focused death/save tests (34 passed), formatter verification,
+  zero-warning Release build, and the full verification gate passed with 300
+  Release tests. The gate required a process-scoped execution-policy bypass
+  and `core.autocrlf=false` because the host rejects unsigned local scripts
+  and reports an unrelated dirty-file line-ending warning.
 
 ## Mutation baseline
 

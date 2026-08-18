@@ -238,19 +238,22 @@ public sealed record LegacyStateDto
     public required PersistentMapStateDto PersistentMap { get; init; }
     public IReadOnlyList<DeadHeroRecordDto>? PreviousHeroes { get; init; }
     public IReadOnlyList<GraveRecordDto>? Graves { get; init; }
+    public IReadOnlyList<HeirloomRecordDto>? Heirlooms { get; init; }
 
     public static LegacyStateDto FromState(LegacyState legacy) => new()
     {
         PersistentMap = PersistentMapStateDto.FromState(legacy.PersistentMap),
         PreviousHeroes = legacy.PreviousHeroes.Select(DeadHeroRecordDto.FromState).ToArray(),
-        Graves = legacy.Graves.Select(GraveRecordDto.FromState).ToArray()
+        Graves = legacy.Graves.Select(GraveRecordDto.FromState).ToArray(),
+        Heirlooms = legacy.Heirlooms.Select(HeirloomRecordDto.FromState).ToArray()
     };
 
     public LegacyState ToState() => new()
     {
         PersistentMap = PersistentMap.ToState(),
         PreviousHeroes = (PreviousHeroes ?? []).Select(hero => hero.ToState()).ToArray(),
-        Graves = (Graves ?? []).Select(grave => grave.ToState()).ToArray()
+        Graves = (Graves ?? []).Select(grave => grave.ToState()).ToArray(),
+        Heirlooms = (Heirlooms ?? []).Select(heirloom => heirloom.ToState()).ToArray()
     };
 }
 
@@ -302,6 +305,20 @@ public sealed record GraveRecordDto
         HeroId,
         Position.ToState(),
         ExpeditionId);
+}
+
+public sealed record HeirloomRecordDto
+{
+    public Guid HeroId { get; init; }
+    public required string ItemId { get; init; }
+
+    public static HeirloomRecordDto FromState(HeirloomRecord heirloom) => new()
+    {
+        HeroId = heirloom.HeroId,
+        ItemId = heirloom.ItemId
+    };
+
+    public HeirloomRecord ToState() => new(HeroId, ItemId);
 }
 
 public sealed record InnStateDto
