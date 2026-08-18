@@ -14,8 +14,9 @@ slice covers the successful inn → expedition → carried gold → safety → s
 gold → completion → next expedition loop, plus dedicated suspension/save
 resume. TEL-037 now supplies the renderer-independent death/failure transition,
 TEL-080 adds the Classic character-deletion policy, TEL-081 adds the Legacy
-death policy, TEL-082 adds the Adventure return-to-inn policy, and TEL-083
-persists Legacy dead-hero records. Graves and heirlooms remain later work.
+death policy, TEL-082 adds the Adventure return-to-inn policy, TEL-083
+persists Legacy dead-hero records, and TEL-084 persists Legacy grave markers.
+Heirlooms remain later work.
 Runtime
 producers for the remaining expedition counters also remain absent; see [the
 Phase 2 gate](gates/PHASE-2.md).
@@ -44,8 +45,8 @@ the generic feature definition/runtime/activation foundation, TEL-041 adds
 deterministic weighted outcome selection, TEL-042 adds fountain outcomes,
 TEL-043 adds altar outcome resolution, TEL-044 adds configured pit drops, and
 TEL-045 adds configured teleporter relocation; feature-specific knowledge,
-enemy-damage production, canonical encounter balance, graves, and heirlooms
-remain later scope.
+enemy-damage production, canonical encounter balance, and heirlooms remain
+later scope.
 
 ## Core Alpha gap review — 2026-08-17
 
@@ -2028,6 +2029,43 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
   disclosure, or presentation authority was added.
 - Acceptance: focused death/save tests (32 passed), formatter verification,
   zero-warning Release build, and the full verification gate passed.
+
+## TEL-084 verification
+
+- Status: implemented and verified; Legacy death now appends a stable grave marker to
+  persistent `LegacyState.Graves`.
+- Tests added: grave creation and field capture, append behavior with existing
+  graves, explicit save round trip, version-11 migration to an empty grave
+  collection, and invalid DTO validation.
+- Files/modules affected: `src/Telengard.Core/Simulation/GameState.cs`,
+  `src/Telengard.Core/combat/Death.cs`,
+  `src/Telengard.Save/Dto/GameStateSaveDto.cs`,
+  `src/Telengard.Save/Migrations/SaveMigrations.cs`,
+  `tests/Telengard.Architecture.Tests/DeathTests.cs`,
+  `tests/Telengard.Architecture.Tests/SaveGameSerializerTests.cs`,
+  `docs/tasks/README.md`, `CHANGELOG.md`, and this status/plan documentation.
+- New public APIs: `GraveRecord`, `LegacyState.Graves`, and `GraveRecordDto`.
+- New events: none; the existing committed death/failure event sequence remains
+  the command boundary.
+- Save-schema impact: current save version advanced from 11 to 12. Explicit
+  grave DTOs are persisted, and version-11-and-earlier saves migrate to an
+  empty grave collection. Simulation, generator, and content versions are
+  unchanged.
+- Design choice: a grave stores only hero identity, death position, and
+  expedition identity. The specification does not define grave encounters,
+  contents, recovery, or balance, so loot, corpse, and heirloom behavior remain
+  `CONFIGURATION/TUNING DECISION REQUIRED` or later ticket scope.
+- Invariants: validation remains in the simulation; Legacy persistent map,
+  dead-hero records, and secured wealth are unchanged; carried wealth is still
+  lost on Legacy death; equal inputs reproduce equal state/events; no
+  randomness, hidden-information disclosure, or presentation authority was
+  added.
+- Acceptance: focused death/save tests (33 passed), formatter verification,
+  zero-warning Release build, and `./eng/verify.ps1 -Mode Full` passed with
+  299 Release tests. The verification script required a process-scoped
+  `core.autocrlf=false` override for unrelated dirty files and a
+  process-scoped execution-policy bypass because the host rejects unsigned
+  local scripts.
 
 ## Mutation baseline
 

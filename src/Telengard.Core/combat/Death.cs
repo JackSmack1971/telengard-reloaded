@@ -56,7 +56,12 @@ public static class PlayerDeathResolver
                             state.Player.Experience,
                             state.Player.Position,
                             state.Expedition.ExpeditionId,
-                            state.Expedition.DeepestFloorReached)).ToArray()
+                            state.Expedition.DeepestFloorReached)).ToArray(),
+                    Graves = state.Legacy.Graves.Append(
+                        new GraveRecord(
+                            state.Player.Id,
+                            state.Player.Position,
+                            state.Expedition.ExpeditionId)).ToArray()
                 }
                 : state.Legacy,
             Expedition = state.Expedition with

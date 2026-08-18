@@ -98,6 +98,10 @@ public sealed class DeathTests
         Assert.Equal(state.Player.Position, record.DeathPosition);
         Assert.Equal(state.Expedition.ExpeditionId, record.ExpeditionId);
         Assert.Equal(state.Expedition.DeepestFloorReached, record.DeepestFloorReached);
+        var grave = Assert.Single(result.State.Legacy.Graves);
+        Assert.Equal(state.Player.Id, grave.HeroId);
+        Assert.Equal(state.Player.Position, grave.Position);
+        Assert.Equal(state.Expedition.ExpeditionId, grave.ExpeditionId);
         Assert.Equal(state.Knowledge, result.State.Knowledge);
 
         Assert.Collection(
@@ -133,13 +137,18 @@ public sealed class DeathTests
             new DungeonPosition(1, 1, 1),
             Guid.Parse("00000000-0000-0000-0000-000000000006"),
             1);
+        var priorGrave = new GraveRecord(
+            prior.HeroId,
+            prior.DeathPosition,
+            prior.ExpeditionId);
         var state = ActiveState() with
         {
             CurrentMode = GameMode.Legacy,
             Legacy = new LegacyState
             {
                 PersistentMap = ActiveState().Legacy.PersistentMap,
-                PreviousHeroes = [prior]
+                PreviousHeroes = [prior],
+                Graves = [priorGrave]
             }
         };
 
@@ -147,6 +156,8 @@ public sealed class DeathTests
 
         Assert.Equal([prior], result.State.Legacy.PreviousHeroes.Take(1));
         Assert.Equal(2, result.State.Legacy.PreviousHeroes.Count);
+        Assert.Equal([priorGrave], result.State.Legacy.Graves.Take(1));
+        Assert.Equal(2, result.State.Legacy.Graves.Count);
     }
 
     [Fact]
