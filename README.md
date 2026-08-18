@@ -209,7 +209,9 @@ For the headless solution:
 
 * [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
 
-The repository pins .NET SDK `8.0.100` and permits compatible feature-band roll-forward.
+The repository pins .NET SDK `8.0.100` and permits compatible feature-band
+roll-forward. A fresh clone must provision the ignored repository-local SDK
+before running the checks; follow the [SDK provisioning instructions](docs/DEVELOPMENT.md#provisioning-the-repository-local-sdk).
 
 For graphical development:
 
@@ -226,26 +228,26 @@ cd telengard-reloaded
 
 ### Restore
 
-```bash
-dotnet restore Telengard.sln
+```powershell
+./eng/dotnet.ps1 restore Telengard.sln
 ```
 
 ### Build
 
-```bash
-dotnet build Telengard.sln --configuration Release
+```powershell
+./eng/dotnet.ps1 build Telengard.sln --configuration Release
 ```
 
 ### Run the Tests
 
-```bash
-dotnet test Telengard.sln --configuration Release --no-restore
+```powershell
+./eng/dotnet.ps1 test Telengard.sln --configuration Release --no-restore
 ```
 
 ### Verify Formatting
 
-```bash
-dotnet format Telengard.sln --verify-no-changes
+```powershell
+./eng/dotnet.ps1 format Telengard.sln --verify-no-changes
 ```
 
 ### Full Repository Verification
