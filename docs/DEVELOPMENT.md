@@ -20,6 +20,25 @@ The following commands are the configured headless verification commands for the
 | Formatter/linter | `./eng/dotnet.ps1 format Telengard.sln --verify-no-changes` |
 | Deterministic test mode | Unknown — no executable exists yet; the specification requires an equivalent of `game --seed <seed> --deterministic` |
 
+### Provisioning the repository-local SDK
+
+A fresh clone does not include the ignored `.dotnet/` directory. From the
+repository root in PowerShell, install the pinned SDK before running
+`eng/doctor.ps1`:
+
+```powershell
+$installer = Join-Path $env:TEMP 'dotnet-install.ps1'
+Invoke-WebRequest -Uri 'https://dot.net/v1/dotnet-install.ps1' -OutFile $installer
+& powershell.exe -NoProfile -ExecutionPolicy Bypass -File $installer `
+    -Version 8.0.100 `
+    -InstallDir (Join-Path (Get-Location) '.dotnet') `
+    -NoPath
+```
+
+The installer writes only to the repository-local `.dotnet/` directory. The
+wrapper then selects that SDK for repository commands; it does not require a
+global SDK or a machine `PATH` change.
+
 The repository pins SDK `8.0.100` in `global.json` and provides the supported
 PowerShell wrapper at `eng/dotnet.ps1`, which selects `.dotnet/dotnet.exe`.
 Run `./eng/doctor.ps1` when SDK or environment behavior is uncertain. Godot is
