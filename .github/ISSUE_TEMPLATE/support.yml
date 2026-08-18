@@ -1,0 +1,27 @@
+name: Support question
+description: Ask a focused question about using or developing the project.
+title: "[Support]: "
+labels:
+  - question
+body:
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: What do you need help understanding or doing?
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Include the relevant command, revision, environment, or documentation section.
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Triage checks
+      options:
+        - label: I searched the documentation and existing issues first.
+          required: true
