@@ -30,6 +30,13 @@ public sealed class SaveGameSerializerTests
                         new DungeonPosition(4, 5, 6),
                         Guid.Parse("00000000-0000-0000-0000-000000000003"),
                         4)
+                ],
+                Graves =
+                [
+                    new GraveRecord(
+                        Guid.Parse("00000000-0000-0000-0000-000000000002"),
+                        new DungeonPosition(4, 5, 6),
+                        Guid.Parse("00000000-0000-0000-0000-000000000003"))
                 ]
             },
             Player = new PlayerState
@@ -68,12 +75,13 @@ public sealed class SaveGameSerializerTests
         Assert.Equal(state.Legacy.PersistentMap.ObservedPositions, roundTrip.Legacy.PersistentMap.ObservedPositions);
         Assert.Equal(state.Legacy.PersistentMap.VisitedPositions, roundTrip.Legacy.PersistentMap.VisitedPositions);
         Assert.Equal(state.Legacy.PreviousHeroes, roundTrip.Legacy.PreviousHeroes);
+        Assert.Equal(state.Legacy.Graves, roundTrip.Legacy.Graves);
     }
 
     [Fact]
     public void Deserialize_rejects_unsupported_save_versions()
     {
-        var json = SaveGameSerializer.Serialize(GameState.Create(1234)).Replace("\"saveVersion\": 11", "\"saveVersion\": 12");
+        var json = SaveGameSerializer.Serialize(GameState.Create(1234)).Replace("\"saveVersion\": 12", "\"saveVersion\": 13");
 
         Assert.Throws<SaveFormatException>(() => SaveGameSerializer.Deserialize(json));
     }
@@ -81,7 +89,7 @@ public sealed class SaveGameSerializerTests
     [Fact]
     public void Deserialize_migrates_version_one_saves_with_an_empty_persistent_map()
     {
-        var json = SaveGameSerializer.Serialize(GameState.Create(1234)).Replace("\"saveVersion\": 11", "\"saveVersion\": 1");
+        var json = SaveGameSerializer.Serialize(GameState.Create(1234)).Replace("\"saveVersion\": 12", "\"saveVersion\": 1");
 
         var state = SaveGameSerializer.Deserialize(json);
 
@@ -101,6 +109,19 @@ public sealed class SaveGameSerializerTests
 
         Assert.Equal(GameState.CurrentSaveVersion, state.SaveVersion);
         Assert.Empty(state.Legacy.PreviousHeroes);
+    }
+
+    [Fact]
+    public void Deserialize_migrates_version_eleven_saves_without_graves()
+    {
+        var document = JsonNode.Parse(SaveGameSerializer.Serialize(GameState.Create(1234)))!.AsObject();
+        document["saveVersion"] = 11;
+        document["legacy"]!.AsObject().Remove("graves");
+
+        var state = SaveGameSerializer.Deserialize(document.ToJsonString());
+
+        Assert.Equal(GameState.CurrentSaveVersion, state.SaveVersion);
+        Assert.Empty(state.Legacy.Graves);
     }
 
     [Fact]
@@ -340,6 +361,10 @@ public sealed class SaveGameSerializerTests
         }));
         Assert.Throws<SaveFormatException>(() => SaveMigrations.Validate(save with
         {
+            Legacy = save.Legacy with { Graves = null }
+        }));
+        Assert.Throws<SaveFormatException>(() => SaveMigrations.Validate(save with
+        {
             Legacy = save.Legacy with
             {
                 PersistentMap = save.Legacy.PersistentMap with { ObservedPositions = null! }
@@ -399,7 +424,7 @@ public sealed class SaveGameSerializerTests
         Assert.Throws<ArgumentNullException>(() => SaveMigrations.Validate(null!));
 
         Assert.Throws<SaveFormatException>(() => SaveMigrations.Validate(
-            GameStateSaveDto.FromState(GameState.Create(1234)) with { SaveVersion = 12 }));
+            GameStateSaveDto.FromState(GameState.Create(1234)) with { SaveVersion = 13 }));
     }
 
     [Fact]

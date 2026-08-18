@@ -237,17 +237,20 @@ public sealed record LegacyStateDto
 {
     public required PersistentMapStateDto PersistentMap { get; init; }
     public IReadOnlyList<DeadHeroRecordDto>? PreviousHeroes { get; init; }
+    public IReadOnlyList<GraveRecordDto>? Graves { get; init; }
 
     public static LegacyStateDto FromState(LegacyState legacy) => new()
     {
         PersistentMap = PersistentMapStateDto.FromState(legacy.PersistentMap),
-        PreviousHeroes = legacy.PreviousHeroes.Select(DeadHeroRecordDto.FromState).ToArray()
+        PreviousHeroes = legacy.PreviousHeroes.Select(DeadHeroRecordDto.FromState).ToArray(),
+        Graves = legacy.Graves.Select(GraveRecordDto.FromState).ToArray()
     };
 
     public LegacyState ToState() => new()
     {
         PersistentMap = PersistentMap.ToState(),
-        PreviousHeroes = (PreviousHeroes ?? []).Select(hero => hero.ToState()).ToArray()
+        PreviousHeroes = (PreviousHeroes ?? []).Select(hero => hero.ToState()).ToArray(),
+        Graves = (Graves ?? []).Select(grave => grave.ToState()).ToArray()
     };
 }
 
@@ -280,6 +283,25 @@ public sealed record DeadHeroRecordDto
         DeathPosition.ToState(),
         ExpeditionId,
         DeepestFloorReached);
+}
+
+public sealed record GraveRecordDto
+{
+    public Guid HeroId { get; init; }
+    public required DungeonPositionDto Position { get; init; }
+    public Guid? ExpeditionId { get; init; }
+
+    public static GraveRecordDto FromState(GraveRecord grave) => new()
+    {
+        HeroId = grave.HeroId,
+        Position = DungeonPositionDto.FromState(grave.Position),
+        ExpeditionId = grave.ExpeditionId
+    };
+
+    public GraveRecord ToState() => new(
+        HeroId,
+        Position.ToState(),
+        ExpeditionId);
 }
 
 public sealed record InnStateDto
