@@ -115,6 +115,55 @@ public sealed class DeathTests
     }
 
     [Fact]
+    public void Adventure_death_returns_to_the_inn_retains_the_character_and_loses_expedition_treasure()
+    {
+        var state = ActiveState() with { CurrentMode = GameMode.Adventure };
+
+        var result = PlayerDeathResolver.Resolve(state, new PlayerDeathCommand());
+
+        Assert.True(result.State.Player.Alive);
+        Assert.Equal(state.Player.MaxHitPoints, result.State.Player.HitPoints);
+        Assert.Equal(state.Player.Id, result.State.Player.Id);
+        Assert.Equal(state.Player.Attributes, result.State.Player.Attributes);
+        Assert.Equal(state.Player.Level, result.State.Player.Level);
+        Assert.Equal(state.Player.Experience, result.State.Player.Experience);
+        Assert.Equal(state.Player.Inventory, result.State.Player.Inventory);
+        Assert.Equal(state.Player.EquipmentSlots, result.State.Player.EquipmentSlots);
+        Assert.Equal(state.Player.Talents, result.State.Player.Talents);
+        Assert.Equal(state.Player.Spells, result.State.Player.Spells);
+        Assert.Equal(state.Player.Injuries, result.State.Player.Injuries);
+        Assert.Equal(state.Player.TemporaryEffects, result.State.Player.TemporaryEffects);
+        Assert.Equal(0, result.State.Player.CarriedGold);
+        Assert.False(result.State.Expedition.Active);
+        Assert.Equal(0, result.State.Expedition.CarriedGold);
+        Assert.Empty(result.State.Expedition.AcquiredItems);
+        Assert.True(result.State.Inn.IsAtInn);
+        Assert.Null(result.State.Combat);
+        Assert.Equal(state.SecuredProgress, result.State.SecuredProgress);
+        Assert.Equal(state.Legacy, result.State.Legacy);
+        Assert.Equal(state.Knowledge, result.State.Knowledge);
+
+        Assert.Collection(
+            result.Events,
+            domainEvent => Assert.IsType<PlayerDiedEvent>(domainEvent),
+            domainEvent => Assert.IsType<ExpeditionFailedEvent>(domainEvent));
+    }
+
+    [Fact]
+    public void Adventure_death_replays_to_the_same_state_and_events()
+    {
+        var first = PlayerDeathResolver.Resolve(
+            ActiveState() with { CurrentMode = GameMode.Adventure },
+            new PlayerDeathCommand());
+        var second = PlayerDeathResolver.Resolve(
+            ActiveState() with { CurrentMode = GameMode.Adventure },
+            new PlayerDeathCommand());
+
+        Assert.Equal(SaveGameSerializer.Serialize(first.State), SaveGameSerializer.Serialize(second.State));
+        Assert.Equal(first.Events, second.Events);
+    }
+
+    [Fact]
     public void Death_requires_a_live_expedition_and_depleted_hit_points()
     {
         var command = new PlayerDeathCommand();
@@ -142,7 +191,8 @@ public sealed class DeathTests
     [Theory]
     [InlineData(GameMode.Classic)]
     [InlineData(GameMode.Legacy)]
-    public void Dead_state_round_trips_through_the_explicit_save_contract(GameMode mode)
+    [InlineData(GameMode.Adventure)]
+    public void Death_state_round_trips_through_the_explicit_save_contract(GameMode mode)
     {
         var result = PlayerDeathResolver.Resolve(
             ActiveState() with { CurrentMode = mode },
@@ -151,7 +201,7 @@ public sealed class DeathTests
         var restored = SaveGameSerializer.Deserialize(SaveGameSerializer.Serialize(result.State));
 
         Assert.Equal(SaveGameSerializer.Serialize(result.State), SaveGameSerializer.Serialize(restored));
-        Assert.False(restored.Player.Alive);
+        Assert.Equal(mode == GameMode.Adventure, restored.Player.Alive);
         Assert.False(restored.Expedition.Active);
         Assert.Null(restored.Combat);
     }

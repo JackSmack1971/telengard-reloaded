@@ -35,22 +35,23 @@ public static class PlayerDeathResolver
             throw new InvalidOperationException("The player cannot die while hit points remain.");
         }
 
-        var losesUnsecuredAssets = state.CurrentMode is GameMode.Classic or GameMode.Legacy;
+        var losesExpeditionTreasure = state.CurrentMode is GameMode.Classic or GameMode.Legacy or GameMode.Adventure;
         var next = state with
         {
             Player = state.CurrentMode switch
             {
                 GameMode.Classic => DeleteClassicCharacter(),
                 GameMode.Legacy => ResolveLegacyDeath(state.Player),
-                _ => (state.Player with { Alive = false, HitPoints = 0 })
+                GameMode.Adventure => ResolveAdventureDeath(state.Player),
+                _ => throw new ArgumentOutOfRangeException(nameof(state.CurrentMode), state.CurrentMode, "Unknown game mode.")
             },
             Expedition = state.Expedition with
             {
                 Active = false,
-                CarriedGold = losesUnsecuredAssets
+                CarriedGold = losesExpeditionTreasure
                     ? 0
                     : state.Expedition.CarriedGold,
-                AcquiredItems = losesUnsecuredAssets
+                AcquiredItems = losesExpeditionTreasure
                     ? Array.Empty<string>()
                     : state.Expedition.AcquiredItems
             },
@@ -81,5 +82,12 @@ public static class PlayerDeathResolver
         EquipmentSlots = player.EquipmentSlots
             .Select(slot => new EquipmentSlotState(slot.SlotId))
             .ToArray()
+    };
+
+    private static PlayerState ResolveAdventureDeath(PlayerState player) => player with
+    {
+        Alive = true,
+        HitPoints = player.MaxHitPoints,
+        CarriedGold = 0
     };
 }
