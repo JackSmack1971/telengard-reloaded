@@ -3,7 +3,14 @@ description: Ask a focused question about using or developing the project.
 title: "[Support]: "
 labels:
   - question
+
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form for how-to or understanding questions.
+        If you can reproduce incorrect behavior, use the Bug report form instead.
+
   - type: textarea
     id: question
     attributes:
@@ -11,13 +18,17 @@ body:
       description: What do you need help understanding or doing?
     validations:
       required: true
+
   - type: textarea
     id: context
     attributes:
-      label: Context
-      description: Include the relevant command, revision, environment, or documentation section.
+      label: Context and what you tried
+      description: |
+        What have you already tried? Include the relevant command, revision,
+        environment, or documentation section only when it matters.
     validations:
       required: true
+
   - type: checkboxes
     id: checks
     attributes:

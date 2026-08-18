@@ -1,34 +1,125 @@
 name: Feature proposal
-description: Propose a focused, evidence-backed improvement.
+description: Propose a focused, well-motivated improvement with agent-ready acceptance criteria.
 title: "[Feature]: "
 labels:
   - enhancement
+
 body:
-  - type: textarea
-    id: problem
+  - type: markdown
     attributes:
-      label: Problem or player need
-      description: What problem should this solve, and for whom?
+      value: |
+        Focus on the user-visible need and the smallest useful outcome.
+        Make success observable; avoid speculative architecture unless it is a known constraint.
+
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal or player need
+      description: What problem or opportunity does this address, and for whom?
     validations:
       required: true
+
   - type: textarea
-    id: proposal
+    id: outcome
     attributes:
-      label: Proposed outcome
-      description: Describe the smallest useful outcome without prescribing speculative architecture.
+      label: Smallest useful outcome
+      description: |
+        Describe the smallest useful behavior and give one concrete example of what success looks like.
     validations:
       required: true
+
   - type: textarea
-    id: constraints
+    id: scope
     attributes:
-      label: Constraints and non-goals
-      description: Note determinism, save compatibility, hidden-information, or presentation-boundary considerations.
+      label: Scope and non-goals
+      description: |
+        State what is in scope and explicitly call out nearby behavior that should not change.
+      placeholder: |
+        In scope:
+        - ...
+
+        Non-goals:
+        - ...
+
+  - type: textarea
+    id: sources
+    attributes:
+      label: Relevant code and sources of truth
+      description: |
+        Give the agent useful starting points: files/types, specification sections, TEL tickets,
+        existing analogous implementations, invariants, architecture guidance, and relevant tests.
+      placeholder: |
+        Relevant files / types:
+        - ...
+
+        Sources of truth:
+        - docs/modern-telengard-spec.md: ...
+        - docs/tasks/TEL-xxx.md: ...
+
+        Existing analogue / tests:
+        - ...
+
+  - type: textarea
+    id: guidance
+    attributes:
+      label: Implementation guidance
+      description: |
+        Optional. Record a known direction or constraint that narrows the solution space
+        without prescribing speculative architecture.
+
+  - type: dropdown
+    id: invariant_impact
+    attributes:
+      label: Invariant / compatibility impact
+      description: Select all that apply. Choose "None / not applicable" only when none apply.
+      multiple: true
+      options:
+        - Determinism / RNG
+        - Simulation authority
+        - Renderer independence
+        - Hidden information / player knowledge
+        - Save compatibility / migration
+        - Content / runtime separation
+        - Command / event ordering
+        - Carried vs. secured progress
+        - None / not applicable
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: |
+        Write observable assertions, not implementation steps.
+        Include determinism, presentation-boundary, save, or compatibility expectations when relevant.
+      placeholder: |
+        - [ ] A player can ...
+        - [ ] The result is deterministic for the same seed and authoritative state.
+        - [ ] Terminal and Godot remain consumers of authoritative simulation results.
+        - [ ] Existing saves ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: validation
+    attributes:
+      label: Validation
+      description: |
+        List focused tests or scenarios when known.
+        Code-changing work should also run the repository's required final verification gate when appropriate:
+        ./eng/verify.ps1 -Mode Full
+      placeholder: |
+        Focused:
+        ./eng/dotnet.ps1 test ...
+
+        Scenario:
+        ...
+
   - type: checkboxes
     id: checks
     attributes:
-      label: Triage checks
+      label: Submission checks
       options:
-        - label: I searched existing issues for duplicates.
-          required: true
-        - label: I have removed secrets and private data from this report.
+        - label: I searched existing issues for related or duplicate proposals.
           required: true

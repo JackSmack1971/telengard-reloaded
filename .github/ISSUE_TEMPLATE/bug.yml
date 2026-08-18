@@ -1,45 +1,142 @@
 name: Bug report
-description: Report a reproducible problem in the simulation, tooling, or presentation boundary.
+description: Report a reproducible defect with enough context for an implementation agent.
 title: "[Bug]: "
 labels:
   - bug
+
 body:
   - type: markdown
     attributes:
       value: |
-        Provide enough detail for the issue to be reproduced without access to private data.
+        Write this as a compact repair specification.
+        Prefer concrete files, types, tests, commands, and observable behavior over narrative context.
+        Do not include secrets or private data.
+
   - type: textarea
-    id: observed
+    id: problem
     attributes:
-      label: Observed behavior
-      description: What happened?
+      label: Problem
+      description: What is incorrect, and what should happen instead?
+      placeholder: |
+        Observed:
+        Expected:
     validations:
       required: true
+
   - type: textarea
-    id: expected
+    id: localization
     attributes:
-      label: Expected behavior
-      description: What should have happened?
-    validations:
-      required: true
+      label: Relevant code
+      description: |
+        Identify likely files, types, methods, tests, or subsystems if known.
+        Use repository paths and symbol names when possible.
+      placeholder: |
+        Likely relevant:
+        - src/Telengard.Core/...
+        - SomeType.SomeMethod
+        - tests/.../SomeTests.cs
+
   - type: textarea
     id: reproduction
     attributes:
-      label: Reproduction steps
-      description: Include commands, inputs, seed/version values, and the smallest useful example.
+      label: Reproduction or failing test
+      description: |
+        Give the shortest deterministic reproduction available.
+        Include commands, inputs, seed/version values, or an existing failing test.
+      placeholder: |
+        Command:
+        Seed / inputs:
+        Steps:
+        Failure:
     validations:
       required: true
-  - type: input
-    id: revision
+
+  - type: textarea
+    id: diagnostics
     attributes:
-      label: Revision or version
-      description: Provide the commit, release, or save/simulation version if known.
+      label: Diagnostic evidence
+      description: |
+        If available, include stack traces, failing-test output, screenshots, save files,
+        minimal reproduction artifacts, or other evidence that narrows the failure.
+
+  - type: textarea
+    id: repair_direction
+    attributes:
+      label: Suggested repair direction
+      description: |
+        If known, describe the intended repair direction.
+        Treat this as a constraint or hypothesis, not a requirement to preserve a particular implementation.
+      placeholder: |
+        Example: Resolution should occur in the authoritative simulation,
+        not in Terminal or Godot presentation code.
+
+  - type: dropdown
+    id: invariant_impact
+    attributes:
+      label: Invariant / compatibility impact
+      description: Select all that apply. Choose "None / not applicable" only when none apply.
+      multiple: true
+      options:
+        - Determinism / RNG
+        - Simulation authority
+        - Renderer independence
+        - Hidden information / player knowledge
+        - Save compatibility / migration
+        - Content / runtime separation
+        - Command / event ordering
+        - Carried vs. secured progress
+        - None / not applicable
+    validations:
+      required: true
+
+  - type: textarea
+    id: sources
+    attributes:
+      label: Constraints and sources of truth
+      description: |
+        Cite relevant specs, TEL tickets, invariants, ADRs, save/version requirements,
+        architecture boundaries, existing tests, or analogous implementations.
+      placeholder: |
+        Relevant:
+        - docs/modern-telengard-spec.md: ...
+        - docs/INVARIANTS.md: ...
+        - docs/ARCHITECTURE.md: ...
+        - docs/tasks/TEL-xxx.md: ...
+        - Existing test: ...
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: State observable conditions that must be true after the fix.
+      placeholder: |
+        - [ ] ...
+        - [ ] ...
+        - [ ] No unrelated deterministic output changes.
+    validations:
+      required: true
+
+  - type: textarea
+    id: validation
+    attributes:
+      label: Validation
+      description: |
+        Give focused verification commands or scenarios when known.
+        Code-changing work should also run the repository's required final verification gate when appropriate:
+        ./eng/verify.ps1 -Mode Full
+      placeholder: |
+        Focused:
+        ./eng/dotnet.ps1 test ...
+
+        Deterministic harness / manual scenario:
+        ...
+
   - type: checkboxes
     id: checks
     attributes:
-      label: Triage checks
+      label: Submission checks
       options:
         - label: I searched existing issues for duplicates.
           required: true
-        - label: I have removed secrets and private data from this report.
+        - label: This report contains no secrets or private data.
           required: true

@@ -1,0 +1,170 @@
+name: Implementation task
+description: Specify decided code-changing work as a concise, verifiable agent task.
+title: "[Task]: "
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form when the desired change is already decided.
+        Write a compact executable specification: objective -> sources -> starting points -> constraints -> acceptance -> validation.
+        For significant or risky work, follow docs/PLANS.md and create or update an ExecPlan.
+
+  - type: textarea
+    id: objective
+    attributes:
+      label: Objective
+      description: What repository behavior or capability must exist when this task is complete?
+      placeholder: |
+        Implement ...
+        User-visible / repository-visible outcome: ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: sources
+    attributes:
+      label: Sources of truth
+      description: |
+        Cite the TEL ticket, specification section, invariant, ADR, architecture rule,
+        existing behavior, or test that defines the intended result.
+      placeholder: |
+        - docs/tasks/TEL-xxx.md
+        - docs/modern-telengard-spec.md: ...
+        - docs/INVARIANTS.md: ...
+        - docs/ARCHITECTURE.md: ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: localization
+    attributes:
+      label: Relevant code / starting points
+      description: |
+        Identify concrete files, types, methods, tests, tools, or analogous implementations
+        that should be inspected first. Verify these against the current tree before editing.
+      placeholder: |
+        - src/Telengard.Core/...
+        - tests/Telengard.Architecture.Tests/...
+        - tools/Telengard.TestHarness/...
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope and non-goals
+      description: |
+        State exactly what is in scope and what nearby work is intentionally excluded.
+        Write "No explicit non-goals" if none are known.
+      placeholder: |
+        In scope:
+        - ...
+
+        Non-goals:
+        - ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: guidance
+    attributes:
+      label: Implementation guidance
+      description: |
+        Optional. Record a decided direction, known constraint, or useful hypothesis.
+        Do not require a particular internal implementation unless it is itself a contract.
+
+  - type: dropdown
+    id: invariant_impact
+    attributes:
+      label: Invariant impact
+      description: Select all that apply. Choose "None / not applicable" only when none apply.
+      multiple: true
+      options:
+        - Determinism / RNG
+        - Simulation authority
+        - Renderer independence
+        - Hidden information / player knowledge
+        - Content / runtime separation
+        - Command / event ordering
+        - Carried vs. secured progress
+        - None / not applicable
+    validations:
+      required: true
+
+  - type: dropdown
+    id: save_version_impact
+    attributes:
+      label: Save / version impact
+      description: Select all that apply. Choose "None" only when no save or version contract changes.
+      multiple: true
+      options:
+        - Save DTO / schema
+        - Migration / backward compatibility
+        - save_version
+        - simulation_version
+        - generator_version
+        - content_version
+        - Unknown / requires investigation
+        - None
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: |
+        State observable assertions that define completion.
+        Prefer behavior and contract outcomes over implementation steps.
+      placeholder: |
+        - [ ] ...
+        - [ ] ...
+        - [ ] Applicable invariants remain satisfied.
+        - [ ] Required compatibility behavior is covered.
+    validations:
+      required: true
+
+  - type: textarea
+    id: validation
+    attributes:
+      label: Validation
+      description: |
+        Give exact focused checks plus any deterministic harness or manual presentation scenarios.
+        For code changes, the final gate is normally:
+        ./eng/verify.ps1 -Mode Full
+      placeholder: |
+        Focused:
+        ./eng/dotnet.ps1 test ...
+
+        Harness / manual:
+        ...
+
+        Final:
+        ./eng/verify.ps1 -Mode Full
+    validations:
+      required: true
+
+  - type: dropdown
+    id: execplan
+    attributes:
+      label: ExecPlan
+      description: |
+        Is an ExecPlan required under docs/PLANS.md for this work?
+        Significant features/refactors, multi-ticket work, migrations, broad architecture changes,
+        or work spanning many files/iterations normally require one.
+      options:
+        - "No"
+        - "Yes - create or update docs/exec-plans/active/..."
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Submission checks
+      options:
+        - label: I verified these starting points and sources against the current repository.
+          required: true
+        - label: This task contains no secrets or private data.
+          required: true
