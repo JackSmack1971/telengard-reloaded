@@ -90,7 +90,7 @@ This ledger is derived from the ordered TEL tickets in `docs/modern-telengard-sp
 
 - [TEL-080.md](TEL-080.md) — Implement Classic death — Implemented and verified
 - [TEL-081.md](TEL-081.md) — Implement Legacy death — Implemented and verified
-- [TEL-082.md](TEL-082.md) — Implement Adventure death — Not started
+- [TEL-082.md](TEL-082.md) — Implement Adventure death — Implemented and verified
 - [TEL-083.md](TEL-083.md) — Persist dead hero records — Not started
 - [TEL-084.md](TEL-084.md) — Implement graves — Not started
 - [TEL-085.md](TEL-085.md) — Implement heirlooms — Not started
