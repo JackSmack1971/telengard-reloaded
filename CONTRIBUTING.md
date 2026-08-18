@@ -22,6 +22,10 @@ renderer-independent simulation. Before proposing a change, read:
 Use the repository-local SDK wrapper from PowerShell. Do not invoke bare
 `dotnet` for repository work:
 
+If `.dotnet/dotnet.exe` is absent on a fresh clone, follow the
+[SDK provisioning instructions](docs/DEVELOPMENT.md#provisioning-the-repository-local-sdk)
+first.
+
 ```powershell
 ./eng/doctor.ps1
 ./eng/dotnet.ps1 restore Telengard.sln
