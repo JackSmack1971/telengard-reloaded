@@ -45,6 +45,20 @@ public static class PlayerDeathResolver
                 GameMode.Adventure => ResolveAdventureDeath(state.Player),
                 _ => throw new ArgumentOutOfRangeException(nameof(state.CurrentMode), state.CurrentMode, "Unknown game mode.")
             },
+            Legacy = state.CurrentMode == GameMode.Legacy
+                ? state.Legacy with
+                {
+                    PreviousHeroes = state.Legacy.PreviousHeroes.Append(
+                        new DeadHeroRecord(
+                            state.Player.Id,
+                            state.Player.Attributes,
+                            state.Player.Level,
+                            state.Player.Experience,
+                            state.Player.Position,
+                            state.Expedition.ExpeditionId,
+                            state.Expedition.DeepestFloorReached)).ToArray()
+                }
+                : state.Legacy,
             Expedition = state.Expedition with
             {
                 Active = false,

@@ -89,7 +89,15 @@ public sealed class DeathTests
         Assert.Equal(0, result.State.Expedition.CarriedGold);
         Assert.Empty(result.State.Expedition.AcquiredItems);
         Assert.Equal(state.SecuredProgress, result.State.SecuredProgress);
-        Assert.Equal(state.Legacy, result.State.Legacy);
+        Assert.Equal(state.Legacy.PersistentMap, result.State.Legacy.PersistentMap);
+        var record = Assert.Single(result.State.Legacy.PreviousHeroes);
+        Assert.Equal(state.Player.Id, record.HeroId);
+        Assert.Equal(state.Player.Attributes, record.Attributes);
+        Assert.Equal(state.Player.Level, record.Level);
+        Assert.Equal(state.Player.Experience, record.Experience);
+        Assert.Equal(state.Player.Position, record.DeathPosition);
+        Assert.Equal(state.Expedition.ExpeditionId, record.ExpeditionId);
+        Assert.Equal(state.Expedition.DeepestFloorReached, record.DeepestFloorReached);
         Assert.Equal(state.Knowledge, result.State.Knowledge);
 
         Assert.Collection(
@@ -112,6 +120,33 @@ public sealed class DeathTests
             SaveGameSerializer.Serialize(first.State),
             SaveGameSerializer.Serialize(second.State));
         Assert.Equal(first.Events, second.Events);
+    }
+
+    [Fact]
+    public void Legacy_death_appends_to_existing_dead_hero_records_without_changing_prior_records()
+    {
+        var prior = new DeadHeroRecord(
+            Guid.Parse("00000000-0000-0000-0000-000000000005"),
+            new PlayerAttributes(1, 2, 3, 4, 5, 6),
+            2,
+            19,
+            new DungeonPosition(1, 1, 1),
+            Guid.Parse("00000000-0000-0000-0000-000000000006"),
+            1);
+        var state = ActiveState() with
+        {
+            CurrentMode = GameMode.Legacy,
+            Legacy = new LegacyState
+            {
+                PersistentMap = ActiveState().Legacy.PersistentMap,
+                PreviousHeroes = [prior]
+            }
+        };
+
+        var result = PlayerDeathResolver.Resolve(state, new PlayerDeathCommand());
+
+        Assert.Equal([prior], result.State.Legacy.PreviousHeroes.Take(1));
+        Assert.Equal(2, result.State.Legacy.PreviousHeroes.Count);
     }
 
     [Fact]

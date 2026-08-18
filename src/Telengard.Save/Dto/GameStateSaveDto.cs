@@ -236,13 +236,50 @@ public sealed record FeatureInstanceDto
 public sealed record LegacyStateDto
 {
     public required PersistentMapStateDto PersistentMap { get; init; }
+    public IReadOnlyList<DeadHeroRecordDto>? PreviousHeroes { get; init; }
 
     public static LegacyStateDto FromState(LegacyState legacy) => new()
     {
-        PersistentMap = PersistentMapStateDto.FromState(legacy.PersistentMap)
+        PersistentMap = PersistentMapStateDto.FromState(legacy.PersistentMap),
+        PreviousHeroes = legacy.PreviousHeroes.Select(DeadHeroRecordDto.FromState).ToArray()
     };
 
-    public LegacyState ToState() => new() { PersistentMap = PersistentMap.ToState() };
+    public LegacyState ToState() => new()
+    {
+        PersistentMap = PersistentMap.ToState(),
+        PreviousHeroes = (PreviousHeroes ?? []).Select(hero => hero.ToState()).ToArray()
+    };
+}
+
+public sealed record DeadHeroRecordDto
+{
+    public Guid HeroId { get; init; }
+    public required PlayerAttributesDto Attributes { get; init; }
+    public int Level { get; init; }
+    public long Experience { get; init; }
+    public required DungeonPositionDto DeathPosition { get; init; }
+    public Guid? ExpeditionId { get; init; }
+    public int DeepestFloorReached { get; init; }
+
+    public static DeadHeroRecordDto FromState(DeadHeroRecord hero) => new()
+    {
+        HeroId = hero.HeroId,
+        Attributes = PlayerAttributesDto.FromState(hero.Attributes),
+        Level = hero.Level,
+        Experience = hero.Experience,
+        DeathPosition = DungeonPositionDto.FromState(hero.DeathPosition),
+        ExpeditionId = hero.ExpeditionId,
+        DeepestFloorReached = hero.DeepestFloorReached
+    };
+
+    public DeadHeroRecord ToState() => new(
+        HeroId,
+        Attributes.ToState(),
+        Level,
+        Experience,
+        DeathPosition.ToState(),
+        ExpeditionId,
+        DeepestFloorReached);
 }
 
 public sealed record InnStateDto

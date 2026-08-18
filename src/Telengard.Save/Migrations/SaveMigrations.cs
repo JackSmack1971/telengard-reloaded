@@ -4,7 +4,7 @@ namespace Telengard.Save;
 
 public static class SaveMigrations
 {
-    public const int CurrentSaveVersion = 10;
+    public const int CurrentSaveVersion = 11;
 
     public static GameStateSaveDto Migrate(GameStateSaveDto save)
     {
@@ -24,6 +24,7 @@ public static class SaveMigrations
         if (save.SaveVersion <= 8) migrated = MigrateVersionEight(migrated);
         if (save.SaveVersion <= 9) migrated = MigrateVersionNine(migrated);
         if (save.SaveVersion <= 10) migrated = MigrateVersionTen(migrated);
+        if (save.SaveVersion <= 11) migrated = MigrateVersionEleven(migrated);
         return migrated;
     }
 
@@ -92,9 +93,10 @@ public static class SaveMigrations
         }
 
         if (save.Legacy.PersistentMap is null || save.Legacy.PersistentMap.ObservedPositions is null ||
-            save.Legacy.PersistentMap.VisitedPositions is null)
+            save.Legacy.PersistentMap.VisitedPositions is null || save.Legacy.PreviousHeroes is null ||
+            save.Legacy.PreviousHeroes.Any(hero => hero is null || hero.Attributes is null || hero.DeathPosition is null))
         {
-            throw new SaveFormatException("Save document is missing persistent map state.");
+            throw new SaveFormatException("Save document is missing legacy state.");
         }
 
         var observed = save.Legacy.PersistentMap.ObservedPositions.Select(position => (position.Floor, position.X, position.Y)).ToHashSet();
@@ -171,6 +173,14 @@ public static class SaveMigrations
     private static GameStateSaveDto MigrateVersionTen(GameStateSaveDto save) => save with
     {
         SaveVersion = CurrentSaveVersion
+    };
+
+    private static GameStateSaveDto MigrateVersionEleven(GameStateSaveDto save) => save with
+    {
+        SaveVersion = CurrentSaveVersion,
+        Legacy = save.Legacy is null
+            ? new LegacyStateDto { PersistentMap = EmptyMap(), PreviousHeroes = [] }
+            : save.Legacy with { PreviousHeroes = save.Legacy.PreviousHeroes ?? [] }
     };
 
     private static bool HasValidValues(IReadOnlyList<string>? values) =>
