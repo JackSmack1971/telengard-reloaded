@@ -2,12 +2,17 @@
 
 ## Current repository state
 
-The repository now contains a C#/.NET 8 scaffold and the engineering-contract
-documents. No gameplay is implemented yet. The headless solution contains
-the simulation, content, save, Terminal, and architecture-test boundaries;
-the Godot presentation is represented separately under `src/Telengard.Godot`.
+The repository contains a C#/.NET 8 headless solution, engineering-contract
+documents, and a separate Godot presentation boundary. The renderer-independent
+simulation has implemented and verified dungeon walking, expedition/safety
+transitions, encounter/combat slices, and dungeon-feature slices; see
+[`docs/BUILD_STATUS.md`](BUILD_STATUS.md) for the current phase and remaining
+scope. Terminal and Godot clients remain presentation boundaries rather than
+complete playable clients.
 
-Therefore, the structure below separates the specification's proposed target architecture from the repository's current implementation state. Future agents must verify the actual tree before using or extending any path.
+The structure below separates implemented boundaries from the specification's
+proposed target architecture. Future agents must still verify the actual tree
+and current status before using or extending any path.
 
 ## Architectural boundary
 

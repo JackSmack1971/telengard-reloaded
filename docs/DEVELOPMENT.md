@@ -2,11 +2,11 @@
 
 ## Repository status
 
-The repository now contains the Phase 0 scaffold selected by
-`docs/adr/ADR-001-technology-stack.md`. The headless .NET solution contains
-the simulation, content, save, Terminal, and architecture-test projects.
-The Godot presentation is represented separately under `src/Telengard.Godot`
-and is not required to build or test the simulation.
+The repository contains the .NET 8 headless solution selected by
+`docs/adr/ADR-001-technology-stack.md`, with implemented simulation slices and
+ongoing Core Alpha work. The current phase and verified scope are recorded in
+[`docs/BUILD_STATUS.md`](BUILD_STATUS.md). The Godot presentation is separate
+under `src/Telengard.Godot` and is not required to build or test the simulation.
 
 ## Commands
 
@@ -14,14 +14,16 @@ The following commands are the configured headless verification commands for the
 
 | Purpose | Command |
 |---|---|
-| Build | `dotnet build Telengard.sln --configuration Release` |
-| Tests | `dotnet test Telengard.sln --configuration Release --no-restore` |
-| Formatter/linter | `dotnet format Telengard.sln --verify-no-changes` |
+| Restore | `./eng/dotnet.ps1 restore Telengard.sln` |
+| Build | `./eng/dotnet.ps1 build Telengard.sln --configuration Release` |
+| Tests | `./eng/dotnet.ps1 test Telengard.sln --configuration Release --no-restore` |
+| Formatter/linter | `./eng/dotnet.ps1 format Telengard.sln --verify-no-changes` |
 | Deterministic test mode | Unknown — no executable exists yet; the specification requires an equivalent of `game --seed <seed> --deterministic` |
 
-The commands are configured by the scaffold but were not executable in the
-current environment because `dotnet` is unavailable. Re-run them after
-installing the .NET 8 SDK. The Godot editor/CLI is also not installed here.
+The repository pins SDK `8.0.100` in `global.json` and provides the supported
+PowerShell wrapper at `eng/dotnet.ps1`, which selects `.dotnet/dotnet.exe`.
+Run `./eng/doctor.ps1` when SDK or environment behavior is uncertain. Godot is
+not required for headless verification.
 
 ## Project structure
 
@@ -53,8 +55,9 @@ docs/
 ```
 
 The target domain areas are represented as boundaries under `Telengard.Core`;
-they contain no gameplay implementation. `Telengard.Godot` remains a separate
-presentation module so core tests do not launch graphical presentation.
+several are implemented incrementally and the remaining areas are still
+scoped by the task ledger. `Telengard.Godot` remains a separate presentation
+module so core tests do not launch graphical presentation.
 
 ## Domain events
 
