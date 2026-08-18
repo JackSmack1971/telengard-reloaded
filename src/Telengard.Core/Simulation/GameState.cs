@@ -109,6 +109,15 @@ public sealed record PlayerState
     public bool Alive { get; init; } = true;
 }
 
+public sealed record DeadHeroRecord(
+    Guid HeroId,
+    PlayerAttributes Attributes,
+    int Level,
+    long Experience,
+    DungeonPosition DeathPosition,
+    Guid? ExpeditionId,
+    int DeepestFloorReached);
+
 public sealed record ExpeditionState
 {
     public Guid? ExpeditionId { get; init; }
@@ -246,7 +255,25 @@ public sealed record KnowledgeState
 
 public sealed record LegacyState
 {
+    private IReadOnlyList<DeadHeroRecord> _previousHeroes = Array.Empty<DeadHeroRecord>();
+
     public PersistentMapState PersistentMap { get; init; } = new();
+
+    public IReadOnlyList<DeadHeroRecord> PreviousHeroes
+    {
+        get => _previousHeroes;
+        init
+        {
+            ArgumentNullException.ThrowIfNull(value);
+            var heroes = value.ToArray();
+            if (heroes.Any(hero => hero is null))
+            {
+                throw new ArgumentException("Previous heroes cannot contain null values.", nameof(value));
+            }
+
+            _previousHeroes = Array.AsReadOnly(heroes);
+        }
+    }
 }
 public sealed record InnState
 {
@@ -260,7 +287,7 @@ public sealed record SettingsState;
 
 public sealed record GameState
 {
-    public const int CurrentSaveVersion = 10;
+    public const int CurrentSaveVersion = 11;
 
     public int SaveVersion { get; init; } = CurrentSaveVersion;
     public required GameVersions Versions { get; init; }

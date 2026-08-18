@@ -9,3 +9,4 @@ All notable changes to this project will be documented in this file.
 - Added a renderer-independent deterministic simulation foundation for seeded dungeon exploration, expeditions, encounters, combat, features, items, magic, and progression
 - Added explicit versioned save/load DTOs and migrations for restoring simulation state across sessions
 - Added Adventure death handling that returns the retained character to the inn while discarding expedition-carried gold and acquired loot
+- Added Legacy dead-hero records with explicit save/load persistence and version-10 migration support

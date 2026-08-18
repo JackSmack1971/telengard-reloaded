@@ -1,6 +1,6 @@
 # Modern Telengard build status
 
-Last verified: 2026-08-17
+Last verified: 2026-08-18
 
 ## Current implementation phase
 
@@ -14,8 +14,9 @@ slice covers the successful inn → expedition → carried gold → safety → s
 gold → completion → next expedition loop, plus dedicated suspension/save
 resume. TEL-037 now supplies the renderer-independent death/failure transition,
 TEL-080 adds the Classic character-deletion policy, TEL-081 adds the Legacy
-death policy, and TEL-082 adds the Adventure return-to-inn policy; dead-hero
-legacy records remain later work. Runtime
+death policy, TEL-082 adds the Adventure return-to-inn policy, and TEL-083
+persists Legacy dead-hero records. Graves and heirlooms remain later work.
+Runtime
 producers for the remaining expedition counters also remain absent; see [the
 Phase 2 gate](gates/PHASE-2.md).
 
@@ -43,8 +44,8 @@ the generic feature definition/runtime/activation foundation, TEL-041 adds
 deterministic weighted outcome selection, TEL-042 adds fountain outcomes,
 TEL-043 adds altar outcome resolution, TEL-044 adds configured pit drops, and
 TEL-045 adds configured teleporter relocation; feature-specific knowledge,
-enemy-damage production, canonical encounter balance, and dead-hero legacy
-records remain later scope.
+enemy-damage production, canonical encounter balance, graves, and heirlooms
+remain later scope.
 
 ## Core Alpha gap review — 2026-08-17
 
@@ -1984,8 +1985,8 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
   inn. The specification does not define a percentage or random loss formula,
   so no such canonical tuning rule was introduced; finer partial-loss policy
   remains `CONFIGURATION/TUNING DECISION REQUIRED`.
-- Known follow-up work: dead-hero records, graves, heirlooms, and any finer
-  Adventure loss tuning remain later work. No next TEL ticket was started.
+- Known follow-up work: graves, heirlooms, and any finer Adventure loss tuning
+  remain later work. No next TEL ticket was started.
 - Invariants: validation occurs before mutation; persistent map knowledge and
   secured wealth remain unchanged; carried/unsecured wealth is not secured by
   death; equal inputs reproduce equal state/events; no randomness,
@@ -1994,6 +1995,39 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
   zero-warning Release build, and `./eng/verify.ps1 -Mode Full` passed with
   296 Release tests using the repository-local SDK and a process-scoped
   `core.autocrlf=false` override for the host Git line-ending warning.
+
+## TEL-083 verification
+
+- Status: implemented and verified; Legacy death now appends a stable dead-hero
+  record to persistent `LegacyState.PreviousHeroes`.
+- Tests added: Legacy record creation and field capture, append behavior with
+  existing records, explicit save round trip, version-10 migration to an empty
+  collection, and invalid DTO validation.
+- Files/modules affected: `src/Telengard.Core/Simulation/GameState.cs`,
+  `src/Telengard.Core/combat/Death.cs`,
+  `src/Telengard.Save/Dto/GameStateSaveDto.cs`,
+  `src/Telengard.Save/Migrations/SaveMigrations.cs`,
+  `tests/Telengard.Architecture.Tests/DeathTests.cs`,
+  `tests/Telengard.Architecture.Tests/SaveGameSerializerTests.cs`,
+  `docs/tasks/README.md`, `CHANGELOG.md`, and this status/plan documentation.
+- New public APIs: `DeadHeroRecord`, `LegacyState.PreviousHeroes`, and
+  `DeadHeroRecordDto`.
+- New events: none; the existing committed death/failure event sequence remains
+  the command boundary.
+- Save-schema impact: current save version advanced from 10 to 11. Explicit
+  dead-hero DTOs are persisted, and version-10-and-earlier saves migrate to an
+  empty record collection. Simulation, generator, and content versions are
+  unchanged.
+- Design choice: records capture stable hero identity, attributes, level, XP,
+  death position, expedition ID, and deepest floor. Item loss, graves,
+  heirlooms, and character replacement remain separate decisions/tickets; no
+  balance or retention formula was introduced.
+- Invariants: validation remains in the simulation; Legacy persistent map and
+  secured wealth are unchanged; carried wealth is still lost on Legacy death;
+  equal inputs reproduce equal state/events; no randomness, hidden-information
+  disclosure, or presentation authority was added.
+- Acceptance: focused death/save tests (32 passed), formatter verification,
+  zero-warning Release build, and the full verification gate passed.
 
 ## Mutation baseline
 
