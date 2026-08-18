@@ -29,25 +29,37 @@ simulation ---> authoritative GameState
 
 Commands are requests. The simulation validates commands and is the only owner of authoritative state. Domain events describe committed domain facts for presentation, knowledge, audio, telemetry, debugging, and legacy mechanics.
 
-## Proposed domain areas
+## Domain areas: implemented slices and reserved boundaries
 
-These areas are represented as empty/reserved boundaries; they are not
-implemented gameplay systems yet:
+The map below is a conceptual grouping of the current tree and the proposed
+target architecture. It is not a claim that any area is complete. Status
+labels distinguish implemented slices from presentation boundaries and areas
+that remain reserved for future work:
 
 ```text
-core/          simulation, rng, events, time
-world/         dungeon, generation, floors, regions, tiles, features, hazards
-actors/        player, monsters, stats, effects
-combat/        encounters, actions, damage, fleeing, threat
-items/         inventory, equipment, treasure, affixes, artifacts, identification
-magic/         spells, spell effects, experimentation
-knowledge/     journal, observations, confidence, cartography
-progression/   experience, talents, legacy
-economy/       carried wealth, secured wealth
-meta/          save, game modes, profile
-presentation/  modern, retro, terminal
-ui/            input, menus, HUD
+[implemented]         authoritative simulation code exists
+[implemented slices]  part of the area is implemented; more scope remains
+[boundary]             integration boundary exists; the client/system is incomplete
+[reserved]             target area is identified but not implemented
 ```
+
+```text
+core/          [implemented]         simulation, rng, events, time
+world/         [implemented slices]  dungeon, generation, floors, features, visibility
+actors/        [reserved]            player, monsters, stats, effects
+combat/        [implemented slices]  encounters, actions, damage, fleeing, threat
+items/         [implemented slices]  inventory, equipment, treasure, affixes, identification
+magic/         [implemented slices]  spells and spell effects; experimentation remains
+knowledge/     [implemented slices]  journal, observations, confidence, cartography
+progression/   [implemented slices]  experience, talents, legacy
+economy/       [implemented]         carried wealth, secured wealth
+meta/          [implemented slices]  suspension; save/profile scope remains partial
+presentation/  [boundary]            modern, retro, terminal presentation boundaries
+ui/            [reserved]             input, menus, HUD
+```
+
+Explicit save DTOs and migrations live in `Telengard.Save`; they are part of
+the meta boundary but are intentionally separate from the Core domain folders.
 
 Keep content definitions (monsters, items, spells, features, bands, loot tables, encounter tables, talents) separate from these simulation systems. The eventual file/resource format is intentionally undecided by the specification.
 
