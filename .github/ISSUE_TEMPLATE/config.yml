@@ -1,4 +1,5 @@
 blank_issues_enabled: false
+
 contact_links:
   - name: Report a security vulnerability privately
     url: https://github.com/JackSmack1971/telengard-reloaded/security/advisories/new
