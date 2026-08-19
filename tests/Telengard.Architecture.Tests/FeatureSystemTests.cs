@@ -156,7 +156,8 @@ public sealed class FeatureSystemTests
     private static GameState ActiveState(FeatureInstance feature) => GameState.Create(1234) with
     {
         Player = new PlayerState { Position = feature.Position },
-        Expedition = new ExpeditionState { Active = true, ExpeditionId = Guid.Parse("00000000-0000-0000-0000-000000000041") },
+        Expedition = new ExpeditionState { Active = true, FloorsVisited = [1], ExpeditionId = Guid.Parse("00000000-0000-0000-0000-000000000041") },
+        Inn = new InnState { IsAtInn = false },
         Dungeon = new DungeonState { Features = [feature] }
     };
 }

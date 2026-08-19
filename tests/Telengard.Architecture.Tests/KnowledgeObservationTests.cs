@@ -192,7 +192,9 @@ public sealed class KnowledgeObservationTests
         Expedition = new ExpeditionState
         {
             Active = true,
+            FloorsVisited = [1],
             ExpeditionId = Guid.Parse("00000000-0000-0000-0000-000000000051")
-        }
+        },
+        Inn = new InnState { IsAtInn = false }
     };
 }

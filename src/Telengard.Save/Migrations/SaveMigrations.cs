@@ -1,3 +1,4 @@
+using Telengard.Core.Combat;
 using Telengard.Save.Dto;
 
 namespace Telengard.Save;
@@ -38,6 +39,8 @@ public static class SaveMigrations
             throw new SaveFormatException($"Unsupported save version: {save.SaveVersion}.");
         }
 
+        // STRUCTURAL: establish the DTO graph and collection shape before any
+        // nested value is inspected or materialized into runtime state.
         if (save.Versions is null || save.Player is null || save.Expedition is null ||
             save.Dungeon is null || save.Knowledge is null || save.Legacy is null ||
             save.Inn is null || save.SecuredProgress is null ||
@@ -52,7 +55,7 @@ public static class SaveMigrations
             save.Player.Talents is null || save.Player.Spells is null ||
             save.Player.Injuries is null || save.Player.TemporaryEffects is null ||
             save.Expedition.AcquiredItems is null || save.Expedition.DiscoveriesMade is null ||
-            save.Expedition.FloorsVisited is null ||
+            save.Expedition.FloorsVisited is null || save.Expedition.Objectives is null ||
             save.Player.EquipmentSlots.Any(slot => slot is null ||
                 string.IsNullOrWhiteSpace(slot.SlotId) ||
                 slot.ItemInstanceId == Guid.Empty) ||
@@ -86,6 +89,18 @@ public static class SaveMigrations
             throw new SaveFormatException("Save document is missing collection or player state.");
         }
 
+        if (string.IsNullOrWhiteSpace(save.Versions.SimulationVersion) ||
+            string.IsNullOrWhiteSpace(save.Versions.GeneratorVersion) ||
+            string.IsNullOrWhiteSpace(save.Versions.ContentVersion) ||
+            save.Legacy.PersistentMap is null ||
+            save.Legacy.PersistentMap.ObservedPositions is null ||
+            save.Legacy.PersistentMap.VisitedPositions is null ||
+            save.Legacy.PersistentMap.ObservedPositions.Any(position => position is null) ||
+            save.Legacy.PersistentMap.VisitedPositions.Any(position => position is null))
+        {
+            throw new SaveFormatException("Save document contains invalid structural state.");
+        }
+
         if (save.Dungeon.Features is null || save.Dungeon.Features.Any(feature =>
                 feature is null || feature.InstanceId == Guid.Empty || string.IsNullOrWhiteSpace(feature.DefinitionId) ||
                 feature.Position is null || feature.ActivationCount < 0) ||
@@ -104,10 +119,84 @@ public static class SaveMigrations
             throw new SaveFormatException("Save document is missing legacy state.");
         }
 
+        if (save.Legacy.PersistentMap.ObservedPositions.Any(position => position is null) ||
+            save.Legacy.PersistentMap.VisitedPositions.Any(position => position is null) ||
+            save.Knowledge.TeleporterMappings.Any(mapping => mapping is null ||
+                mapping.Source is null || mapping.Destination is null) ||
+            save.Dungeon.Features.Any(feature => feature is null || feature.Position is null))
+        {
+            throw new SaveFormatException("Save document contains null position state.");
+        }
+
+        if (save.Combat is not null &&
+            (save.Combat.Monster is null ||
+             save.Combat.Monster.Position is null ||
+             save.Combat.Monster.TemporaryEffects is null ||
+             save.Combat.Monster.TemporaryEffects.Any(effect => string.IsNullOrWhiteSpace(effect))))
+        {
+            throw new SaveFormatException("Save document contains invalid combat structure.");
+        }
+
+        // SCALAR DOMAIN: reject values that would violate DTO constructor or
+        // resolver range contracts instead of relying on materialization to do so.
+        if (save.SimulationTick < 0 ||
+            save.Player.Level < 0 || save.Player.Experience < 0 ||
+            save.Player.HitPoints < 0 || save.Player.MaxHitPoints < 0 ||
+            save.Player.HitPoints > save.Player.MaxHitPoints ||
+            save.Player.SpellPower < 0 || save.Player.MaxSpellPower < 0 ||
+            save.Player.SpellPower > save.Player.MaxSpellPower ||
+            save.Player.CarriedGold < 0 ||
+            save.Expedition.StartingFloor is < 1 or > 50 ||
+            save.Expedition.DeepestFloorReached is < 1 or > 50 ||
+            save.Expedition.StartSimulationTick < 0 ||
+            save.Expedition.SimulationTicks < 0 ||
+            save.Expedition.CarriedGold < 0 ||
+            save.Expedition.MonstersDefeated < 0 ||
+            save.Expedition.RoomsVisited < 0 ||
+            save.Expedition.FloorsVisited.Any(floor => floor is < 1 or > 50) ||
+            save.SecuredProgress.SecuredGold < 0 ||
+            save.Legacy.PreviousHeroes.Any(hero => hero.Level < 0 || hero.Experience < 0 ||
+                hero.DeepestFloorReached is < 1 or > 50) ||
+            save.Dungeon.Features.Any(feature => feature.ActivationCount < 0) ||
+            save.Combat is not null && (save.Combat.Round < 1 ||
+                save.Combat.Monster.InstanceId == Guid.Empty ||
+                save.Combat.Monster.Level < 1 ||
+                save.Combat.Monster.CurrentHitPoints < 0))
+        {
+            throw new SaveFormatException("Save document contains invalid scalar state.");
+        }
+
+        if (save.Player.Position.Floor is < 1 or > 50 ||
+            save.Legacy.PersistentMap.ObservedPositions.Any(position => position.Floor is < 1 or > 50) ||
+            save.Legacy.PersistentMap.VisitedPositions.Any(position => position.Floor is < 1 or > 50) ||
+            save.Knowledge.TeleporterMappings.Any(mapping =>
+                mapping.Source.Floor is < 1 or > 50 || mapping.Destination.Floor is < 1 or > 50) ||
+            save.Dungeon.Features.Any(feature => feature.Position.Floor is < 1 or > 50) ||
+            save.Legacy.PreviousHeroes.Any(hero => hero.DeathPosition.Floor is < 1 or > 50) ||
+            save.Legacy.Graves.Any(grave => grave.Position.Floor is < 1 or > 50) ||
+            (save.Combat is not null && save.Combat.Monster.Position.Floor is < 1 or > 50))
+        {
+            throw new SaveFormatException("Save document contains an invalid dungeon floor.");
+        }
+
         var observed = save.Legacy.PersistentMap.ObservedPositions.Select(position => (position.Floor, position.X, position.Y)).ToHashSet();
         if (save.Legacy.PersistentMap.VisitedPositions.Any(position => !observed.Contains((position.Floor, position.X, position.Y))))
         {
             throw new SaveFormatException("Visited map positions must also be observed.");
+        }
+
+        // CROSS-FIELD: preserve invariants enforced by the simulation's
+        // lifecycle and economy resolvers before admitting authoritative state.
+        if (save.Player.CarriedGold != save.Expedition.CarriedGold ||
+            save.Expedition.Active && save.Inn.IsAtInn ||
+            save.Combat is not null &&
+                (!save.Expedition.Active || save.Inn.IsAtInn || !save.Player.Alive) ||
+            !save.Player.Alive && save.Player.HitPoints > 0 ||
+            save.Expedition.DeepestFloorReached < save.Expedition.StartingFloor ||
+            save.Expedition.FloorsVisited.Count > 0 &&
+                save.Expedition.DeepestFloorReached != save.Expedition.FloorsVisited.Max())
+        {
+            throw new SaveFormatException("Save document violates a cross-field state invariant.");
         }
 
         if (save.Combat is not null &&
@@ -115,7 +204,11 @@ public static class SaveMigrations
              save.Combat.Monster.TemporaryEffects is null ||
              !Enum.IsDefined(save.Combat.Phase) ||
              (save.Combat.SelectedAction is not null && !Enum.IsDefined(save.Combat.SelectedAction.Value)) ||
-             (save.Combat.ThreatLevel is not null && !Enum.IsDefined(save.Combat.ThreatLevel.Value))))
+             (save.Combat.ThreatLevel is not null && !Enum.IsDefined(save.Combat.ThreatLevel.Value)) ||
+             (save.Combat.SelectedAction is not null && save.Combat.Phase is
+                 CombatPhase.Searching or CombatPhase.Contact or CombatPhase.ThreatAssessment) ||
+             (save.Combat.ThreatLevel is not null && save.Combat.Phase is
+                 CombatPhase.Searching or CombatPhase.Contact or CombatPhase.ThreatAssessment)))
         {
             throw new SaveFormatException("Save document contains invalid combat state.");
         }

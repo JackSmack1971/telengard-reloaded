@@ -119,6 +119,7 @@ public sealed class FleeTests
         var state = GameState.Create(1234) with
         {
             Expedition = new ExpeditionState { Active = true },
+            Inn = new InnState { IsAtInn = false },
             Player = new PlayerState { Position = new DungeonPosition(1, 0, 0) }
         };
         return state with

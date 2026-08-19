@@ -74,6 +74,7 @@ public sealed class ExpeditionStateTests
     {
         var state = GameState.Create(1234) with
         {
+            Player = new PlayerState { CarriedGold = 23 },
             Expedition = new ExpeditionState
             {
                 ExpeditionId = Guid.Parse("00000000-0000-0000-0000-000000000002"),
@@ -89,7 +90,8 @@ public sealed class ExpeditionStateTests
                 RoomsVisited = 8,
                 Objectives = ["reach-depth-7"],
                 Active = true
-            }
+            },
+            Inn = new InnState { IsAtInn = false }
         };
 
         var restored = SaveGameSerializer.Deserialize(SaveGameSerializer.Serialize(state));
