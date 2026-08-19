@@ -2,6 +2,35 @@
 
 Last verified: 2026-08-18
 
+## AUD-004 verification
+
+- Status: implemented; `.github/workflows/verification.yml` runs the
+  canonical `./eng/verify.ps1 -Mode Full` gate on pull requests and pushes to
+  `main` using a Windows runner.
+- Workflow controls: the job grants `contents: read`, uses concurrency
+  cancellation for superseded pull-request runs, and declares no secrets or
+  mutation-testing steps.
+- SDK provisioning: `actions/setup-dotnet` reads `global.json`, so CI follows
+  the repository's existing SDK policy without duplicating a version string in
+  workflow YAML. The canonical wrapper runs against that provisioned SDK on
+  `PATH` when the ignored local SDK directory is absent.
+- Compatibility impact: save, simulation, generator, and content versions are
+  unchanged; deterministic vectors, save migrations, and replay compatibility
+  are unchanged.
+- Verification evidence: workflow structure and the local canonical gate are
+  validated in the implementation environment; an actual GitHub Actions run
+  is unverified from this environment until the workflow is pushed and a PR or
+  `main` push executes it.
+- Coverage evidence: the required separate coverage gate ran all 334 tests but
+  failed its strict 100% target at 3,229/3,243 lines (99.57%) and 1,491/1,564
+  branches (95.33%). AUD-004 changes no production code; coverage remediation
+  remains outside this packet.
+- Repository setting: a maintainer must add the `Full verification` check from
+  the `Repository verification` workflow as a required status check for
+  `main`; the workflow file cannot configure branch protection. At
+  implementation time, the GitHub API reported no required status checks for
+  `main`.
+
 ## Current implementation phase
 
 Phase 1 — Dungeon Walking Prototype implemented and gated. The headless,
