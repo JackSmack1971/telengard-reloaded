@@ -29,6 +29,10 @@ jobs:
         with:
           global-json-file: global.json
 
+      - name: Prepare verification stamp directory
+        shell: pwsh
+        run: New-Item -ItemType Directory -Force -Path .codex | Out-Null
+
       - name: Run the canonical verification gate
         shell: pwsh
         run: ./eng/verify.ps1 -Mode Full
