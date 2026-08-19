@@ -55,6 +55,30 @@ public sealed class ItemInstanceTests
     }
 
     [Fact]
+    public void Instance_does_not_expose_a_mutable_affix_snapshot()
+    {
+        var instance = new ItemInstance(
+            Guid.Parse("00000000-0000-0000-0000-000000000001"),
+            "sword",
+            ["keen"]);
+
+        Assert.Throws<NotSupportedException>(() => ((IList<string>)instance.GeneratedAffixes)[0] = "flaming");
+        Assert.Equal(["keen"], instance.GeneratedAffixes);
+    }
+
+    [Fact]
+    public void Observed_state_does_not_expose_a_mutable_affix_snapshot()
+    {
+        var observed = new ItemObservedState(
+            Guid.Parse("00000000-0000-0000-0000-000000000001"),
+            identified: true,
+            ["keen"]);
+
+        Assert.Throws<NotSupportedException>(() => ((IList<string>)observed.GeneratedAffixes)[0] = "flaming");
+        Assert.Equal(["keen"], observed.GeneratedAffixes);
+    }
+
+    [Fact]
     public void Instance_serializes_runtime_state_without_content_definition_fields()
     {
         var instance = new ItemInstance(

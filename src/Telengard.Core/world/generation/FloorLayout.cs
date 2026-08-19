@@ -56,8 +56,16 @@ public sealed class FloorLayout
         DungeonPosition stairsDown)
     {
         Floor = floor;
-        _tiles = tiles;
-        Rooms = rooms;
+        ArgumentNullException.ThrowIfNull(tiles);
+        ArgumentNullException.ThrowIfNull(rooms);
+        var roomCopy = rooms.ToArray();
+        if (roomCopy.Any(room => room is null))
+        {
+            throw new ArgumentException("Rooms cannot contain null values.", nameof(rooms));
+        }
+
+        _tiles = (DungeonTile[,])tiles.Clone();
+        Rooms = Array.AsReadOnly(roomCopy);
         StairsUp = stairsUp;
         StairsDown = stairsDown;
     }

@@ -97,6 +97,21 @@ public sealed class MonsterSchemaTests
     }
 
     [Fact]
+    public void Instance_does_not_expose_a_mutable_effect_snapshot()
+    {
+        var instance = new MonsterInstance(
+            Guid.Parse("00000000-0000-0000-0000-000000000001"),
+            "rat",
+            1,
+            1,
+            new DungeonPosition(1, 0, 0),
+            ["slowed"]);
+
+        Assert.Throws<NotSupportedException>(() => ((IList<string>)instance.TemporaryEffects)[0] = "poison");
+        Assert.Equal(["slowed"], instance.TemporaryEffects);
+    }
+
+    [Fact]
     public void Instance_rejects_invalid_runtime_boundaries()
     {
         var position = new DungeonPosition(1, 0, 0);
