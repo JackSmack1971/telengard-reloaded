@@ -1,6 +1,6 @@
 # Modern Telengard implementation task ledger
 
-This ledger is derived from the ordered TEL tickets in `docs/modern-telengard-spec.md` §49. The Core Alpha extension tickets below are project-local implementation tasks, not additions or changes to the source specification. Numeric gaps in the specification-defined series remain intentional.
+This ledger is derived from the ordered TEL tickets in `docs/modern-telengard-spec.md` §49. The Core Alpha and first-vertical-slice extension tickets below are project-local implementation tasks, not additions or changes to the source specification. Numeric gaps in the specification-defined series remain intentional.
 
 ## Rules
 
@@ -119,6 +119,39 @@ and verified.
 - [TEL-107.md](TEL-107.md) — Add the Core Alpha vertical-slice integration proof — Not started
 - [TEL-108.md](TEL-108.md) — Add deterministic developer debug commands — Not started
 
+## Recommended First Vertical Slice content extensions (project-local)
+
+These tickets populate only the §48 representative slice: floors 1–5, one
+dungeon biome, 8–12 monsters, 10–15 items, 6–8 spells, and the four named
+features. They author data against the existing `Telengard.Content` schemas;
+they do not add fifty-floor content, move rules into renderers, or reimplement
+the already-owned feature, journal, wealth, inn, or death mechanics.
+
+- TEL-109 — Establish the data-driven vertical-slice content pack — Not started
+  - Define the external content files, catalog/loader boundary, validation, and content-version handling for the slice.
+  - Keep authored definitions separate from simulation logic and presentation; do not add renderer-owned content rules.
+- TEL-110 — Author the floors 1–5 dungeon biome and band data — Not started
+  - Provide one biome covering only floors 1–5, with data references for its encounter, feature, and loot ecology.
+  - Keep unresolved pacing, weights, and balance as `CONFIGURATION/TUNING DECISION REQUIRED`.
+- TEL-111 — Author the first-slice monster roster — Not started
+  - Provide 8–12 distinct monster definitions using families, traits, behaviors, actions, resistances, vulnerabilities, spawn rules, and loot references.
+  - Require ecological differences; do not fill the roster with stat-scaled variations of one monster.
+- TEL-112 — Author first-slice encounter ecology tables — Not started
+  - Provide deterministic, data-driven floor-band encounter tables for floors 1–5 that reference the TEL-111 monster IDs.
+  - Keep encounter selection and validation in the existing simulation/content boundary, not in renderer code.
+- TEL-113 — Author the first-slice item roster — Not started
+  - Provide 10–15 item definitions using the existing categories, properties, identification, affix, curse, and depth-rule fields.
+  - Keep item-instance creation and treasure resolution in the existing item/expedition tickets.
+- TEL-114 — Author first-slice loot tables — Not started
+  - Provide data-driven loot tables that reference TEL-113 item IDs and the existing carried-wealth/treasure boundary.
+  - Do not invent a permanent drop-rate, value, or loss formula where the specification is silent.
+- TEL-115 — Author the first-slice spell roster — Not started
+  - Provide 6–8 spell definitions with targeting, effects, interactions, costs, and discovery descriptions for the existing spell system.
+  - Leave balance and undefined spell formulas configurable.
+- TEL-116 — Author the four first-slice dungeon feature definitions — Not started
+  - Provide data definitions and outcomes for exactly fountain, altar, pit, and teleporter using the existing generic feature and knowledge contracts.
+  - Do not duplicate the already-implemented feature resolvers or encode feature behavior in a renderer.
+
 ## Core Alpha coverage audit
 
 The audit compares §26 Character Creation, §48 Recommended First Vertical
@@ -147,10 +180,11 @@ implementation evidence:
 - **Knowledge between Legacy characters:** existing legacy tickets do not own
   the death-to-new-character profile handoff required by §51; TEL-106 owns
   that narrow gap.
-- **First vertical-slice content:** §48 is a recommendation, not a separate
-  §51 checklist item. Per scope, no production content-expansion ticket is
-  created. TEL-107 is an integration/evidence ticket using fixtures and does
-  not add the recommended content counts.
+- **First vertical-slice content:** the generic schemas and mechanics exist,
+  but authored data, a data-driven content pack boundary, the single biome,
+  rosters, and encounter/loot tables are absent. TEL-109–TEL-116 now own that
+  narrowly scoped §48 content work. TEL-107 remains an integration/evidence
+  ticket and does not expand beyond the slice content assigned here.
 - **Developer debug commands and deterministic test mode:** the existing
   harness only accepts `--seed` and `--deterministic`; §43–§44 are not
   owned by an existing TEL ticket. TEL-108 owns the tooling surface without
