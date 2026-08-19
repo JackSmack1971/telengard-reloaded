@@ -67,7 +67,7 @@ Results:
 
 - Focused audit consumer/ownership tests: **79 passed, 0 failed**.
 - Canonical full verification: restore passed, format verification passed,
-  Release build passed with **0 warnings and 0 errors**, and **314 Release
+  Release build passed with **0 warnings and 0 errors**, and **309 Release
   tests passed**.
 
 ## Unresolved risks and caveats
