@@ -14,7 +14,7 @@ public enum GameMode
 
 public sealed record GameVersions
 {
-    public static GameVersions Current { get; } = new("0.1", "0.1", "0.1");
+    public static GameVersions Current { get; } = new("0.2", "0.2", "0.2");
 
     public GameVersions(string simulationVersion, string generatorVersion, string contentVersion)
     {

@@ -157,7 +157,7 @@ public sealed class EncounterTriggerTests
             position,
             new EncounterTriggerConfiguration(roll, [new EncounterSpawnOption("rat", 1, 1)]));
 
-        Assert.Equal(0.7192288264632225d, roll);
+        Assert.Equal(0.070197857916355133d, roll);
         Assert.Equal(state, result.State);
         Assert.Empty(result.Events);
     }
@@ -177,7 +177,7 @@ public sealed class EncounterTriggerTests
             new EncounterTriggerConfiguration(1, [new EncounterSpawnOption("rat", 1, 1)]));
 
         var encounter = Assert.IsType<EncounterStartedEvent>(Assert.Single(result.Events));
-        Assert.Equal(Guid.Parse("9dea57e0-78f1-c832-9416-8628266a2d36"), encounter.Monster.InstanceId);
+        Assert.Equal(Guid.Parse("edbf8e93-0c3a-c484-da6f-8f04d3f030db"), encounter.Monster.InstanceId);
 
         var triggered = EncounterTriggerResolver.Evaluate(
             state,
@@ -199,7 +199,7 @@ public sealed class EncounterTriggerTests
             .CreateStream("encounter", $"expedition:{id}", "tick:0", "floor:1", "x:0", "y:0")
             .NextDouble();
 
-        Assert.Equal(0.769582137465477d, roll);
+        Assert.Equal(0.48504265397787094d, roll);
         var result = EncounterTriggerResolver.Evaluate(
             state,
             state.Player.Position,

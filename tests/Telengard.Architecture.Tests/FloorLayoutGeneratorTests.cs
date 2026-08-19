@@ -117,18 +117,18 @@ public sealed class FloorLayoutGeneratorTests
         var generator = new FloorLayoutGenerator();
 
         Assert.Equal(
-            "8B7284D51DF66CE9F57CD3E5BF809F0B775B9E7A1D6DEB6A1F2AC47CA49A5B74",
-            Fingerprint(generator.Generate(1234, "generator-1", 1)));
+            "2A69F0873452AFC0703A87336250111DC4C05F55E465B1FE5E28B19B8CCD09B6",
+            Fingerprint(generator.Generate(1234, "0.2", 1)));
         Assert.Equal(
-            "BA734ABE26C0004B607BEE891437BB41F3BDEB788543901D9185E61B9B8A8CE1",
-            Fingerprint(generator.Generate(99, "generator-1", 3)));
+            "BD417AA065B115CF4A3BDF6EEAF5BFF11AFE8B49F85248143FBD453F21C0B915",
+            Fingerprint(generator.Generate(99, "0.2", 3)));
         Assert.Equal(
-            "95471DBC305D480AED040AD1C64D7ECBC14EC1A5BD3822A08538C43E6027AA16",
-            Fingerprint(generator.Generate(42, "generator-1", 1, new FloorLayoutOptions(roomCount: 2))));
+            "A84E1AAA8DE02E8F84477C5DBFCD560ACF1F11425ECB669745A8ED065052E9EE",
+            Fingerprint(generator.Generate(42, "0.2", 1, new FloorLayoutOptions(roomCount: 2))));
         Assert.Equal(
-            "2F8EC9375BDA2BC96B86C18CF37A80EB0B2B1795C297BEF948DA0C226FB11F8A",
-            AggregateFingerprint(string.Join(';', Enumerable.Range(0, 32).Select(seed => Fingerprint(generator.Generate(seed, "generator-1", 1))))));
-        Assert.Equal(50, generator.Generate(1, "generator-1", 50).Floor);
+            "E348980BBA8C3BBFD8DC5CBDC7F33F02F4BA1C6358379EFAD3A1BCE1A17FA4AA",
+            AggregateFingerprint(string.Join(';', Enumerable.Range(0, 32).Select(seed => Fingerprint(generator.Generate(seed, "0.2", 1))))));
+        Assert.Equal(50, generator.Generate(1, "0.2", 50).Floor);
     }
 
     [Fact]

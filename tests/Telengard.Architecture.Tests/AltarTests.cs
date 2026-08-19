@@ -82,8 +82,8 @@ public sealed class AltarTests
         Assert.Equal(first.Events.Take(2), second.Events.Take(2));
         var outcome = Assert.IsType<AltarOutcomeResolvedEvent>(first.Events[^1]);
         var replayedOutcome = Assert.IsType<AltarOutcomeResolvedEvent>(second.Events[^1]);
-        Assert.Equal(["rare"], outcome.Effects);
-        Assert.Equal(["relic_resonates"], outcome.Observations);
+        Assert.Equal(["common"], outcome.Effects);
+        Assert.Equal(["dust_stirs"], outcome.Observations);
         Assert.Equal(outcome.FeatureId, replayedOutcome.FeatureId);
         Assert.Equal(outcome.Position, replayedOutcome.Position);
         Assert.Equal(outcome.ActivationCount, replayedOutcome.ActivationCount);
