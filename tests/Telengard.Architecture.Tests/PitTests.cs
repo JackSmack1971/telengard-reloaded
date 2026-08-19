@@ -61,8 +61,8 @@ public sealed class PitTests
         Assert.Equal(firstOutcome.ActivationCount, secondOutcome.ActivationCount);
         Assert.Equal(firstOutcome.Effects, secondOutcome.Effects);
         Assert.Equal(firstOutcome.Observations, secondOutcome.Observations);
-        Assert.Equal([PitEffectIds.DropTwoFloors], firstOutcome.Effects);
-        Assert.Equal(["rope_slows_the_fall"], firstOutcome.Observations);
+        Assert.Empty(firstOutcome.Effects);
+        Assert.Equal(["the_floor_gives_way"], firstOutcome.Observations);
     }
 
     [Fact]
