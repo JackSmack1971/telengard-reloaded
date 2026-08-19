@@ -17,10 +17,12 @@ Last verified: 2026-08-18
 - Compatibility impact: save, simulation, generator, and content versions are
   unchanged; deterministic vectors, save migrations, and replay compatibility
   are unchanged.
-- Verification evidence: workflow structure and the local canonical gate are
-  validated in the implementation environment; an actual GitHub Actions run
-  is unverified from this environment until the workflow is pushed and a PR or
-  `main` push executes it.
+- Verification evidence: workflow structure and the local canonical gate were
+  validated in the implementation environment. GitHub Actions PR #27 then
+  passed on commit `3957084`, completing restore, format verification, a
+  zero-warning Release build, and 329 Release tests. The workflow creates the
+  ignored `.codex` stamp directory required by the canonical verifier on a
+  clean checkout.
 - Coverage evidence: the required separate coverage gate ran all 334 tests but
   failed its strict 100% target at 3,229/3,243 lines (99.57%) and 1,491/1,564
   branches (95.33%). AUD-004 changes no production code; coverage remediation
