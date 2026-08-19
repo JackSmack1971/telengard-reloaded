@@ -83,7 +83,9 @@ public sealed class FeatureKnowledgeTests
         Expedition = new ExpeditionState
         {
             Active = true,
+            FloorsVisited = [1],
             ExpeditionId = Guid.Parse("00000000-0000-0000-0000-000000000055")
-        }
+        },
+        Inn = new InnState { IsAtInn = false }
     };
 }

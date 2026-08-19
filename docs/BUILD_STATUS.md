@@ -1130,6 +1130,17 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
 - Coverage gate: not required by AUD-002; no coverage policy or production behavior requiring a coverage artifact changed.
 - Scope confirmation: no other AUD packet was started.
 
+## AUD-007 remediation
+
+- Status: remediated against audit baseline `34c7a4d00d8b7588869875f34edee1c1adfcdeaf`; current implementation was inspected at `ebec46da09b2994d784e65aace57693f3fcb7002`.
+- Defect reproduced by save serializer regressions: a null persistent-map position escaped validation as `NullReferenceException`, while negative counters, active-at-inn state, carried-gold mismatch, and combat without an active expedition were admitted as authoritative state.
+- Production change: save validation now runs after migration in structural, scalar-domain, and cross-field stages; nested position/collection contracts, resolver-backed ranges, carried-gold mirrors, expedition/inn lifecycle, floor/deepest coherence, and combat lifecycle are rejected before DTO materialization. Serializer materialization failures are exposed as `SaveFormatException`.
+- Compatibility impact: save version unchanged; simulation, generator, and content versions unchanged; deterministic vectors unchanged; no migration added; valid-save replay compatibility preserved. Supported save versions 1–13 continue to migrate and load successfully.
+- Tests added/updated: malformed current-save coverage for null positions, negative gold/counters, active-at-inn, carried-gold mismatch, invalid combat lifecycle, and all supported save-version migrations; active round-trip fixtures now represent valid dungeon lifecycle state.
+- Verification: focused save tests passed 40/40; full Release architecture tests passed 334/334; doctor, formatter verification, zero-warning Release build, and `./eng/verify.ps1 -Mode Full` passed with a process-scoped execution-policy bypass and `core.autocrlf=false` override for the host’s unsigned-script and dirty-worktree line-ending behavior.
+- Coverage gate: not required by AUD-007; no coverage policy or coverage artifact behavior changed.
+- Scope confirmation: no other AUD packet was started.
+
 ## TEL-003 verification
 
 - Status: implemented and verified with the portable .NET 8.0.100 SDK.

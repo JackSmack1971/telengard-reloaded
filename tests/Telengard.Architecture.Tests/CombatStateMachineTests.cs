@@ -200,7 +200,8 @@ public sealed class CombatStateMachineTests
     {
         var state = GameState.Create(1234) with
         {
-            Expedition = new ExpeditionState { Active = true },
+            Expedition = new ExpeditionState { Active = true, FloorsVisited = [1] },
+            Inn = new InnState { IsAtInn = false },
             Player = new PlayerState
             {
                 Position = new DungeonPosition(1, 0, 0),

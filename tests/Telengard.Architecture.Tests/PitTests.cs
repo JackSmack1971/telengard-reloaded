@@ -144,6 +144,7 @@ public sealed class PitTests
             DeepestFloorReached = feature.Position.Floor,
             FloorsVisited = [feature.Position.Floor]
         },
+        Inn = new InnState { IsAtInn = false },
         Dungeon = new DungeonState { Features = [feature] }
     };
 }

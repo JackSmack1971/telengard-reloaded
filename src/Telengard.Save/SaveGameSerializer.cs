@@ -26,11 +26,15 @@ public static class SaveGameSerializer
                 ?? throw new SaveFormatException("Save document is empty.");
             return SaveMigrations.Migrate(save).ToState();
         }
+        catch (SaveFormatException)
+        {
+            throw;
+        }
         catch (JsonException exception)
         {
             throw new SaveFormatException("Save document is invalid JSON.", exception);
         }
-        catch (ArgumentException exception)
+        catch (Exception exception)
         {
             throw new SaveFormatException("Save document contains invalid state.", exception);
         }

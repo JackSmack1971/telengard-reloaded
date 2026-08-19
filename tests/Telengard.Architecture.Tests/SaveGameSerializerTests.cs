@@ -54,7 +54,14 @@ public sealed class SaveGameSerializerTests
                 CarriedGold = 17,
                 Alive = true
             },
-            Expedition = new ExpeditionState { Active = true, CarriedGold = 17, FloorsVisited = [1, 7] },
+            Expedition = new ExpeditionState
+            {
+                Active = true,
+                CarriedGold = 17,
+                DeepestFloorReached = 7,
+                FloorsVisited = [1, 7]
+            },
+            Inn = new InnState { IsAtInn = false },
             SecuredProgress = new SecuredProgressState { SecuredGold = 23 }
         };
 
@@ -103,6 +110,30 @@ public sealed class SaveGameSerializerTests
         Assert.Equal(GameState.CurrentSaveVersion, state.SaveVersion);
         Assert.Empty(state.Legacy.PersistentMap.ObservedPositions);
         Assert.Empty(state.Legacy.PersistentMap.VisitedPositions);
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(3)]
+    [InlineData(4)]
+    [InlineData(5)]
+    [InlineData(6)]
+    [InlineData(7)]
+    [InlineData(8)]
+    [InlineData(9)]
+    [InlineData(10)]
+    [InlineData(11)]
+    [InlineData(12)]
+    [InlineData(13)]
+    public void Deserialize_accepts_every_supported_save_version(int saveVersion)
+    {
+        var document = JsonNode.Parse(SaveGameSerializer.Serialize(GameState.Create(1234)))!.AsObject();
+        document["saveVersion"] = saveVersion;
+
+        var state = SaveGameSerializer.Deserialize(document.ToJsonString());
+
+        Assert.Equal(GameState.CurrentSaveVersion, state.SaveVersion);
     }
 
     [Fact]
@@ -181,7 +212,8 @@ public sealed class SaveGameSerializerTests
     {
         var state = GameState.Create(1234) with
         {
-            Expedition = new ExpeditionState { Active = true },
+            Expedition = new ExpeditionState { Active = true, FloorsVisited = [1] },
+            Inn = new InnState { IsAtInn = false },
             Player = new PlayerState { Position = new DungeonPosition(1, 0, 0) },
             Combat = new CombatState(
                 new MonsterInstance(
@@ -211,10 +243,9 @@ public sealed class SaveGameSerializerTests
         {
             Expedition = new ExpeditionState
             {
-                Active = true,
-                CarriedGold = 17,
                 FloorsVisited = [1, 7]
-            }
+            },
+            Inn = new InnState { IsAtInn = false }
         }))!.AsObject();
         document["saveVersion"] = 1;
         var expedition = document["expedition"]!.AsObject();
@@ -230,8 +261,8 @@ public sealed class SaveGameSerializerTests
 
         var state = SaveGameSerializer.Deserialize(document.ToJsonString());
 
-        Assert.True(state.Expedition.Active);
-        Assert.Equal(17, state.Expedition.CarriedGold);
+        Assert.False(state.Expedition.Active);
+        Assert.Equal(0, state.Expedition.CarriedGold);
         Assert.Equal(1, state.Expedition.StartingFloor);
         Assert.Equal(7, state.Expedition.DeepestFloorReached);
         Assert.Equal([1, 7], state.Expedition.FloorsVisited);
@@ -466,6 +497,90 @@ public sealed class SaveGameSerializerTests
     }
 
     [Fact]
+    public void Deserialize_rejects_null_positions_as_save_format_errors()
+    {
+        var document = JsonNode.Parse(SaveGameSerializer.Serialize(GameState.Create(1234)))!.AsObject();
+        document["legacy"]!["persistentMap"]!["observedPositions"] = new JsonArray((JsonNode?)null);
+
+        Assert.Throws<SaveFormatException>(() => SaveGameSerializer.Deserialize(document.ToJsonString()));
+    }
+
+    [Fact]
+    public void Deserialize_rejects_negative_gold_and_counters()
+    {
+        var invalidDocuments = new[]
+        {
+            CurrentDocument(document => document["player"]!["carriedGold"] = -1),
+            CurrentDocument(document => document["expedition"]!["carriedGold"] = -1),
+            CurrentDocument(document => document["securedProgress"]!["securedGold"] = -1),
+            CurrentDocument(document => document["simulationTick"] = -1),
+            CurrentDocument(document => document["expedition"]!["simulationTicks"] = -1),
+            CurrentDocument(document => document["expedition"]!["monstersDefeated"] = -1),
+            CurrentDocument(document => document["expedition"]!["roomsVisited"] = -1)
+        };
+
+        Assert.All(invalidDocuments, json => Assert.Throws<SaveFormatException>(
+            () => SaveGameSerializer.Deserialize(json)));
+    }
+
+    [Fact]
+    public void Deserialize_rejects_active_expeditions_at_the_inn()
+    {
+        var json = CurrentDocument(document => document["expedition"]!["active"] = true);
+
+        Assert.Throws<SaveFormatException>(() => SaveGameSerializer.Deserialize(json));
+    }
+
+    [Fact]
+    public void Deserialize_rejects_player_and_expedition_carried_gold_mismatch()
+    {
+        var json = CurrentDocument(document => document["player"]!["carriedGold"] = 1);
+
+        Assert.Throws<SaveFormatException>(() => SaveGameSerializer.Deserialize(json));
+    }
+
+    [Fact]
+    public void Deserialize_rejects_incoherent_expedition_floor_history()
+    {
+        var json = CurrentDocument(document =>
+        {
+            document["expedition"]!["active"] = true;
+            document["expedition"]!["floorsVisited"] = new JsonArray(1);
+            document["expedition"]!["deepestFloorReached"] = 2;
+            document["inn"]!["isAtInn"] = false;
+        });
+
+        Assert.Throws<SaveFormatException>(() => SaveGameSerializer.Deserialize(json));
+    }
+
+    [Fact]
+    public void Deserialize_rejects_combat_without_an_active_expedition()
+    {
+        var state = GameState.Create(1234) with
+        {
+            Expedition = new ExpeditionState { Active = true, FloorsVisited = [1] },
+            Inn = new InnState { IsAtInn = false },
+            Player = new PlayerState
+            {
+                Position = new DungeonPosition(1, 0, 0),
+                HitPoints = 1,
+                MaxHitPoints = 1
+            },
+            Combat = new CombatState(
+                new MonsterInstance(
+                    Guid.Parse("00000000-0000-0000-0000-000000000001"),
+                    "rat",
+                    1,
+                    3,
+                    new DungeonPosition(1, 0, 0)))
+        };
+        var document = JsonNode.Parse(SaveGameSerializer.Serialize(state))!.AsObject();
+        document["expedition"]!["active"] = false;
+
+        Assert.Throws<SaveFormatException>(() => SaveGameSerializer.Deserialize(document.ToJsonString()));
+    }
+
+    [Fact]
     public void Expedition_dto_defaults_missing_collections()
     {
         var expedition = new ExpeditionStateDto
@@ -536,5 +651,12 @@ public sealed class SaveGameSerializerTests
         Assert.Empty(migratedMissing.AcquiredItems!);
         Assert.Empty(migratedMissing.DiscoveriesMade!);
         Assert.Empty(migratedMissing.Objectives!);
+    }
+
+    private static string CurrentDocument(Action<JsonObject> mutate)
+    {
+        var document = JsonNode.Parse(SaveGameSerializer.Serialize(GameState.Create(1234)))!.AsObject();
+        mutate(document);
+        return document.ToJsonString();
     }
 }

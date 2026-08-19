@@ -104,8 +104,10 @@ public sealed class MonsterKnowledgeTests
         Expedition = new ExpeditionState
         {
             Active = true,
+            FloorsVisited = [1],
             ExpeditionId = Guid.Parse("00000000-0000-0000-0000-000000000054")
-        }
+        },
+        Inn = new InnState { IsAtInn = false }
     };
 
     private static MonsterInstance Monster(string definitionId, int level) => new(
