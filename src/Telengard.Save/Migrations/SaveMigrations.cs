@@ -1,11 +1,12 @@
 using Telengard.Core.Combat;
+using Telengard.Core.Simulation;
 using Telengard.Save.Dto;
 
 namespace Telengard.Save;
 
 public static class SaveMigrations
 {
-    public const int CurrentSaveVersion = 13;
+    public const int CurrentSaveVersion = 14;
 
     public static GameStateSaveDto Migrate(GameStateSaveDto save)
     {
@@ -28,6 +29,7 @@ public static class SaveMigrations
         if (save.SaveVersion <= 11) migrated = MigrateVersionEleven(migrated);
         if (save.SaveVersion <= 12) migrated = MigrateVersionTwelve(migrated);
         if (save.SaveVersion <= 13) migrated = MigrateVersionThirteen(migrated);
+        if (save.SaveVersion <= 13) migrated = MigrateVersionFourteen(migrated);
         return migrated;
     }
 
@@ -140,6 +142,7 @@ public static class SaveMigrations
         // SCALAR DOMAIN: reject values that would violate DTO constructor or
         // resolver range contracts instead of relying on materialization to do so.
         if (save.SimulationTick < 0 ||
+            save.ExpeditionSequence < 0 ||
             save.Player.Level < 0 || save.Player.Experience < 0 ||
             save.Player.HitPoints < 0 || save.Player.MaxHitPoints < 0 ||
             save.Player.HitPoints > save.Player.MaxHitPoints ||
@@ -295,6 +298,15 @@ public static class SaveMigrations
         Legacy = save.Legacy is null
             ? new LegacyStateDto { PersistentMap = EmptyMap(), PreviousHeroes = [], Graves = [], Heirlooms = [] }
             : save.Legacy with { Heirlooms = save.Legacy.Heirlooms ?? [] }
+    };
+
+    private static GameStateSaveDto MigrateVersionFourteen(GameStateSaveDto save) => save with
+    {
+        SaveVersion = CurrentSaveVersion,
+        ExpeditionSequence = save.Expedition?.ExpeditionId is null ? 0 : 1,
+        Versions = save.Versions is null
+            ? null!
+            : save.Versions with { SimulationVersion = GameVersions.Current.SimulationVersion }
     };
 
     private static bool HasValidValues(IReadOnlyList<string>? values) =>

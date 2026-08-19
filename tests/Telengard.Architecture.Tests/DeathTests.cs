@@ -130,6 +130,35 @@ public sealed class DeathTests
     }
 
     [Fact]
+    public void Legacy_dead_hero_record_references_the_current_sequential_expedition()
+    {
+        var layout = new FloorLayoutGenerator().Generate(1234, "generator-1", 1);
+        var initial = GameState.Create(
+            1234,
+            mode: GameMode.Legacy,
+            playerId: Guid.Parse("00000000-0000-0000-0000-000000000004")) with
+        {
+            Player = new PlayerState { HitPoints = 10, MaxHitPoints = 10 }
+        };
+        var first = DungeonWalkingResolver.Enter(initial, new EnterDungeonCommand(), layout);
+        var returned = DungeonWalkingResolver.Leave(
+            first.State with { Player = first.State.Player with { Position = layout.StairsDown } },
+            new LeaveDungeonCommand(),
+            layout);
+        var second = DungeonWalkingResolver.Enter(returned.State, new EnterDungeonCommand(), layout);
+        var dying = second.State with
+        {
+            Player = second.State.Player with { HitPoints = 0 }
+        };
+
+        var result = PlayerDeathResolver.Resolve(dying, new PlayerDeathCommand());
+
+        var record = Assert.Single(result.State.Legacy.PreviousHeroes);
+        Assert.Equal(second.State.Expedition.ExpeditionId, record.ExpeditionId);
+        Assert.NotEqual(first.State.Expedition.ExpeditionId, record.ExpeditionId);
+    }
+
+    [Fact]
     public void Legacy_death_appends_to_existing_dead_hero_records_without_changing_prior_records()
     {
         var prior = new DeadHeroRecord(

@@ -1,6 +1,7 @@
 using Telengard.Core.Combat;
 using Telengard.Core.Simulation;
 using Telengard.Core.World.Visibility;
+using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -36,9 +37,11 @@ public static class DungeonWalkingResolver
         if (state.Expedition.Active) throw new InvalidOperationException("An expedition is already active.");
         if (!state.Player.Alive) throw new InvalidOperationException("A dead player cannot start an expedition.");
         if (!state.Inn.IsAtInn) throw new InvalidOperationException("The player must be at the inn to start an expedition.");
+        if (state.ExpeditionSequence < 0) throw new InvalidOperationException("The expedition sequence cannot be negative.");
 
         var position = layout.StairsUp;
-        var expeditionId = CreateExpeditionId(state);
+        var expeditionSequence = checked(state.ExpeditionSequence + 1);
+        var expeditionId = CreateExpeditionId(state, expeditionSequence);
         var expedition = new ExpeditionState
         {
             ExpeditionId = expeditionId,
@@ -51,6 +54,7 @@ public static class DungeonWalkingResolver
         };
         var next = state with
         {
+            ExpeditionSequence = expeditionSequence,
             Player = state.Player with { Position = position },
             Inn = state.Inn with { IsAtInn = false },
             Expedition = expedition
@@ -160,9 +164,15 @@ public static class DungeonWalkingResolver
         };
     }
 
-    private static Guid CreateExpeditionId(GameState state)
+    private static Guid CreateExpeditionId(GameState state, long expeditionSequence)
     {
-        var bytes = SHA256.HashData(Encoding.UTF8.GetBytes($"{state.WorldSeed}:{state.SimulationTick}:{state.Player.Id}"));
+        var input = string.Join(
+            ":",
+            state.WorldSeed.ToString(CultureInfo.InvariantCulture),
+            state.SimulationTick.ToString(CultureInfo.InvariantCulture),
+            state.Player.Id.ToString("D"),
+            expeditionSequence.ToString(CultureInfo.InvariantCulture));
+        var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(input));
         return new Guid(bytes[..16]);
     }
 }

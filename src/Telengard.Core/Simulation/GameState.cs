@@ -14,7 +14,7 @@ public enum GameMode
 
 public sealed record GameVersions
 {
-    public static GameVersions Current { get; } = new("0.2", "0.2", "0.2");
+    public static GameVersions Current { get; } = new("0.3", "0.2", "0.2");
 
     public GameVersions(string simulationVersion, string generatorVersion, string contentVersion)
     {
@@ -384,12 +384,13 @@ public sealed record SettingsState;
 
 public sealed record GameState
 {
-    public const int CurrentSaveVersion = 13;
+    public const int CurrentSaveVersion = 14;
 
     public int SaveVersion { get; init; } = CurrentSaveVersion;
     public required GameVersions Versions { get; init; }
     public long WorldSeed { get; init; }
     public long SimulationTick { get; init; }
+    public long ExpeditionSequence { get; init; }
     public GameMode CurrentMode { get; init; }
     public required PlayerState Player { get; init; }
     public required ExpeditionState Expedition { get; init; }

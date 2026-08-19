@@ -13,6 +13,7 @@ public sealed record GameStateSaveDto
     public required GameVersionsDto Versions { get; init; }
     public long WorldSeed { get; init; }
     public long SimulationTick { get; init; }
+    public long ExpeditionSequence { get; init; }
     public GameMode CurrentMode { get; init; }
     public required PlayerStateDto Player { get; init; }
     public required ExpeditionStateDto Expedition { get; init; }
@@ -30,6 +31,7 @@ public sealed record GameStateSaveDto
         Versions = GameVersionsDto.FromState(state.Versions),
         WorldSeed = state.WorldSeed,
         SimulationTick = state.SimulationTick,
+        ExpeditionSequence = state.ExpeditionSequence,
         CurrentMode = state.CurrentMode,
         Player = PlayerStateDto.FromState(state.Player),
         Expedition = ExpeditionStateDto.FromState(state.Expedition),
@@ -51,6 +53,7 @@ public sealed record GameStateSaveDto
             Versions = Versions.ToState(),
             WorldSeed = WorldSeed,
             SimulationTick = SimulationTick,
+            ExpeditionSequence = ExpeditionSequence,
             CurrentMode = CurrentMode,
             Player = Player.ToState(),
             Expedition = Expedition.ToState(),
