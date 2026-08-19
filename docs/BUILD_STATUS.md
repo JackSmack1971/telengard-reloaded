@@ -2216,3 +2216,39 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
   `core.autocrlf=false` override for unrelated dirty-file line-ending warnings
   and a process-scoped execution-policy bypass because the host rejects
   unsigned local scripts.
+
+## AUD-005 verification
+
+- Status: implemented and verified; expedition entry now advances an
+  authoritative deterministic sequence before deriving the expedition ID.
+  Sequential same-tick expeditions receive distinct IDs, and replay/save-load
+  continuation reproduces the same ordered identities.
+- Defect evidence: the pre-remediation `Phase2AcceptanceTests` flow completed
+  and restarted an expedition without advancing `SimulationTick`; the added
+  regression assertion failed against the old ID derivation.
+- Tests added/updated: same-tick sequential identity and replay, save/load
+  continuation, v13 migration seeding, dead-hero ID linkage, save-version
+  expectations, and the post-remediation fixed expedition-ID vector.
+- Files/modules affected: `src/Telengard.Core/Simulation/GameState.cs`,
+  `src/Telengard.Core/world/generation/DungeonWalking.cs`,
+  `src/Telengard.Save/Dto/GameStateSaveDto.cs`,
+  `src/Telengard.Save/Migrations/SaveMigrations.cs`, and the expedition,
+  death, phase-2, and save serializer tests.
+- Save-schema impact: current save version advanced from 13 to 14. The
+  explicit root `ExpeditionSequence` field is persisted; v13-and-earlier saves
+  with a retained expedition ID migrate to sequence one, while saves without
+  one migrate to zero. Migrated saves advance the simulation compatibility
+  version from 0.2 to 0.3. Generator and content versions remain 0.2.
+- Compatibility impact: deterministic expedition-ID vectors intentionally
+  changed; replay compatibility is version-bounded. Dungeon generation and
+  content definitions are unchanged.
+- Invariants: sequence advancement and ID derivation remain simulation-owned;
+  no uncontrolled randomness, hidden-information disclosure, wealth semantic,
+  event-boundary, or renderer-authority change was introduced. Dead-hero
+  records continue to capture the committed expedition ID.
+- Acceptance: focused remediation tests (67 passed), full Release solution
+  tests (339 passed), repository doctor, formatter verification, zero-warning
+  Release build, and `./eng/verify.ps1 -Mode Full` passed. The gate used a
+  process-scoped execution-policy bypass because the host rejects unsigned
+  local scripts and `core.autocrlf=false` to avoid unrelated dirty-file
+  line-ending warnings. A separate coverage gate was not required by AUD-005.

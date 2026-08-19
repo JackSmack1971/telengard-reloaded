@@ -2,6 +2,7 @@ using Telengard.Core.Simulation;
 using Telengard.Core.Combat;
 using Telengard.Save;
 using Telengard.Save.Dto;
+using Telengard.Core.World.Generation;
 using System.Text.Json.Nodes;
 using Xunit;
 
@@ -95,7 +96,7 @@ public sealed class SaveGameSerializerTests
     [Fact]
     public void Deserialize_rejects_unsupported_save_versions()
     {
-        var json = SaveGameSerializer.Serialize(GameState.Create(1234)).Replace("\"saveVersion\": 13", "\"saveVersion\": 14");
+        var json = SaveGameSerializer.Serialize(GameState.Create(1234)).Replace("\"saveVersion\": 14", "\"saveVersion\": 15");
 
         Assert.Throws<SaveFormatException>(() => SaveGameSerializer.Deserialize(json));
     }
@@ -103,7 +104,7 @@ public sealed class SaveGameSerializerTests
     [Fact]
     public void Deserialize_migrates_version_one_saves_with_an_empty_persistent_map()
     {
-        var json = SaveGameSerializer.Serialize(GameState.Create(1234)).Replace("\"saveVersion\": 13", "\"saveVersion\": 1");
+        var json = SaveGameSerializer.Serialize(GameState.Create(1234)).Replace("\"saveVersion\": 14", "\"saveVersion\": 1");
 
         var state = SaveGameSerializer.Deserialize(json);
 
@@ -126,6 +127,7 @@ public sealed class SaveGameSerializerTests
     [InlineData(11)]
     [InlineData(12)]
     [InlineData(13)]
+    [InlineData(14)]
     public void Deserialize_accepts_every_supported_save_version(int saveVersion)
     {
         var document = JsonNode.Parse(SaveGameSerializer.Serialize(GameState.Create(1234)))!.AsObject();
@@ -173,6 +175,39 @@ public sealed class SaveGameSerializerTests
 
         Assert.Equal(GameState.CurrentSaveVersion, state.SaveVersion);
         Assert.Empty(state.Legacy.Heirlooms);
+    }
+
+    [Fact]
+    public void Version_thirteen_migration_seeds_the_expedition_sequence_after_a_retained_expedition()
+    {
+        var layout = new FloorLayoutGenerator().Generate(1234, "generator-1", 1);
+        var entered = DungeonWalkingResolver.Enter(GameState.Create(1234), new EnterDungeonCommand(), layout);
+        var completed = DungeonWalkingResolver.Leave(
+            entered.State with { Player = entered.State.Player with { Position = layout.StairsDown } },
+            new LeaveDungeonCommand(),
+            layout).State;
+        var save = GameStateSaveDto.FromState(completed) with
+        {
+            SaveVersion = 13,
+            ExpeditionSequence = 0,
+            Versions = new GameVersionsDto
+            {
+                SimulationVersion = "0.2",
+                GeneratorVersion = "0.2",
+                ContentVersion = "0.2"
+            }
+        };
+
+        var migrated = SaveMigrations.Migrate(save);
+
+        Assert.Equal(GameState.CurrentSaveVersion, migrated.SaveVersion);
+        Assert.Equal(1, migrated.ExpeditionSequence);
+        Assert.Equal("0.3", migrated.Versions.SimulationVersion);
+
+        var continued = DungeonWalkingResolver.Enter(migrated.ToState(), new EnterDungeonCommand(), layout);
+
+        Assert.Equal(2, continued.State.ExpeditionSequence);
+        Assert.NotEqual(completed.Expedition.ExpeditionId, continued.State.Expedition.ExpeditionId);
     }
 
     [Fact]
@@ -493,7 +528,7 @@ public sealed class SaveGameSerializerTests
         Assert.Throws<ArgumentNullException>(() => SaveMigrations.Validate(null!));
 
         Assert.Throws<SaveFormatException>(() => SaveMigrations.Validate(
-            GameStateSaveDto.FromState(GameState.Create(1234)) with { SaveVersion = 14 }));
+            GameStateSaveDto.FromState(GameState.Create(1234)) with { SaveVersion = 15 }));
     }
 
     [Fact]

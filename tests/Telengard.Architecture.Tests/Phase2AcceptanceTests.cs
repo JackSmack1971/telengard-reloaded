@@ -39,6 +39,7 @@ public sealed class Phase2AcceptanceTests
         Assert.Equal([1], next.State.Expedition.FloorsVisited);
         Assert.Equal(1, next.State.Expedition.StartingFloor);
         Assert.Equal(1, next.State.Expedition.DeepestFloorReached);
+        Assert.NotEqual(entered.State.Expedition.ExpeditionId, next.State.Expedition.ExpeditionId);
     }
 
     [Fact]

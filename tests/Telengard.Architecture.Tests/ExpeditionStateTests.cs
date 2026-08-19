@@ -11,12 +11,12 @@ public sealed class ExpeditionStateTests
     public void Entering_the_dungeon_starts_a_deterministic_expedition()
     {
         var layout = new FloorLayoutGenerator().Generate(1234, "generator-1", 1);
-        var state = GameState.Create(1234, new GameVersions("0.1", "generator-1", "0.1"), playerId: Guid.Parse("00000000-0000-0000-0000-000000000001"));
+        var state = GameState.Create(1234, GameVersions.Current, playerId: Guid.Parse("00000000-0000-0000-0000-000000000001"));
 
         var result = DungeonWalkingResolver.Enter(state, new EnterDungeonCommand(), layout);
 
         Assert.True(result.State.Expedition.Active);
-        Assert.Equal(Guid.Parse("94763997-d2b2-f852-bcae-62073422c39d"), result.State.Expedition.ExpeditionId);
+        Assert.Equal(Guid.Parse("4f9f6060-a6f2-8a44-e9a2-444389125f60"), result.State.Expedition.ExpeditionId);
         Assert.Equal(1, result.State.Expedition.StartingFloor);
         Assert.Equal(1, result.State.Expedition.DeepestFloorReached);
         Assert.Equal([1], result.State.Expedition.FloorsVisited);
@@ -24,6 +24,52 @@ public sealed class ExpeditionStateTests
         Assert.Equal(
             result.State.Expedition.ExpeditionId,
             DungeonWalkingResolver.Enter(state, new EnterDungeonCommand(), layout).State.Expedition.ExpeditionId);
+    }
+
+    [Fact]
+    public void Sequential_expeditions_without_tick_advance_receive_distinct_replayable_ids()
+    {
+        var layout = new FloorLayoutGenerator().Generate(1234, "generator-1", 1);
+
+        static Guid[] RunTwoExpeditions(FloorLayout layout)
+        {
+            var initial = GameState.Create(1234, playerId: Guid.Parse("00000000-0000-0000-0000-000000000001"));
+            var first = DungeonWalkingResolver.Enter(initial, new EnterDungeonCommand(), layout);
+            var returned = DungeonWalkingResolver.Leave(
+                first.State with { Player = first.State.Player with { Position = layout.StairsDown } },
+                new LeaveDungeonCommand(),
+                layout);
+            var second = DungeonWalkingResolver.Enter(returned.State, new EnterDungeonCommand(), layout);
+
+            Assert.Equal(0, second.State.SimulationTick);
+            Assert.Equal(2, second.State.ExpeditionSequence);
+            return [first.State.Expedition.ExpeditionId!.Value, second.State.Expedition.ExpeditionId!.Value];
+        }
+
+        var firstRun = RunTwoExpeditions(layout);
+        var secondRun = RunTwoExpeditions(layout);
+
+        Assert.NotEqual(firstRun[0], firstRun[1]);
+        Assert.Equal(firstRun, secondRun);
+    }
+
+    [Fact]
+    public void Save_load_between_expeditions_preserves_the_next_deterministic_identity()
+    {
+        var layout = new FloorLayoutGenerator().Generate(1234, "generator-1", 1);
+        var initial = GameState.Create(1234, playerId: Guid.Parse("00000000-0000-0000-0000-000000000001"));
+        var first = DungeonWalkingResolver.Enter(initial, new EnterDungeonCommand(), layout);
+        var returned = DungeonWalkingResolver.Leave(
+            first.State with { Player = first.State.Player with { Position = layout.StairsDown } },
+            new LeaveDungeonCommand(),
+            layout).State;
+        var restored = SaveGameSerializer.Deserialize(SaveGameSerializer.Serialize(returned));
+
+        var direct = DungeonWalkingResolver.Enter(returned, new EnterDungeonCommand(), layout);
+        var afterLoad = DungeonWalkingResolver.Enter(restored, new EnterDungeonCommand(), layout);
+
+        Assert.Equal(direct.State.Expedition.ExpeditionId, afterLoad.State.Expedition.ExpeditionId);
+        Assert.Equal(2, afterLoad.State.ExpeditionSequence);
     }
 
     [Fact]
@@ -101,6 +147,7 @@ public sealed class ExpeditionStateTests
         Assert.Equal(state.Expedition.DeepestFloorReached, restored.Expedition.DeepestFloorReached);
         Assert.Equal(state.Expedition.StartSimulationTick, restored.Expedition.StartSimulationTick);
         Assert.Equal(state.Expedition.SimulationTicks, restored.Expedition.SimulationTicks);
+        Assert.Equal(state.ExpeditionSequence, restored.ExpeditionSequence);
         Assert.Equal(state.Expedition.CarriedGold, restored.Expedition.CarriedGold);
         Assert.Equal(state.Expedition.AcquiredItems, restored.Expedition.AcquiredItems);
         Assert.Equal(state.Expedition.MonstersDefeated, restored.Expedition.MonstersDefeated);
