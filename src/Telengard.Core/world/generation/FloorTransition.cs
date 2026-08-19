@@ -35,6 +35,9 @@ public static class FloorTransitionResolver
             throw new ArgumentOutOfRangeException(nameof(command), command.Direction, "Unknown stair direction.");
         }
 
+        if (!state.Expedition.Active) throw new InvalidOperationException("Floor transitions require an active expedition.");
+        if (state.Inn.IsAtInn) throw new InvalidOperationException("Floor transitions are unavailable at the inn.");
+
         var from = state.Player.Position;
         if (from.Floor != currentLayout.Floor || currentLayout.GetTile(from) is not (DungeonTile.StairsUp or DungeonTile.StairsDown))
         {

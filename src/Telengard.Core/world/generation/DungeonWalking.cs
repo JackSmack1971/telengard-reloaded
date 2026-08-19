@@ -69,6 +69,8 @@ public static class DungeonWalkingResolver
         ArgumentNullException.ThrowIfNull(command);
         ArgumentNullException.ThrowIfNull(layout);
 
+        if (!state.Expedition.Active) throw new InvalidOperationException("Movement requires an active expedition.");
+        if (state.Inn.IsAtInn) throw new InvalidOperationException("Movement is unavailable at the inn.");
         if (!state.Player.Alive) throw new InvalidOperationException("A dead player cannot move.");
         if (state.Combat is not null) throw new InvalidOperationException("Movement is unavailable during combat.");
         var from = state.Player.Position;

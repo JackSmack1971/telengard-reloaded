@@ -42,7 +42,8 @@ public sealed class DungeonWalkingTests
     {
         var layout = new FloorLayoutGenerator().Generate(1234, "generator-1", 1);
         var (position, wall, walkable) = FindMixedNeighborhood(layout);
-        var state = GameState.Create(1234) with { Player = new PlayerState { Position = position } };
+        var entered = DungeonWalkingResolver.Enter(GameState.Create(1234), new EnterDungeonCommand(), layout);
+        var state = entered.State with { Player = entered.State.Player with { Position = position } };
 
         Assert.Throws<InvalidOperationException>(() => DungeonWalkingResolver.Move(state, new MoveCommand(wall), layout));
         var moved = DungeonWalkingResolver.Move(state, new MoveCommand(walkable), layout);
@@ -50,6 +51,26 @@ public sealed class DungeonWalkingTests
         var movement = Assert.IsType<PlayerMovedEvent>(Assert.Single(moved.Events));
         Assert.Equal(state.Player.Position, movement.From);
         Assert.Equal(moved.State.Player.Position, movement.To);
+    }
+
+    [Fact]
+    public void Movement_rejects_inactive_and_at_inn_states_before_discovery()
+    {
+        var layout = new FloorLayoutGenerator().Generate(1234, "generator-1", 1);
+        var (position, _, walkable) = FindMixedNeighborhood(layout);
+        var inactive = GameState.Create(1234) with
+        {
+            Player = new PlayerState { Position = position }
+        };
+
+        Assert.Throws<InvalidOperationException>(() => DungeonWalkingResolver.Move(
+            inactive, new MoveCommand(walkable), layout));
+        Assert.Equal(new PersistentMapState(), inactive.Legacy.PersistentMap);
+
+        var atInn = inactive with { Expedition = new ExpeditionState { Active = true } };
+        Assert.Throws<InvalidOperationException>(() => DungeonWalkingResolver.Move(
+            atInn, new MoveCommand(walkable), layout));
+        Assert.Equal(new PersistentMapState(), atInn.Legacy.PersistentMap);
     }
 
     [Fact]
@@ -244,12 +265,19 @@ public sealed class DungeonWalkingTests
     public void Discovering_a_floor_preserves_known_positions_from_other_floors()
     {
         var generator = new FloorLayoutGenerator();
+        var first = generator.Generate(1234, "generator-1", 1);
         var floor = generator.Generate(1234, "generator-1", 2);
         var start = FindPositionWithDirection(floor, MovementDirection.East);
         var retained = new DungeonPosition(1, 2, 2);
-        var state = GameState.Create(1234) with
+        var entered = DungeonWalkingResolver.Enter(GameState.Create(1234), new EnterDungeonCommand(), first);
+        var descended = FloorTransitionResolver.Apply(
+            entered.State with { Player = entered.State.Player with { Position = first.StairsDown } },
+            new ChangeFloorCommand(StairDirection.Down),
+            first,
+            floor);
+        var state = descended.State with
         {
-            Player = new PlayerState { Position = start },
+            Player = descended.State.Player with { Position = start },
             Legacy = new LegacyState
             {
                 PersistentMap = new PersistentMapState([retained], [retained])
