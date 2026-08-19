@@ -2148,3 +2148,29 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
 - Undefined formulas and anti-save-scumming policy still require explicit design decisions before implementation.
 - The proposed architecture has only been validated against the Phase 0
   synthetic command/replay slice; gameplay remains unimplemented.
+
+## AUD-006 verification
+
+- Status: implemented; dungeon movement and floor transitions now reject
+  inactive expeditions and at-inn states before state discovery, mutation, or
+  committed events.
+- Defect evidence: pre-remediation tests demonstrated that fresh inactive
+  states could move and change floors; the new lifecycle tests fail without
+  the guards and pass with them.
+- Tests added/updated: inactive and at-inn movement rejection with unchanged
+  persistent map, inactive and at-inn floor-transition rejection without
+  mutation, and valid entered-dungeon movement/floor-transition fixtures.
+- Files/modules affected: `src/Telengard.Core/world/generation/DungeonWalking.cs`,
+  `src/Telengard.Core/world/generation/FloorTransition.cs`,
+  `tests/Telengard.Architecture.Tests/DungeonWalkingTests.cs`, and
+  `tests/Telengard.Architecture.Tests/FloorTransitionTests.cs`.
+- Compatibility impact: save, simulation, generator, and content versions are
+  unchanged. Valid active-expedition movement and transition vectors remain
+  unchanged; invalid lifecycle commands now reject before mutation/event
+  production.
+- Acceptance: focused tests (17 passed), full Release solution tests (315
+  passed), formatter verification, zero-warning Release build, and
+  `./eng/verify.ps1 -Mode Full` passed. The gate required a process-scoped
+  `core.autocrlf=false` override for unrelated dirty-file line-ending warnings
+  and a process-scoped execution-policy bypass because the host rejects
+  unsigned local scripts.

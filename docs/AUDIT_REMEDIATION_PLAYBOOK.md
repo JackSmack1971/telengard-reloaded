@@ -129,7 +129,7 @@ remediations:
   - id: AUD-006
     severity: medium
     priority: P1
-    status: open
+    status: closed
     area: command-validation
     compatibility_sensitive: false
   - id: AUD-007

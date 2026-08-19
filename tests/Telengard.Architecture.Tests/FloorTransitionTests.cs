@@ -13,9 +13,10 @@ public sealed class FloorTransitionTests
         var generator = new FloorLayoutGenerator();
         var current = generator.Generate(1234, "generator-1", 1);
         var next = generator.Generate(1234, "generator-1", 2);
-        var dispatcher = new CommandDispatcher(GameState.Create(1234) with
+        var entered = DungeonWalkingResolver.Enter(GameState.Create(1234), new EnterDungeonCommand(), current);
+        var dispatcher = new CommandDispatcher(entered.State with
         {
-            Player = new PlayerState { Position = current.StairsDown }
+            Player = entered.State.Player with { Position = current.StairsDown }
         });
         dispatcher.Register<ChangeFloorCommand>((state, command) =>
             FloorTransitionResolver.Apply(state, command, current, next));
@@ -35,7 +36,13 @@ public sealed class FloorTransitionTests
         var generator = new FloorLayoutGenerator();
         var previous = generator.Generate(1234, "generator-1", 1);
         var current = generator.Generate(1234, "generator-1", 2);
-        var state = GameState.Create(1234) with
+        var entered = DungeonWalkingResolver.Enter(GameState.Create(1234), new EnterDungeonCommand(), previous);
+        var descended = FloorTransitionResolver.Apply(
+            entered.State with { Player = entered.State.Player with { Position = previous.StairsDown } },
+            new ChangeFloorCommand(StairDirection.Down),
+            previous,
+            current);
+        var state = descended.State with
         {
             Player = new PlayerState { Position = current.StairsUp }
         };
@@ -55,9 +62,10 @@ public sealed class FloorTransitionTests
         var generator = new FloorLayoutGenerator();
         var first = generator.Generate(1234, "generator-1", 1);
         var second = generator.Generate(1234, "generator-1", 2);
-        var state = GameState.Create(1234) with
+        var entered = DungeonWalkingResolver.Enter(GameState.Create(1234), new EnterDungeonCommand(), first);
+        var state = entered.State with
         {
-            Player = new PlayerState { Position = first.StairsUp }
+            Player = entered.State.Player with { Position = first.StairsUp }
         };
 
         Assert.Throws<InvalidOperationException>(() => FloorTransitionResolver.Apply(
@@ -95,7 +103,11 @@ public sealed class FloorTransitionTests
         var generator = new FloorLayoutGenerator();
         var first = generator.Generate(1234, "generator-1", 1);
         var second = generator.Generate(1234, "generator-1", 2);
-        var state = GameState.Create(1234) with { Player = new PlayerState { Position = first.StairsDown } };
+        var entered = DungeonWalkingResolver.Enter(GameState.Create(1234), new EnterDungeonCommand(), first);
+        var state = entered.State with
+        {
+            Player = entered.State.Player with { Position = first.StairsDown }
+        };
 
         Assert.Throws<ArgumentOutOfRangeException>(() => FloorTransitionResolver.Apply(
             state, new ChangeFloorCommand((StairDirection)999), first, second));
@@ -127,14 +139,14 @@ public sealed class FloorTransitionTests
 
         var fortyNine = generator.Generate(1234, "generator-1", 49);
         var fifty = generator.Generate(1234, "generator-1", 50);
-        var boundary = GameState.Create(1234) with { Player = new PlayerState { Position = fortyNine.StairsDown } };
+        var boundary = state with { Player = state.Player with { Position = fortyNine.StairsDown } };
         var boundaryResult = FloorTransitionResolver.Apply(
             boundary, new ChangeFloorCommand(StairDirection.Down), fortyNine, fifty);
         Assert.Equal(fifty.StairsUp, boundaryResult.State.Player.Position);
     }
 
     [Fact]
-    public void Transition_rejects_null_arguments_and_preserves_inactive_expeditions()
+    public void Transition_rejects_null_arguments_and_invalid_lifecycle_states()
     {
         var generator = new FloorLayoutGenerator();
         var first = generator.Generate(1234, "generator-1", 1);
@@ -150,8 +162,15 @@ public sealed class FloorTransitionTests
         {
             Expedition = new ExpeditionState { StartingFloor = 4, DeepestFloorReached = 4, FloorsVisited = [4] }
         };
-        var result = FloorTransitionResolver.Apply(inactive, new ChangeFloorCommand(StairDirection.Down), first, second);
+        var inactiveBefore = inactive;
+        Assert.Throws<InvalidOperationException>(() => FloorTransitionResolver.Apply(
+            inactive, new ChangeFloorCommand(StairDirection.Down), first, second));
+        Assert.Same(inactiveBefore, inactive);
 
-        Assert.Equal(inactive.Expedition, result.State.Expedition);
+        var atInn = inactive with { Expedition = new ExpeditionState { Active = true } };
+        var atInnBefore = atInn;
+        Assert.Throws<InvalidOperationException>(() => FloorTransitionResolver.Apply(
+            atInn, new ChangeFloorCommand(StairDirection.Down), first, second));
+        Assert.Same(atInnBefore, atInn);
     }
 }
