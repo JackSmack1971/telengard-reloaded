@@ -44,6 +44,14 @@ PowerShell wrapper at `eng/dotnet.ps1`, which selects `.dotnet/dotnet.exe`.
 Run `./eng/doctor.ps1` when SDK or environment behavior is uncertain. Godot is
 not required for headless verification.
 
+GitHub Actions uses the Windows `Repository verification` workflow to read the
+same `global.json` through `actions/setup-dotnet` and then invokes
+`./eng/verify.ps1 -Mode Full`. CI does not need to populate the ignored
+`.dotnet/` directory: the wrapper's supported fallback to the SDK provisioned
+on `PATH` keeps the server check aligned with the repository's pinned SDK
+policy. If `global.json` changes, the workflow follows that file rather than
+duplicating the SDK version in YAML.
+
 ## Project structure
 
 The current structure is:

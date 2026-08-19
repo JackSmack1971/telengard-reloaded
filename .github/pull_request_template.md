@@ -18,10 +18,18 @@
 
 ## Verification
 
-- [ ] `./eng/verify.ps1 -Mode Full`
+Run `./eng/verify.ps1 -Mode Full` locally before requesting review when
+possible. GitHub Actions runs the same canonical gate automatically on this
+pull request and reports the `Full verification` check.
+
+- [ ] Local `./eng/verify.ps1 -Mode Full` completed
 - Focused checks:
 
 ## Documentation
 
 - [ ] Documentation and task/status records were updated when needed.
 - [ ] No unrelated files or generated artifacts are included.
+
+Repository maintainers must configure the `Full verification` check as a
+required status check for `main`; the workflow file cannot enable branch
+protection by itself.

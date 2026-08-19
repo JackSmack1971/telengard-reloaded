@@ -36,6 +36,12 @@ For focused checks, use `./eng/dotnet.ps1` with the required `build`, `test`,
 or `format` arguments. Do not install a global SDK or modify `.dotnet/` as
 part of an ordinary change.
 
+GitHub Actions runs the same full verification gate on every pull request and
+on pushes to `main`. The workflow uses a Windows runner and provisions the SDK
+from `global.json` with `actions/setup-dotnet`; this is the CI equivalent of
+the repository-local SDK contract because `eng/dotnet.ps1` supports the
+provisioned SDK on `PATH` when `.dotnet/` is absent.
+
 ## Pull requests
 
 Describe the intent, scope, non-goals, determinism impact, save impact,
@@ -43,9 +49,16 @@ command/event impact, and verification performed. Keep unrelated cleanup out
 of the change. Pull requests use squash merging so each accepted change has a
 single reviewable commit; the pull-request template lists the required checks.
 
-Run the full verification gate before requesting review. If verification is
-blocked by the environment, report the exact command and failure instead of
-claiming a pass.
+Run the full verification gate locally before requesting review when possible;
+the `Full verification` GitHub Actions check is the server-side enforcement
+for pull requests. If local verification is blocked by the environment, report
+the exact command and failure instead of claiming a pass.
+
+The workflow cannot configure branch protection. A repository maintainer must
+add the `Full verification` check from the `Repository verification` workflow
+as a required status check for `main` after the workflow is merged. Until that
+setting is applied, the workflow runs and reports results but branch
+protection does not require it.
 
 ## Reporting problems
 
