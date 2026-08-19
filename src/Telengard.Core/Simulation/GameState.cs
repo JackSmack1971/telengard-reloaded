@@ -60,7 +60,12 @@ public sealed record PlayerAttributes(
 
 public sealed record PlayerState
 {
+    private IReadOnlyList<string> _inventory = Array.Empty<string>();
     private IReadOnlyList<EquipmentSlotState> _equipmentSlots = Array.Empty<EquipmentSlotState>();
+    private IReadOnlyList<string> _talents = Array.Empty<string>();
+    private IReadOnlyList<string> _spells = Array.Empty<string>();
+    private IReadOnlyList<string> _injuries = Array.Empty<string>();
+    private IReadOnlyList<string> _temporaryEffects = Array.Empty<string>();
 
     public Guid Id { get; init; }
     public PlayerAttributes Attributes { get; init; } = new(0, 0, 0, 0, 0, 0);
@@ -71,7 +76,11 @@ public sealed record PlayerState
     public int SpellPower { get; init; }
     public int MaxSpellPower { get; init; }
     public DungeonPosition Position { get; init; } = new(1, 0, 0);
-    public IReadOnlyList<string> Inventory { get; init; } = Array.Empty<string>();
+    public IReadOnlyList<string> Inventory
+    {
+        get => _inventory;
+        init => _inventory = StateCollections.Copy(value, nameof(Inventory));
+    }
     public IReadOnlyList<EquipmentSlotState> EquipmentSlots
     {
         get => _equipmentSlots;
@@ -101,10 +110,26 @@ public sealed record PlayerState
             _equipmentSlots = Array.AsReadOnly(slots);
         }
     }
-    public IReadOnlyList<string> Talents { get; init; } = Array.Empty<string>();
-    public IReadOnlyList<string> Spells { get; init; } = Array.Empty<string>();
-    public IReadOnlyList<string> Injuries { get; init; } = Array.Empty<string>();
-    public IReadOnlyList<string> TemporaryEffects { get; init; } = Array.Empty<string>();
+    public IReadOnlyList<string> Talents
+    {
+        get => _talents;
+        init => _talents = StateCollections.Copy(value, nameof(Talents));
+    }
+    public IReadOnlyList<string> Spells
+    {
+        get => _spells;
+        init => _spells = StateCollections.Copy(value, nameof(Spells));
+    }
+    public IReadOnlyList<string> Injuries
+    {
+        get => _injuries;
+        init => _injuries = StateCollections.Copy(value, nameof(Injuries));
+    }
+    public IReadOnlyList<string> TemporaryEffects
+    {
+        get => _temporaryEffects;
+        init => _temporaryEffects = StateCollections.Copy(value, nameof(TemporaryEffects));
+    }
     public int CarriedGold { get; init; }
     public bool Alive { get; init; } = true;
 }
@@ -129,18 +154,39 @@ public sealed record HeirloomRecord(
 
 public sealed record ExpeditionState
 {
+    private IReadOnlyList<string> _acquiredItems = Array.Empty<string>();
+    private IReadOnlyList<string> _discoveriesMade = Array.Empty<string>();
+    private IReadOnlyList<int> _floorsVisited = Array.Empty<int>();
+    private IReadOnlyList<string> _objectives = Array.Empty<string>();
+
     public Guid? ExpeditionId { get; init; }
     public int StartingFloor { get; init; } = 1;
     public int DeepestFloorReached { get; init; } = 1;
     public long StartSimulationTick { get; init; }
     public long SimulationTicks { get; init; }
     public int CarriedGold { get; init; }
-    public IReadOnlyList<string> AcquiredItems { get; init; } = Array.Empty<string>();
+    public IReadOnlyList<string> AcquiredItems
+    {
+        get => _acquiredItems;
+        init => _acquiredItems = StateCollections.Copy(value, nameof(AcquiredItems));
+    }
     public int MonstersDefeated { get; init; }
-    public IReadOnlyList<string> DiscoveriesMade { get; init; } = Array.Empty<string>();
-    public IReadOnlyList<int> FloorsVisited { get; init; } = Array.Empty<int>();
+    public IReadOnlyList<string> DiscoveriesMade
+    {
+        get => _discoveriesMade;
+        init => _discoveriesMade = StateCollections.Copy(value, nameof(DiscoveriesMade));
+    }
+    public IReadOnlyList<int> FloorsVisited
+    {
+        get => _floorsVisited;
+        init => _floorsVisited = StateCollections.Copy(value, nameof(FloorsVisited));
+    }
     public int RoomsVisited { get; init; }
-    public IReadOnlyList<string> Objectives { get; init; } = Array.Empty<string>();
+    public IReadOnlyList<string> Objectives
+    {
+        get => _objectives;
+        init => _objectives = StateCollections.Copy(value, nameof(Objectives));
+    }
     public bool Active { get; init; }
 }
 
@@ -197,8 +243,16 @@ public sealed class PersistentMapState : IEquatable<PersistentMapState>
         return hash.ToHashCode();
     }
 
-    private static IReadOnlyList<DungeonPosition> Normalize(IEnumerable<DungeonPosition>? positions) =>
-        (positions ?? []).Distinct().OrderBy(position => position.Floor).ThenBy(position => position.X).ThenBy(position => position.Y).ToArray();
+    private static IReadOnlyList<DungeonPosition> Normalize(IEnumerable<DungeonPosition>? positions)
+    {
+        var copy = StateCollections.Copy(positions ?? [], nameof(positions));
+        return Array.AsReadOnly(copy
+            .Distinct()
+            .OrderBy(position => position.Floor)
+            .ThenBy(position => position.X)
+            .ThenBy(position => position.Y)
+            .ToArray());
+    }
 }
 
 public sealed record KnowledgeState
@@ -373,5 +427,21 @@ public sealed record GameState
             SecuredProgress = new SecuredProgressState(),
             Settings = new SettingsState()
         };
+    }
+}
+
+internal static class StateCollections
+{
+    public static IReadOnlyList<T> Copy<T>(IEnumerable<T> values, string parameterName)
+    {
+        ArgumentNullException.ThrowIfNull(values);
+
+        var copy = values.ToArray();
+        if (copy.Any(value => value is null))
+        {
+            throw new ArgumentException("Collections cannot contain null values.", parameterName);
+        }
+
+        return Array.AsReadOnly(copy);
     }
 }

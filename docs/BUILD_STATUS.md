@@ -1120,6 +1120,16 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
   each stream without a shared global RNG.
 - Acceptance: implementation and focused tests are authored and verified.
 
+## AUD-002 remediation
+
+- Status: remediated and verified against audit baseline `34c7a4d00d8b7588869875f34edee1c1adfcdeaf`; current implementation was inspected at `ba18040778dc7128a0ad443b8c6db242a05a36ca`.
+- Defect reproduced by aliasing and mutable-snapshot tests in `GameStateTests`, `ItemInstanceTests`, `MonsterSchemaTests`, and `FloorLayoutGeneratorTests`; the old implementation retained caller-owned player/expedition lists and exposed mutable array/list instances through read-only interfaces.
+- Production change: authoritative player and expedition collections now copy inputs, reject null elements, and expose read-only snapshots. Persistent map, floor layout rooms/tiles, item affixes, and monster effects now retain defensive/read-only snapshots at their boundaries.
+- Compatibility impact: save version unchanged; simulation, generator, and content versions unchanged; deterministic vectors unchanged; no migration required; replay compatibility preserved because ordering and values are unchanged and only aliasing/mutation behavior is corrected.
+- Focused verification: the pre-fix regression run failed 5 tests; the post-fix focused suite passed 34 tests. Formatter verification passed.
+- Coverage gate: not required by AUD-002; no coverage policy or production behavior requiring a coverage artifact changed.
+- Scope confirmation: no other AUD packet was started.
+
 ## TEL-003 verification
 
 - Status: implemented and verified with the portable .NET 8.0.100 SDK.

@@ -47,6 +47,6 @@ public sealed record MonsterInstance
             copy.Add(effect);
         }
 
-        return copy.ToArray();
+        return Array.AsReadOnly(copy.ToArray());
     }
 }

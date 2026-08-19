@@ -103,6 +103,15 @@ public sealed class FloorLayoutGeneratorTests
     }
 
     [Fact]
+    public void Generated_rooms_are_not_mutable_through_the_read_only_view()
+    {
+        var layout = new FloorLayoutGenerator().Generate(1234, "generator-1", 1);
+
+        Assert.Throws<NotSupportedException>(() => ((IList<DungeonRoom>)layout.Rooms).Add(new DungeonRoom(99, 1, 1, 3, 3)));
+        Assert.Equal(8, layout.Rooms.Count);
+    }
+
+    [Fact]
     public void Generator_output_is_stable_for_compatibility_version_inputs()
     {
         var generator = new FloorLayoutGenerator();

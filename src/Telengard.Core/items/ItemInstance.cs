@@ -21,7 +21,13 @@ public sealed record ItemObservedState
 
         InstanceId = instanceId;
         Identified = identified;
-        GeneratedAffixes = (generatedAffixes ?? []).ToArray();
+        var affixes = (generatedAffixes ?? []).ToArray();
+        if (affixes.Any(affix => affix is null))
+        {
+            throw new ArgumentException("Generated affixes cannot contain null values.", nameof(generatedAffixes));
+        }
+
+        GeneratedAffixes = Array.AsReadOnly(affixes);
         Curse = string.IsNullOrWhiteSpace(curse) ? null : curse;
         Durability = durability;
     }
@@ -118,6 +124,6 @@ public sealed record ItemInstance
             copy.Add(value);
         }
 
-        return copy.ToArray();
+        return Array.AsReadOnly(copy.ToArray());
     }
 }
