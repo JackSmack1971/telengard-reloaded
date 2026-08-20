@@ -4,8 +4,14 @@ Date verified: 2026-08-18
 
 Baseline: `34c7a4d00d8b7588869875f34edee1c1adfcdeaf`
 
-Current implementation: AUD-002 commit `c651694` plus the current AUD-001
-working-tree changes. P1 remediation was not started.
+Historical snapshot: this gate records the P0 state verified on 2026-08-18.
+The verified implementation commits for that P0 result were AUD-001
+`1c1a1262` and AUD-002 `d976c4c4`; the earlier wording's AUD-001 working-tree
+reference is stale. At that snapshot, P1 remediation had not yet started.
+This statement is historical and is not the current P1 status.
+Subsequent current-`HEAD` records verify AUD-006, AUD-007, and AUD-005 work;
+the canonical ticket/exec-plan ledger is authoritative for the remaining P1
+status.
 
 ## Result
 
@@ -20,7 +26,7 @@ working-tree changes. P1 remediation was not started.
 | Culture changes do not change streams | `DeterministicRngTests.Canonical_stream_encoding_is_invariant_to_current_culture` compares `en-US` and `fa-IR` streams for the same negative seed and scope. | PASS |
 | Invalid inputs remain rejected | `DeterministicRngTests.Invalid_stream_inputs_are_rejected` covers null/blank inputs, null scope elements, malformed UTF-16, and invalid draw ranges. | PASS |
 | Explicit fixed vectors exist | `DeterministicRngTests.Fixed_seed_stream_has_a_stable_sequence_and_double_projection` records the post-remediation `0.2` stream values. `FloorLayoutGeneratorTests.Generator_output_is_stable_for_compatibility_version_inputs` records post-remediation layout fingerprints. Encounter tests record the post-remediation roll and instance-id vectors. | PASS |
-| Generator, simulation, and content version decisions are documented | `GameVersions.Current` is `0.2` for simulation, generator, and content in `src/Telengard.Core/Simulation/GameState.cs:17`. The compatibility decision and version-bounded replay rule are recorded in `docs/exec-plans/active/AUD-001.md` and `src/Telengard.Core/Rng/README.md`. Save schema remains unchanged. | PASS |
+| Generator, simulation, and content version decisions are documented | `GameVersions.Current` is `0.2` for simulation, generator, and content in `src/Telengard.Core/Simulation/GameState.cs:17`. The compatibility decision and version-bounded replay rule are recorded in `docs/exec-plans/completed/AUD-001.md` and `src/Telengard.Core/Rng/README.md`. Save schema remains unchanged. | PASS |
 | Affected consumers and replay implications are covered | The focused run covered RNG, generation, encounter, flee, feature, item, altar, pit, game-state, and monster tests: **79 passed**. Replay and save-checkpoint coverage also passed in `SimulationTestHarnessTests`, `FleeTests`, feature tests, and the full suite. | PASS |
 
 ### AUD-001 version impact

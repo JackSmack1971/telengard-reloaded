@@ -99,13 +99,15 @@ remediations:
   - id: AUD-001
     severity: high
     priority: P0
-    status: open
+    status: closed
+    verified_commit: 1c1a1262
     area: determinism
     compatibility_sensitive: true
   - id: AUD-002
     severity: high
     priority: P0
-    status: open
+    status: closed
+    verified_commit: d976c4c4
     area: authoritative-state
     compatibility_sensitive: false
   - id: AUD-003
@@ -123,7 +125,8 @@ remediations:
   - id: AUD-005
     severity: medium
     priority: P1
-    status: open
+    status: closed
+    verified_commit: 9cbd2021
     area: expedition-identity
     compatibility_sensitive: true
   - id: AUD-006
@@ -135,7 +138,8 @@ remediations:
   - id: AUD-007
     severity: medium
     priority: P1
-    status: open
+    status: closed
+    verified_commit: 1474e1b2
     area: save-validation
     compatibility_sensitive: true
   - id: AUD-008
@@ -151,6 +155,8 @@ remediations:
     area: quality-gates
     compatibility_sensitive: false
 ```
+
+**Status note:** The four status changes above reflect current-`HEAD` verification evidence for AUD-001, AUD-002, AUD-005, and AUD-007; AUD-006 was already closed. Per-packet status and verified-commit provenance should be reconciled from the canonical ticket/exec-plan ledger. `docs/BUILD_STATUS.md` remains verification history, and `docs/gates/AUDIT-P0.md` remains a historical snapshot.
 
 ---
 
