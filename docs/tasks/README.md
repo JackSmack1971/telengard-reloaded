@@ -8,35 +8,36 @@ This ledger is derived from the ordered TEL tickets in `docs/modern-telengard-sp
 - These are implementation tasks, not gameplay decisions. Undefined formulas, balancing, and policies remain `CONFIGURATION/TUNING DECISION REQUIRED`.
 - Every task preserves renderer-independent authoritative simulation, deterministic replay, explicit save DTOs/migrations, content separation, and documented non-goals.
 - Status is `Not started` until implementation and verification evidence exist.
+- This ledger is the current authority for TEL-ticket status. `docs/BUILD_STATUS.md` is append-only verification history; it does not override this ledger when historical evidence and current status differ.
 
 ## Ordered ledger
 
 ### Foundation
 
-- [TEL-001.md](TEL-001.md) — Create GameState domain model — Not started
-- [TEL-002.md](TEL-002.md) — Implement deterministic RNG service — Not started
-- [TEL-003.md](TEL-003.md) — Implement command dispatcher — Not started
-- [TEL-004.md](TEL-004.md) — Implement domain event bus — Complete
-- [TEL-005.md](TEL-005.md) — Implement save/load DTO system — Not started
-- [TEL-006.md](TEL-006.md) — Add deterministic simulation test harness — Complete
+- [TEL-001.md](TEL-001.md) — Create GameState domain model — Implemented and verified
+- [TEL-002.md](TEL-002.md) — Implement deterministic RNG service — Implemented and verified
+- [TEL-003.md](TEL-003.md) — Implement command dispatcher — Implemented and verified
+- [TEL-004.md](TEL-004.md) — Implement domain event bus — Implemented and verified
+- [TEL-005.md](TEL-005.md) — Implement save/load DTO system — Implemented and verified
+- [TEL-006.md](TEL-006.md) — Add deterministic simulation test harness — Implemented and verified
 
 ### Dungeon
 
-- [TEL-010.md](TEL-010.md) — Define dungeon coordinate types — Complete
-- [TEL-011.md](TEL-011.md) — Implement procedural floor layout generator — Not started
-- [TEL-012.md](TEL-012.md) — Add connectivity validation — Not started
-- [TEL-013.md](TEL-013.md) — Implement tile visibility — Not started
-- [TEL-014.md](TEL-014.md) — Implement fog-of-war map — Not started
-- [TEL-015.md](TEL-015.md) — Implement stairs and floor transitions — Not started
-- [TEL-016.md](TEL-016.md) — Persist discovered map state — Not started
+- [TEL-010.md](TEL-010.md) — Define dungeon coordinate types — Implemented and verified
+- [TEL-011.md](TEL-011.md) — Implement procedural floor layout generator — Implemented and verified
+- [TEL-012.md](TEL-012.md) — Add connectivity validation — Implemented and verified
+- [TEL-013.md](TEL-013.md) — Implement tile visibility — Implemented and verified
+- [TEL-014.md](TEL-014.md) — Implement fog-of-war map — Implemented and verified
+- [TEL-015.md](TEL-015.md) — Implement stairs and floor transitions — Implemented and verified
+- [TEL-016.md](TEL-016.md) — Persist discovered map state — Implemented and verified
 
 ### Expedition
 
-- [TEL-020.md](TEL-020.md) — Implement ExpeditionState — Complete
-- [TEL-021.md](TEL-021.md) — Implement inn state — Complete
-- [TEL-022.md](TEL-022.md) — Implement carried gold — Complete
-- [TEL-023.md](TEL-023.md) — Implement secured gold — Complete
-- [TEL-024.md](TEL-024.md) — Implement expedition completion — Not started
+- [TEL-020.md](TEL-020.md) — Implement ExpeditionState — Implemented and verified
+- [TEL-021.md](TEL-021.md) — Implement inn state — Implemented and verified
+- [TEL-022.md](TEL-022.md) — Implement carried gold — Implemented and verified
+- [TEL-023.md](TEL-023.md) — Implement secured gold — Implemented and verified
+- [TEL-024.md](TEL-024.md) — Implement expedition completion — Implemented and verified
 - [TEL-025.md](TEL-025.md) — Implement expedition suspension — Implemented and verified
 
 ### Encounters
@@ -151,6 +152,12 @@ the already-owned feature, journal, wealth, inn, or death mechanics.
 - TEL-116 — Author the four first-slice dungeon feature definitions — Not started
   - Provide data definitions and outcomes for exactly fountain, altar, pit, and teleporter using the existing generic feature and knowledge contracts.
   - Do not duplicate the already-implemented feature resolvers or encode feature behavior in a renderer.
+
+## Repository engineering tickets
+
+- [TEL-117.md](TEL-117.md) — Harden coverage and mutation tooling scope — Not started
+- [TEL-118.md](TEL-118.md) — Reconcile audit remediation status and documentation provenance — Implemented and verified
+- [TEL-119.md](TEL-119.md) — Generate audit status fields from the canonical ticket/exec-plan ledger — Not started
 
 ## Core Alpha coverage audit
 
