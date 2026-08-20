@@ -19,6 +19,11 @@ Use this page to choose the smallest context set for a task. The repository spec
 ## Important status rule
 Task-ledger text can lag implementation. Treat working code/tests as the present-state evidence and `modern-telengard-spec.md` as product intent. Never remove implemented behavior solely because a ledger line still says “Not started”; fix the stale status record when appropriate.
 
+For current documentation status, `tasks/README.md` is the TEL-ticket
+ledger, the remediation playbook is the current AUD-packet index until
+TEL-119 is implemented, and `BUILD_STATUS.md` is append-only verification
+history.
+
 ## Current code map
 
 - `src/Telengard.Core/Events/` — domain event bus.

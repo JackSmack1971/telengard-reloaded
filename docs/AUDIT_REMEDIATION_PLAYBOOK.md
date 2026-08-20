@@ -99,13 +99,15 @@ remediations:
   - id: AUD-001
     severity: high
     priority: P0
-    status: open
+    status: closed
+    verified_commit: 1c1a1262
     area: determinism
     compatibility_sensitive: true
   - id: AUD-002
     severity: high
     priority: P0
-    status: open
+    status: closed
+    verified_commit: d976c4c4
     area: authoritative-state
     compatibility_sensitive: false
   - id: AUD-003
@@ -117,13 +119,15 @@ remediations:
   - id: AUD-004
     severity: high
     priority: P1
-    status: open
+    status: closed
+    verified_commit: 3957084
     area: repository-controls
     compatibility_sensitive: false
   - id: AUD-005
     severity: medium
     priority: P1
-    status: open
+    status: closed
+    verified_commit: 9cbd2021
     area: expedition-identity
     compatibility_sensitive: true
   - id: AUD-006
@@ -135,7 +139,8 @@ remediations:
   - id: AUD-007
     severity: medium
     priority: P1
-    status: open
+    status: closed
+    verified_commit: 1474e1b2
     area: save-validation
     compatibility_sensitive: true
   - id: AUD-008
@@ -151,6 +156,8 @@ remediations:
     area: quality-gates
     compatibility_sensitive: false
 ```
+
+**Status authority (current):** Until TEL-119 is implemented, this machine-readable index is the manually maintained authority for current AUD-packet status, priority, severity, and compatibility sensitivity. Completed exec plans provide packet evidence and commit provenance; `docs/BUILD_STATUS.md` is append-only verification history; `docs/gates/AUDIT-P0.md` is a historical snapshot. TEL-119 specifies the future transition to a ticket/exec-plan ledger with generated views, but its planned authority is not yet active.
 
 ---
 

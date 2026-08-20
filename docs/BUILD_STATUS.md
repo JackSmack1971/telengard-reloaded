@@ -2,6 +2,12 @@
 
 Last verified: 2026-08-18
 
+This document is append-only verification history, not the current TEL-ticket
+status ledger. Use [the task ledger](tasks/README.md) for current TEL status.
+Audit-remediation status is maintained in
+[the remediation playbook](AUDIT_REMEDIATION_PLAYBOOK.md) until TEL-119's
+planned derived-view workflow is implemented.
+
 ## AUD-004 verification
 
 - Status: implemented; `.github/workflows/verification.yml` runs the
@@ -33,9 +39,10 @@ Last verified: 2026-08-18
   implementation time, the GitHub API reported no required status checks for
   `main`.
 
-## Current implementation phase
+## Implementation status through Phase 4
 
-Phase 1 — Dungeon Walking Prototype implemented and gated. The headless,
+Implementation is complete and gated through Phase 4. Phase 1 — Dungeon
+Walking Prototype is implemented and gated. The headless,
 renderer-independent simulation enters seeded floors, walks valid space,
 rejects walls, changes floors, leaves, and revisits identical geography. See
 [the Phase 1 gate](gates/PHASE-1.md).
@@ -965,7 +972,7 @@ verification was run for TEL-100–TEL-108; all new tickets remain Not started.
   `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\eng\verify.ps1
   -Mode Full` passed with 290 Release tests.
 
-## Production coverage gate
+## Historical production coverage gate — 2026-08-16
 
 Verified 2026-08-16 with the repository-local pinned SDK 8.0.100, Coverlet
 collector 6.0.4 (test-only), and the complete xUnit suite. Run:
@@ -1099,11 +1106,16 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
   integration, and explicit active-combat save support.
 - Active: None assigned.
 - Blocked: None recorded.
-- Ledger documents: TEL-001–TEL-006, TEL-010–TEL-016, TEL-020–TEL-025, TEL-030–TEL-037, TEL-040–TEL-045, TEL-050–TEL-056, TEL-060–TEL-065, TEL-070–TEL-074, TEL-080–TEL-085, TEL-090–TEL-093, and project-local Core Alpha extensions TEL-100–TEL-108.
-- Open Core Alpha extensions: TEL-100–TEL-108 are not started. Depth ecology,
-  broad content counts, and other post-alpha systems remain intentionally
-  outside this extension set. Encounter probability and spawn options remain
-  explicit configuration until their content/balance owners define them.
+- Ledger documents: the specification-defined TEL-001–TEL-006,
+  TEL-010–TEL-016, TEL-020–TEL-025, TEL-030–TEL-037, TEL-040–TEL-045,
+  TEL-050–TEL-056, TEL-060–TEL-065, TEL-070–TEL-074, TEL-080–TEL-085, and
+  TEL-090–TEL-093 series, plus project-local TEL-100–TEL-119 extensions.
+- Open project-local work: TEL-100–TEL-117 and TEL-119 remain not started in
+  the task ledger; TEL-118 is implemented and verified by the documentation
+  reconciliation recorded in its task. Depth ecology, broad content counts,
+  and other post-alpha systems remain intentionally outside this extension
+  set. Encounter probability and spawn options remain explicit configuration
+  until their content/balance owners define them.
 
 ## TEL-001 verification
 
@@ -2183,13 +2195,16 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
 
 ## Known technical debt
 
-- The implementation stack is selected in [ADR-001](adr/ADR-001-technology-stack.md); project manifests are scaffolded, but gameplay implementation does not exist yet.
+- The implementation stack is selected in [ADR-001](adr/ADR-001-technology-stack.md), and the documented renderer-independent gameplay slices through Phase 4 are implemented. Character creation, authored Core Alpha content, renderer prototypes, and later persistence/gameplay remain scaffolded or not started.
 - Gameplay remains incremental: expedition state, the inn boundary, carried
-  gold, and secured gold are implemented, while later gameplay and persistence
-  remain scaffolded.
+  gold, secured gold, encounters, combat, features, knowledge, items,
+  progression, legacy death policies, and presentation-state projection are
+  implemented in the completed slices; later content and policy decisions
+  remain open.
 - Undefined formulas and anti-save-scumming policy still require explicit design decisions before implementation.
-- The proposed architecture has only been validated against the Phase 0
-  synthetic command/replay slice; gameplay remains unimplemented.
+- The architecture was initially validated against the Phase 0 synthetic
+  command/replay slice and has since gained focused acceptance evidence for
+  the completed gameplay slices documented above.
 
 ## AUD-006 verification
 
@@ -2277,7 +2292,7 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
   features are omitted, internal monster level/behavior/effects are not
   projected, and no randomness, save, wealth, knowledge, or renderer-authority
   boundary changed.
-- Acceptance: focused adapter tests (4 passed), full Release tests (338
+- Acceptance: focused adapter tests (4 passed), full Release tests (343
   passed), formatter verification, and zero-warning Release build passed via
   `./eng/verify.ps1 -Mode Full` using the repository-local SDK and a
   process-scoped execution-policy bypass for unsigned local scripts.

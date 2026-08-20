@@ -12,12 +12,9 @@ This repository carries project-scoped Codex guidance, skills, hooks, and execut
 
 ## Canonical commands
 
-- SDK diagnostics: `./eng/doctor.ps1`
-- .NET passthrough: `./eng/dotnet.ps1 <dotnet arguments>`
-- Fast iteration gate: `./eng/verify.ps1 -Mode Quick`
-- Final code gate: `./eng/verify.ps1 -Mode Full`
-
-Do not use bare `dotnet`. The project-local pre-tool hook rejects it before execution and tells Codex to use the wrapper.
+The command and SDK policy is canonical in the repository root `AGENTS.md`.
+Use the wrapper and verification commands defined there; do not use bare
+`dotnet`.
 
 ## What the hooks do
 
