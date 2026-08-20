@@ -2252,3 +2252,32 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
   process-scoped execution-policy bypass because the host rejects unsigned
   local scripts and `core.autocrlf=false` to avoid unrelated dirty-file
   line-ending warnings. A separate coverage gate was not required by AUD-005.
+
+## TEL-090 verification
+
+- Status: implemented and verified; `PresentationStateAdapter.Create` now
+  projects immutable renderer-facing state from authoritative `GameState`.
+- Tests added: four focused adapter tests covering state projection,
+  undiscovered-feature filtering, hidden monster-detail redaction, and
+  read-only projection collections.
+- Files/modules affected: `src/Telengard.Core/presentation/PresentationStateAdapter.cs`,
+  `tests/Telengard.Architecture.Tests/PresentationStateAdapterTests.cs`,
+  `docs/tasks/TEL-090.md`, `docs/tasks/README.md`, `CHANGELOG.md`, and this
+  status document.
+- New public APIs: additive `PresentationStateAdapter.Create(GameState)` and
+  the immutable `PresentationState`, `PresentationPlayerState`,
+  `PresentationExpeditionState`, `PresentationFeatureState`,
+  `PresentationCombatState`, and `PresentationMonsterState` projections.
+- New events: none. Existing command and domain-event contracts are unchanged.
+- Save-schema impact: none; no authoritative state or DTO changed, and save,
+  simulation, generator, and content versions remain unchanged.
+- Known follow-up work: renderer prototypes and renderer-independent save
+  compatibility remain TEL-091–TEL-093. No next TEL ticket was started.
+- Invariants: presentation only reads committed simulation state; hidden
+  features are omitted, internal monster level/behavior/effects are not
+  projected, and no randomness, save, wealth, knowledge, or renderer-authority
+  boundary changed.
+- Acceptance: focused adapter tests (4 passed), full Release tests (338
+  passed), formatter verification, and zero-warning Release build passed via
+  `./eng/verify.ps1 -Mode Full` using the repository-local SDK and a
+  process-scoped execution-policy bypass for unsigned local scripts.
