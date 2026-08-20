@@ -12,3 +12,4 @@ All notable changes to this project will be documented in this file.
 - Added Legacy dead-hero records with explicit save/load persistence and version-10 migration support
 - Added Legacy grave markers with explicit save/load persistence and version-11 migration support
 - Added Legacy heirloom records with explicit save/load persistence and version-12 migration support
+- Added an immutable renderer-facing presentation-state adapter that filters undiscovered features and internal monster details
