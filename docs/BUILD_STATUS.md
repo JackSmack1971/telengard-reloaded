@@ -4,9 +4,8 @@ Last verified: 2026-08-18
 
 This document is append-only verification history, not the current TEL-ticket
 status ledger. Use [the task ledger](tasks/README.md) for current TEL status.
-Audit-remediation status is maintained in
-[the remediation playbook](AUDIT_REMEDIATION_PLAYBOOK.md) until TEL-119's
-planned derived-view workflow is implemented.
+Audit-remediation status is maintained in the canonical ledger and its
+generated views described in [the audit-status engineering guide](engineering/audit-status.md).
 
 ## AUD-004 verification
 
@@ -1110,7 +1109,7 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
   TEL-010–TEL-016, TEL-020–TEL-025, TEL-030–TEL-037, TEL-040–TEL-045,
   TEL-050–TEL-056, TEL-060–TEL-065, TEL-070–TEL-074, TEL-080–TEL-085, and
   TEL-090–TEL-093 series, plus project-local TEL-100–TEL-119 extensions.
-- Open project-local work: TEL-100–TEL-117 and TEL-119 remain not started in
+- Open project-local work: TEL-100–TEL-117 remains not started in
   the task ledger; TEL-118 is implemented and verified by the documentation
   reconciliation recorded in its task. Depth ecology, broad content counts,
   and other post-alpha systems remain intentionally outside this extension
@@ -2333,3 +2332,29 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
   clean isolated worktree.
 - Known follow-up work: production coverage deficits remain the existing
   coverage-remediation work; no gameplay or next TEL ticket was started.
+
+## TEL-119 verification
+
+- Status: implemented and verified; `docs/audit-status.json` is now the
+  canonical machine-readable audit packet ledger, with deterministic derived
+  status/provenance sections in the remediation playbook and P0 gate.
+- Tests added: `eng/audit-status.tests.ps1` covers byte-stable repeated
+  generation, canonical-field propagation, ticket-over-plan precedence,
+  preservation of human-authored sections, stale-output failure, marker
+  uniqueness, and active/completed plan/provenance validation.
+- Files/modules affected: `docs/audit-status.json`,
+  `eng/audit-status.ps1`, `eng/audit-status.tests.ps1`,
+  `docs/engineering/audit-status.md`, the generated sections in
+  `docs/AUDIT_REMEDIATION_PLAYBOOK.md` and `docs/gates/AUDIT-P0.md`,
+  `.github/workflows/verification.yml`, and this status/changelog/task
+  documentation.
+- New public APIs: none.
+- New events: none.
+- Save-schema impact: none; simulation, generator, content, and save versions
+  are unchanged.
+- Known follow-up work: AUD-003, AUD-008, and AUD-009 remain explicitly open
+  in the canonical ledger. TEL-119 does not implement any next TEL ticket and
+  does not depend on TEL-117.
+- Acceptance: focused audit-status tests, synchronized-output check,
+  formatter verification, Release build, full Release tests, and the full
+  repository verification gate passed on the merge-target branch.
