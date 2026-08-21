@@ -10,10 +10,119 @@ The verified implementation commits for that P0 result were AUD-001
 reference is stale. At that snapshot, P1 remediation had not yet started.
 This statement is historical and is not the current P1 status.
 Subsequent current-`HEAD` records verify AUD-006, AUD-007, and AUD-005 work;
-the current P1 status is maintained in the remediation playbook's
-machine-readable index until TEL-119 activates its planned generated status
-views. This gate remains historical and is not a competing current-status
+the current P1 status is projected from the canonical audit-status ledger
+below. This gate remains historical and is not a competing current-status
 source.
+
+<!-- BEGIN GENERATED: audit-status -->
+## Current audit status and provenance (generated)
+
+```yaml
+remediations:
+  - id: AUD-001
+    status: closed
+    severity: high
+    priority: P0
+    area: 'determinism'
+    compatibility_sensitive: true
+    verified_commit: '1c1a1262'
+    verification_state: verified
+    ticket_source: 'docs/AUDIT_REMEDIATION_PLAYBOOK.md#AUD-001'
+    exec_plan: 'docs/exec-plans/active/AUD-001.md'
+    exec_plan_status: active
+  - id: AUD-002
+    status: closed
+    severity: high
+    priority: P0
+    area: 'authoritative-state'
+    compatibility_sensitive: false
+    verified_commit: 'd976c4c4'
+    verification_state: verified
+    ticket_source: 'docs/AUDIT_REMEDIATION_PLAYBOOK.md#AUD-002'
+    exec_plan: null
+    exec_plan_status: none
+  - id: AUD-003
+    status: open
+    severity: high
+    priority: P1
+    area: 'toolchain-security'
+    compatibility_sensitive: false
+    verified_commit: null
+    verification_state: unresolved
+    ticket_source: 'docs/AUDIT_REMEDIATION_PLAYBOOK.md#AUD-003'
+    exec_plan: null
+    exec_plan_status: none
+    unresolved: 'No implementation or verification evidence is recorded for the SDK security-patch update.'
+  - id: AUD-004
+    status: closed
+    severity: high
+    priority: P1
+    area: 'repository-controls'
+    compatibility_sensitive: false
+    verified_commit: '3957084'
+    verification_state: verified
+    ticket_source: 'docs/AUDIT_REMEDIATION_PLAYBOOK.md#AUD-004'
+    exec_plan: null
+    exec_plan_status: none
+  - id: AUD-005
+    status: closed
+    severity: medium
+    priority: P1
+    area: 'expedition-identity'
+    compatibility_sensitive: true
+    verified_commit: '9cbd2021'
+    verification_state: verified
+    ticket_source: 'docs/AUDIT_REMEDIATION_PLAYBOOK.md#AUD-005'
+    exec_plan: 'docs/exec-plans/completed/AUD-005.md'
+    exec_plan_status: completed
+  - id: AUD-006
+    status: closed
+    severity: medium
+    priority: P1
+    area: 'command-validation'
+    compatibility_sensitive: false
+    verified_commit: 'f34b42d'
+    verification_state: verified
+    ticket_source: 'docs/AUDIT_REMEDIATION_PLAYBOOK.md#AUD-006'
+    exec_plan: null
+    exec_plan_status: none
+  - id: AUD-007
+    status: closed
+    severity: medium
+    priority: P1
+    area: 'save-validation'
+    compatibility_sensitive: true
+    verified_commit: '1474e1b2'
+    verification_state: verified
+    ticket_source: 'docs/AUDIT_REMEDIATION_PLAYBOOK.md#AUD-007'
+    exec_plan: null
+    exec_plan_status: none
+  - id: AUD-008
+    status: open
+    severity: medium
+    priority: P2
+    area: 'event-delivery'
+    compatibility_sensitive: true
+    verified_commit: null
+    verification_state: unresolved
+    ticket_source: 'docs/AUDIT_REMEDIATION_PLAYBOOK.md#AUD-008'
+    exec_plan: null
+    exec_plan_status: none
+    unresolved: 'Observer-failure semantics have not been implemented or verified.'
+  - id: AUD-009
+    status: open
+    severity: low
+    priority: P2
+    area: 'quality-gates'
+    compatibility_sensitive: false
+    verified_commit: null
+    verification_state: unresolved
+    ticket_source: 'docs/AUDIT_REMEDIATION_PLAYBOOK.md#AUD-009'
+    exec_plan: null
+    exec_plan_status: none
+    unresolved: 'The ordinary verification and exhaustive coverage gates have not been reconciled.'
+```
+<!-- END GENERATED: audit-status -->
 
 ## Result
 

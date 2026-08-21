@@ -92,74 +92,115 @@ P2 failure semantics / quality-gate clarity
 
 Do not batch all packets into one change. Preferred unit: one packet per focused branch/PR, except tightly coupled save/version updates that cannot be reviewed safely in isolation.
 
-## 4. Machine-readable remediation index
+<!-- BEGIN GENERATED: audit-status -->
+## Machine-readable remediation index (generated)
 
 ```yaml
 remediations:
   - id: AUD-001
+    status: closed
     severity: high
     priority: P0
-    status: closed
-    verified_commit: 1c1a1262
-    area: determinism
+    area: 'determinism'
     compatibility_sensitive: true
+    verified_commit: '1c1a1262'
+    verification_state: verified
+    ticket_source: 'docs/AUDIT_REMEDIATION_PLAYBOOK.md#AUD-001'
+    exec_plan: 'docs/exec-plans/active/AUD-001.md'
+    exec_plan_status: active
   - id: AUD-002
+    status: closed
     severity: high
     priority: P0
-    status: closed
-    verified_commit: d976c4c4
-    area: authoritative-state
+    area: 'authoritative-state'
     compatibility_sensitive: false
+    verified_commit: 'd976c4c4'
+    verification_state: verified
+    ticket_source: 'docs/AUDIT_REMEDIATION_PLAYBOOK.md#AUD-002'
+    exec_plan: null
+    exec_plan_status: none
   - id: AUD-003
-    severity: high
-    priority: P1
     status: open
-    area: toolchain-security
-    compatibility_sensitive: false
-  - id: AUD-004
     severity: high
     priority: P1
-    status: closed
-    verified_commit: 3957084
-    area: repository-controls
+    area: 'toolchain-security'
     compatibility_sensitive: false
+    verified_commit: null
+    verification_state: unresolved
+    ticket_source: 'docs/AUDIT_REMEDIATION_PLAYBOOK.md#AUD-003'
+    exec_plan: null
+    exec_plan_status: none
+    unresolved: 'No implementation or verification evidence is recorded for the SDK security-patch update.'
+  - id: AUD-004
+    status: closed
+    severity: high
+    priority: P1
+    area: 'repository-controls'
+    compatibility_sensitive: false
+    verified_commit: '3957084'
+    verification_state: verified
+    ticket_source: 'docs/AUDIT_REMEDIATION_PLAYBOOK.md#AUD-004'
+    exec_plan: null
+    exec_plan_status: none
   - id: AUD-005
+    status: closed
     severity: medium
     priority: P1
-    status: closed
-    verified_commit: 9cbd2021
-    area: expedition-identity
+    area: 'expedition-identity'
     compatibility_sensitive: true
+    verified_commit: '9cbd2021'
+    verification_state: verified
+    ticket_source: 'docs/AUDIT_REMEDIATION_PLAYBOOK.md#AUD-005'
+    exec_plan: 'docs/exec-plans/completed/AUD-005.md'
+    exec_plan_status: completed
   - id: AUD-006
+    status: closed
     severity: medium
     priority: P1
-    status: closed
-    area: command-validation
+    area: 'command-validation'
     compatibility_sensitive: false
+    verified_commit: 'f34b42d'
+    verification_state: verified
+    ticket_source: 'docs/AUDIT_REMEDIATION_PLAYBOOK.md#AUD-006'
+    exec_plan: null
+    exec_plan_status: none
   - id: AUD-007
+    status: closed
     severity: medium
     priority: P1
-    status: closed
-    verified_commit: 1474e1b2
-    area: save-validation
+    area: 'save-validation'
     compatibility_sensitive: true
+    verified_commit: '1474e1b2'
+    verification_state: verified
+    ticket_source: 'docs/AUDIT_REMEDIATION_PLAYBOOK.md#AUD-007'
+    exec_plan: null
+    exec_plan_status: none
   - id: AUD-008
+    status: open
     severity: medium
     priority: P2
-    status: open
-    area: event-delivery
+    area: 'event-delivery'
     compatibility_sensitive: true
+    verified_commit: null
+    verification_state: unresolved
+    ticket_source: 'docs/AUDIT_REMEDIATION_PLAYBOOK.md#AUD-008'
+    exec_plan: null
+    exec_plan_status: none
+    unresolved: 'Observer-failure semantics have not been implemented or verified.'
   - id: AUD-009
+    status: open
     severity: low
     priority: P2
-    status: open
-    area: quality-gates
+    area: 'quality-gates'
     compatibility_sensitive: false
+    verified_commit: null
+    verification_state: unresolved
+    ticket_source: 'docs/AUDIT_REMEDIATION_PLAYBOOK.md#AUD-009'
+    exec_plan: null
+    exec_plan_status: none
+    unresolved: 'The ordinary verification and exhaustive coverage gates have not been reconciled.'
 ```
-
-**Status authority (current):** Until TEL-119 is implemented, this machine-readable index is the manually maintained authority for current AUD-packet status, priority, severity, and compatibility sensitivity. Completed exec plans provide packet evidence and commit provenance; `docs/BUILD_STATUS.md` is append-only verification history; `docs/gates/AUDIT-P0.md` is a historical snapshot. TEL-119 specifies the future transition to a ticket/exec-plan ledger with generated views, but its planned authority is not yet active.
-
----
+<!-- END GENERATED: audit-status -->
 
 # AUD-001 — Canonicalize deterministic RNG seed encoding
 

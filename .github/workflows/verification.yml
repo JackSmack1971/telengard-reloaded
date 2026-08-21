@@ -27,11 +27,15 @@ jobs:
       - name: Set up the repository SDK
         uses: actions/setup-dotnet@v5
         with:
-          global-json-file: global.json
+          dotnet-version: 8.0.100
 
       - name: Prepare verification stamp directory
         shell: pwsh
         run: New-Item -ItemType Directory -Force -Path .codex | Out-Null
+
+      - name: Check generated audit status
+        shell: pwsh
+        run: ./eng/audit-status.ps1 -Mode Check
 
       - name: Run the canonical verification gate
         shell: pwsh

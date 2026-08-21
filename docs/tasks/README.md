@@ -157,7 +157,7 @@ the already-owned feature, journal, wealth, inn, or death mechanics.
 
 - [TEL-117.md](TEL-117.md) — Harden coverage and mutation tooling scope — Implemented and verified
 - [TEL-118.md](TEL-118.md) — Reconcile audit remediation status and documentation provenance — Implemented and verified
-- [TEL-119.md](TEL-119.md) — Generate audit status fields from the canonical ticket/exec-plan ledger — Not started
+- [TEL-119.md](TEL-119.md) — Generate audit status fields from the canonical ticket/exec-plan ledger — Implemented and verified
 
 ## Core Alpha coverage audit
 
