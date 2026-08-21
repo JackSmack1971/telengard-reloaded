@@ -15,4 +15,5 @@ All notable changes to this project will be documented in this file.
 - Added Legacy heirloom records with explicit save/load persistence and version-12 migration support
 - Added an immutable renderer-facing presentation-state adapter that filters undiscovered features and internal monster details
 - Added role-aware coverage reporting and safely scoped mutation-tooling arguments
+- Added the renderer-independent character-creation command boundary for ROLLED, POINT_ALLOCATION, and DAILY_SEED providers
 - Added a canonical audit-status ledger with deterministic generated playbook and P0-gate projections and stale-output validation

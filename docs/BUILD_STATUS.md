@@ -1,6 +1,6 @@
 # Modern Telengard build status
 
-Last verified: 2026-08-18
+Last verified: 2026-08-20
 
 This document is append-only verification history, not the current TEL-ticket
 status ledger. Use [the task ledger](tasks/README.md) for current TEL status.
@@ -2359,6 +2359,41 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
   formatter verification, Release build, full Release tests, and the full
   repository verification gate passed on the merge-target branch.
 
+## TEL-100 verification
+
+- Status: implemented and verified; the renderer-independent character
+  creation boundary validates one of the three named modes and delegates
+  generation to a matching simulation-owned provider.
+- Tests added: all three mode selections, invalid mode and provider mismatch
+  rejection before provider/state change, committed event delivery after state
+  commit, provider input forwarding, deterministic replay, null boundaries,
+  and explicit save round-trip coverage.
+- Files/modules affected: `src/Telengard.Core/Simulation/CharacterCreation.cs`,
+  `tests/Telengard.Architecture.Tests/CharacterCreationTests.cs`,
+  `docs/tasks/TEL-100.md`, `docs/tasks/README.md`, `CHANGELOG.md`, and this
+  status document.
+- New public APIs: `CharacterCreationMode`, `CharacterCreationRequest`,
+  `CreateCharacterCommand`, `CharacterCreationResult`,
+  `ICharacterCreationInput`, `ICharacterCreationProvider`, and
+  `CharacterCreationResolver`.
+- New events: `CharacterCreatedEvent`, with only the committed player identity
+  and selected mode.
+- Save-schema impact: none; `PlayerState` is reused, the explicit DTOs and
+  migrations are unchanged, and save version 14 remains current.
+- Design choices: mode mechanics remain provider-owned for TEL-101–TEL-103;
+  no rolled formula, point budget, daily-calendar rule, random source, or
+  anti-reroll policy was invented. The event does not expose generation input
+  or attributes.
+- Known follow-up work: TEL-101–TEL-103 implement the three mode mechanics;
+  no next TEL ticket was started.
+- Invariants: mode validation precedes provider invocation and state
+  replacement; equal provider inputs reproduce equal state/events; the
+  simulation owns the transition and event; no renderer, hidden-information,
+  wealth, or persistence boundary changed.
+- Acceptance: focused TEL-100 tests (9 passed), formatter verification, and
+  the final `./eng/verify.ps1 -Mode Full` gate passed with 352 Release tests,
+  zero build warnings, and formatter verification. The pre-change baseline
+  passed 343 Release tests.
 ## TEL-091 verification
 
 - Status: implemented and verified; the Modern presentation now has a
