@@ -20,6 +20,20 @@ The following commands are the configured headless verification commands for the
 | Formatter/linter | `./eng/dotnet.ps1 format Telengard.sln --verify-no-changes` |
 | Deterministic test mode | Unknown — no executable exists yet; the specification requires an equivalent of `game --seed <seed> --deterministic` |
 
+### Coverage and mutation scope
+
+`./eng/coverage.ps1` reports role-tagged rows for the four production projects
+(`Telengard.Core`, `Telengard.Content`, `Telengard.Save`, and
+`Telengard.Terminal`) and for `Telengard.TestHarness` as test support. Only
+the production aggregate is gated; test-support totals remain visible in the
+generated reports.
+
+`./eng/mutation.ps1` preserves the default all-production-project baseline
+under `TestResults/mutation-baseline`. Pass scoped Stryker options through
+`-AdditionalStrykerArgs` with a distinct `-ResultsDirectoryName`; `--since`
+and `--with-baseline` are rejected when the default baseline directory is
+selected. Use an explicit branch, tag, or commit as the Stryker diff target.
+
 ### Provisioning the repository-local SDK
 
 A fresh clone does not include the ignored `.dotnet/` directory. From the

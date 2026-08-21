@@ -152,6 +152,10 @@ the already-owned feature, journal, wealth, inn, or death mechanics.
   - Provide data definitions and outcomes for exactly fountain, altar, pit, and teleporter using the existing generic feature and knowledge contracts.
   - Do not duplicate the already-implemented feature resolvers or encode feature behavior in a renderer.
 
+## Repository engineering tickets
+
+- [TEL-117.md](TEL-117.md) — Harden coverage and mutation tooling scope — Implemented and verified
+
 ## Core Alpha coverage audit
 
 The audit compares §26 Character Creation, §48 Recommended First Vertical
