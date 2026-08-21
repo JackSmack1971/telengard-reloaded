@@ -109,7 +109,7 @@ checklist but are not owned by an existing §49 ticket. They are intentionally
 narrow implementation extensions and remain `Not started` until implemented
 and verified.
 
-- [TEL-100.md](TEL-100.md) — Define character creation command boundary — Not started
+- [TEL-100.md](TEL-100.md) — Define character creation command boundary — Implemented and verified
 - [TEL-101.md](TEL-101.md) — Implement rolled character creation — Not started
 - [TEL-102.md](TEL-102.md) — Implement point-allocation character creation — Not started
 - [TEL-103.md](TEL-103.md) — Implement daily-seed character creation — Not started
