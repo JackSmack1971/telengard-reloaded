@@ -2358,3 +2358,39 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
 - Acceptance: focused audit-status tests, synchronized-output check,
   formatter verification, Release build, full Release tests, and the full
   repository verification gate passed on the merge-target branch.
+
+## TEL-091 verification
+
+- Status: implemented and verified; the Modern presentation now has a
+  deterministic renderer frame/cue projection plus an optional Godot visual
+  prototype.
+- Tests added: `ModernRendererTests` covers known-map projection and stable
+  ordering, current-tile marking, hidden-feature and hidden-monster-detail
+  redaction, committed-event cue ordering, read-only collections, and null
+  validation.
+- Files/modules affected: `src/Telengard.Core/presentation/ModernRenderer.cs`,
+  `tests/Telengard.Architecture.Tests/ModernRendererTests.cs`,
+  `src/Telengard.Godot/ModernRenderer.gd`,
+  `src/Telengard.Godot/ModernRenderer.tscn`,
+  `src/Telengard.Godot/project.godot`, `src/Telengard.Godot/README.md`,
+  `docs/tasks/TEL-091.md`, `docs/tasks/README.md`, `CHANGELOG.md`, and this
+  status document.
+- New public APIs: additive `ModernRenderer.Create`, `ModernRenderFrame`, and
+  the renderer-only frame, marker, HUD, combat, environment, cue, and enum
+  types. Existing commands, event payloads, and `PresentationState` are
+  unchanged.
+- New events: none. Existing committed events are reduced to safe visual cues;
+  hidden `EncounterStartedEvent` monster internals are not forwarded.
+- Save-schema impact: none; no authoritative state or version marker changed.
+- Known follow-up work: a future host integration can adapt the C# frame to the
+  Godot dictionary contract and bind input to simulation commands. TEL-092 and
+  TEL-093 remain not started; no next TEL ticket was started.
+- Invariants: the renderer only reads immutable presentation state and
+  committed events; hidden map/features/details remain filtered; no randomness,
+  save, wealth, knowledge, command, or simulation-authority boundary changed.
+- Acceptance: focused presentation tests passed (8 total), formatter
+  verification passed, Release build passed with 0 warnings and 0 errors, the
+  full Release suite passed 347 tests, and
+  `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\eng\verify.ps1
+  -Mode Full` passed all stages with a process-scoped
+  `core.autocrlf=false` override.
