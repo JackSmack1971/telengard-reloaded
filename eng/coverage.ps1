@@ -49,12 +49,13 @@ if (-not $coverageFile) {
 
 $coverage = [xml](Get-Content -Raw -LiteralPath $coverageFile.FullName)
 $projects = @(
-    @{ Name = 'Telengard.Core'; Root = Join-Path $RepoRoot 'src\Telengard.Core' },
-    @{ Name = 'Telengard.Content'; Root = Join-Path $RepoRoot 'src\Telengard.Content' },
-    @{ Name = 'Telengard.Save'; Root = Join-Path $RepoRoot 'src\Telengard.Save' },
-    @{ Name = 'Telengard.Terminal'; Root = Join-Path $RepoRoot 'src\Telengard.Terminal' },
-    @{ Name = 'Telengard.TestHarness'; Root = Join-Path $RepoRoot 'tools\Telengard.TestHarness' }
+    @{ Name = 'Telengard.Core'; Root = Join-Path $RepoRoot 'src\Telengard.Core'; Role = 'Production' },
+    @{ Name = 'Telengard.Content'; Root = Join-Path $RepoRoot 'src\Telengard.Content'; Role = 'Production' },
+    @{ Name = 'Telengard.Save'; Root = Join-Path $RepoRoot 'src\Telengard.Save'; Role = 'Production' },
+    @{ Name = 'Telengard.Terminal'; Root = Join-Path $RepoRoot 'src\Telengard.Terminal'; Role = 'Production' },
+    @{ Name = 'Telengard.TestHarness'; Root = Join-Path $RepoRoot 'tools\Telengard.TestHarness'; Role = 'TestSupport' }
 )
+# TestHarness is measured for visibility, but it is tooling rather than production code.
 
 function Normalize-Path([string]$Path) {
     return $Path.Replace('\', '/').TrimStart('./')
@@ -94,6 +95,7 @@ foreach ($project in $projects) {
     if ($sourceFiles.Count -eq 0) {
         $rows.Add([pscustomobject]@{
             Project = $project.Name
+            Role = $project.Role
             File = '(no hand-written C# files)'
             Lines = 'n/a'
             Branches = 'n/a'
@@ -113,6 +115,7 @@ foreach ($project in $projects) {
             ($numbers.BranchesCovered -eq $numbers.BranchesValid)
         $rows.Add([pscustomobject]@{
             Project = $project.Name
+            Role = $project.Role
             File = $relative
             Lines = $lineStatus
             Branches = $branchStatus
@@ -121,31 +124,50 @@ foreach ($project in $projects) {
     }
 }
 
-$measuredRows = @($rows | Where-Object { $_.Lines -ne 'n/a' })
-$linesValid = 0
-$linesCovered = 0
-$branchesValid = 0
-$branchesCovered = 0
-foreach ($row in $measuredRows) {
-    $lineParts = $row.Lines -split '/'
-    $branchParts = $row.Branches -split '/'
-    $linesCovered += [int]$lineParts[0]
-    $linesValid += [int]$lineParts[1]
-    $branchesCovered += [int]$branchParts[0]
-    $branchesValid += [int]$branchParts[1]
+function Get-AggregateTotals($Rows) {
+    $linesValid = 0
+    $linesCovered = 0
+    $branchesValid = 0
+    $branchesCovered = 0
+    foreach ($row in $Rows) {
+        $lineParts = $row.Lines -split '/'
+        $branchParts = $row.Branches -split '/'
+        $linesCovered += [int]$lineParts[0]
+        $linesValid += [int]$lineParts[1]
+        $branchesCovered += [int]$branchParts[0]
+        $branchesValid += [int]$branchParts[1]
+    }
+
+    $lineRate = if ($linesValid -eq 0) { 1 } else { $linesCovered / $linesValid }
+    $branchRate = if ($branchesValid -eq 0) { 1 } else { $branchesCovered / $branchesValid }
+    return [ordered]@{
+        LinesCovered = $linesCovered
+        LinesValid = $linesValid
+        LineRate = $lineRate
+        BranchesCovered = $branchesCovered
+        BranchesValid = $branchesValid
+        BranchRate = $branchRate
+    }
 }
 
-$lineRate = if ($linesValid -eq 0) { 1 } else { $linesCovered / $linesValid }
-$branchRate = if ($branchesValid -eq 0) { 1 } else { $branchesCovered / $branchesValid }
+$productionRows = @($rows | Where-Object { $_.Role -eq 'Production' -and $_.Lines -ne 'n/a' })
+$testSupportRows = @($rows | Where-Object { $_.Role -eq 'TestSupport' -and $_.Lines -ne 'n/a' })
+$production = Get-AggregateTotals $productionRows
+$testSupport = Get-AggregateTotals $testSupportRows
+
 $summary = [ordered]@{
     Configuration = $Configuration
     CoverageFile = $coverageFile.FullName
-    LinesCovered = $linesCovered
-    LinesValid = $linesValid
-    LineRate = $lineRate
-    BranchesCovered = $branchesCovered
-    BranchesValid = $branchesValid
-    BranchRate = $branchRate
+    # These top-level fields preserve the existing summary contract and now
+    # represent the gated production aggregate only.
+    LinesCovered = $production.LinesCovered
+    LinesValid = $production.LinesValid
+    LineRate = $production.LineRate
+    BranchesCovered = $production.BranchesCovered
+    BranchesValid = $production.BranchesValid
+    BranchRate = $production.BranchRate
+    ProductionSummary = $production
+    TestSupportSummary = $testSupport
     Files = @($rows)
 }
 
@@ -156,19 +178,21 @@ $summary | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $jsonPath -Encodin
 $markdown = [System.Collections.Generic.List[string]]::new()
 $markdown.Add('# Telengard coverage')
 $markdown.Add('')
-$markdown.Add("Overall: **$linesCovered/$linesValid lines ($('{0:P2}' -f $lineRate))**, **$branchesCovered/$branchesValid branches ($('{0:P2}' -f $branchRate))**")
+$markdown.Add("Production (gated): **$($production.LinesCovered)/$($production.LinesValid) lines ($('{0:P2}' -f $production.LineRate))**, **$($production.BranchesCovered)/$($production.BranchesValid) branches ($('{0:P2}' -f $production.BranchRate))**")
+$markdown.Add("Test-support (informational): **$($testSupport.LinesCovered)/$($testSupport.LinesValid) lines ($('{0:P2}' -f $testSupport.LineRate))**, **$($testSupport.BranchesCovered)/$($testSupport.BranchesValid) branches ($('{0:P2}' -f $testSupport.BranchRate))**")
 $markdown.Add('')
-$markdown.Add('| Project | Source file | Lines | Branches | Status |')
-$markdown.Add('| --- | --- | ---: | ---: | --- |')
+$markdown.Add('| Project | Role | Source file | Lines | Branches | Status |')
+$markdown.Add('| --- | --- | --- | ---: | ---: | --- |')
 foreach ($row in $rows) {
-    $markdown.Add("| $($row.Project) | $($row.File) | $($row.Lines) | $($row.Branches) | $($row.Status) |")
+    $markdown.Add("| $($row.Project) | $($row.Role) | $($row.File) | $($row.Lines) | $($row.Branches) | $($row.Status) |")
 }
 $markdown -join [Environment]::NewLine | Set-Content -LiteralPath $markdownPath -Encoding UTF8
 
 $rows | Format-Table -AutoSize | Out-String | Write-Host
-Write-Host "Overall: $linesCovered/$linesValid lines ($('{0:P2}' -f $lineRate)); $branchesCovered/$branchesValid branches ($('{0:P2}' -f $branchRate))."
+Write-Host "Production: $($production.LinesCovered)/$($production.LinesValid) lines ($('{0:P2}' -f $production.LineRate)); $($production.BranchesCovered)/$($production.BranchesValid) branches ($('{0:P2}' -f $production.BranchRate))."
+Write-Host "Test-support (informational): $($testSupport.LinesCovered)/$($testSupport.LinesValid) lines; $($testSupport.BranchesCovered)/$($testSupport.BranchesValid) branches."
 
-if ($linesCovered -ne $linesValid -or $branchesCovered -ne $branchesValid) {
+if ($production.LinesCovered -ne $production.LinesValid -or $production.BranchesCovered -ne $production.BranchesValid) {
     throw 'Coverage target failed: every in-scope hand-written production line and branch must be covered.'
 }
 

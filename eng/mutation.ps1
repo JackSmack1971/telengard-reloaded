@@ -7,13 +7,25 @@ param(
     [ValidateSet('All', 'Telengard.Core', 'Telengard.Content', 'Telengard.Save', 'Telengard.Terminal')]
     [string]$Project = 'All',
     [ValidatePattern('^[A-Za-z0-9._-]+$')]
-    [string]$ResultsDirectoryName = 'mutation-baseline'
+    [string]$ResultsDirectoryName = 'mutation-baseline',
+    [string[]]$AdditionalStrykerArgs = @()
 )
 
 $ErrorActionPreference = 'Stop'
 $RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $DotNetScript = Join-Path $RepoRoot 'eng\dotnet.ps1'
 $MsBuildPath = Join-Path $RepoRoot '.dotnet\sdk\8.0.100\MSBuild.dll'
+
+if ($ResultsDirectoryName -eq 'mutation-baseline') {
+    $scopedOptions = @($AdditionalStrykerArgs | Where-Object {
+        $option = ([string]$_ -split '=', 2)[0]
+        $option -in @('--since', '--with-baseline')
+    })
+    if ($scopedOptions.Count -gt 0) {
+        throw "Scoped Stryker arguments ($($scopedOptions -join ', ')) require a non-default -ResultsDirectoryName so they cannot overwrite the full mutation baseline."
+    }
+}
+
 $ResultsDirectory = Join-Path $RepoRoot (Join-Path 'TestResults' $ResultsDirectoryName)
 $ResultsPrefix = "TestResults/$ResultsDirectoryName/"
 
@@ -66,7 +78,7 @@ foreach ($targetProject in $projects) {
     Write-Host "== Mutation run ($MutationLevel): $($targetProject.Name) =="
     Push-Location $projectDirectory
     try {
-        Invoke-RepositoryDotNet -WorkingDirectory $projectDirectory -Arguments @(
+        Invoke-RepositoryDotNet -WorkingDirectory $projectDirectory -Arguments (@(
             'stryker',
             '--config-file', 'stryker-config.json',
             '--configuration', $Configuration,
@@ -79,7 +91,7 @@ foreach ($targetProject in $projects) {
             '--reporter', 'html',
             '--reporter', 'markdown',
             '--skip-version-check'
-        )
+        ) + @($AdditionalStrykerArgs))
     } finally {
         Pop-Location
     }
@@ -132,6 +144,7 @@ $manifest = [ordered]@{
     SdkVersion = '8.0.100'
     MutationLevel = $MutationLevel
     Configuration = $Configuration
+    AdditionalStrykerArgs = @($AdditionalStrykerArgs)
     ResultsDirectory = "TestResults/$ResultsDirectoryName"
     TestProjects = @('tests/Telengard.Architecture.Tests/Telengard.Architecture.Tests.csproj')
     ProductionProjects = @($projects | ForEach-Object { $_.Name })
