@@ -2296,3 +2296,40 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
   passed), formatter verification, and zero-warning Release build passed via
   `./eng/verify.ps1 -Mode Full` using the repository-local SDK and a
   process-scoped execution-policy bypass for unsigned local scripts.
+
+## TEL-117 verification
+
+- Status: implemented and verified on a clean isolated branch anchored to
+  `70c8f51b415c45d9b98928dc0478304ae94ac947`; the original anchored worktree
+  was dirty and was preserved unchanged.
+- Tests added: `tests/Tooling/TEL-117.Tooling.Tests.ps1` verifies role-based
+  coverage aggregation, TestHarness visibility/exclusion, both default
+  mutation-baseline guards, and an independent scoped Stryker invocation.
+- Files/modules affected: `eng/coverage.ps1`, `eng/mutation.ps1`, the tooling
+  regression script, `docs/DEVELOPMENT.md`,
+  `docs/test-quality-current-audit.md`, this status document, the TEL task
+  ledger, and `docs/tasks/TEL-117.md`.
+- New public APIs: none. New events: none. Save-schema impact: none.
+- Coverage behavior: production (`Core`, `Content`, `Save`, `Terminal`) is the
+  gated aggregate; `TestHarness` remains measured and visible as test support.
+- Mutation behavior: `-AdditionalStrykerArgs` is additive; scoped options are
+  rejected for `mutation-baseline`, and scoped manifests record the forwarded
+  arguments.
+- Focused evidence on the merge-target branch: production coverage reported
+  3,344/3,393 lines and 1,475/1,556 branches; TestHarness reported 42/42
+  lines and 32/32 branches.
+  Both guarded mutation forms returned nonzero, and the Basic Terminal scoped
+  run succeeded in `TestResults/mutation-tel-117-scoped` with merge-target
+  parent `3b9e01fe31317dbe447ec5f8b2fb06aca2bb7e44` recorded in the manifest.
+- Default mutation evidence: `powershell.exe -NoProfile
+  -ExecutionPolicy Bypass -File .\eng\mutation.ps1 -MutationLevel Basic`
+  completed for Core, Content, Save, and Terminal in
+  `TestResults/mutation-baseline`; the manifest recorded an empty additional
+  argument list and the unchanged four-project production scope.
+- Final merge-target gate: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File
+  .\eng\verify.ps1 -Mode Full` passed with formatter verification, a zero-warning
+  Release build, and 338/338 Release tests. The gate required a process-scoped
+  `core.autocrlf=false` override and an ignored `.codex` stamp directory in the
+  clean isolated worktree.
+- Known follow-up work: production coverage deficits remain the existing
+  coverage-remediation work; no gameplay or next TEL ticket was started.
