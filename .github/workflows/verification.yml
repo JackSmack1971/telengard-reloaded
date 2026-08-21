@@ -33,6 +33,10 @@ jobs:
         shell: pwsh
         run: New-Item -ItemType Directory -Force -Path .codex | Out-Null
 
+      - name: Check generated audit status
+        shell: pwsh
+        run: ./eng/audit-status.ps1 -Mode Check
+
       - name: Run the canonical verification gate
         shell: pwsh
         run: ./eng/verify.ps1 -Mode Full

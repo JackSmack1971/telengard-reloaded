@@ -92,6 +92,116 @@ P2 failure semantics / quality-gate clarity
 
 Do not batch all packets into one change. Preferred unit: one packet per focused branch/PR, except tightly coupled save/version updates that cannot be reviewed safely in isolation.
 
+<!-- BEGIN GENERATED: audit-status -->
+## Machine-readable remediation index (generated)
+
+```yaml
+remediations:
+  - id: AUD-001
+    status: closed
+    severity: high
+    priority: P0
+    area: 'determinism'
+    compatibility_sensitive: true
+    verified_commit: '1c1a1262'
+    verification_state: verified
+    ticket_source: 'docs/AUDIT_REMEDIATION_PLAYBOOK.md#AUD-001'
+    exec_plan: 'docs/exec-plans/completed/AUD-001.md'
+    exec_plan_status: completed
+  - id: AUD-002
+    status: closed
+    severity: high
+    priority: P0
+    area: 'authoritative-state'
+    compatibility_sensitive: false
+    verified_commit: 'd976c4c4'
+    verification_state: verified
+    ticket_source: 'docs/AUDIT_REMEDIATION_PLAYBOOK.md#AUD-002'
+    exec_plan: null
+    exec_plan_status: none
+  - id: AUD-003
+    status: open
+    severity: high
+    priority: P1
+    area: 'toolchain-security'
+    compatibility_sensitive: false
+    verified_commit: null
+    verification_state: unresolved
+    ticket_source: 'docs/AUDIT_REMEDIATION_PLAYBOOK.md#AUD-003'
+    exec_plan: null
+    exec_plan_status: none
+    unresolved: 'No implementation or verification evidence is recorded for the SDK security-patch update.'
+  - id: AUD-004
+    status: closed
+    severity: high
+    priority: P1
+    area: 'repository-controls'
+    compatibility_sensitive: false
+    verified_commit: '3957084'
+    verification_state: verified
+    ticket_source: 'docs/AUDIT_REMEDIATION_PLAYBOOK.md#AUD-004'
+    exec_plan: null
+    exec_plan_status: none
+  - id: AUD-005
+    status: closed
+    severity: medium
+    priority: P1
+    area: 'expedition-identity'
+    compatibility_sensitive: true
+    verified_commit: '9cbd2021'
+    verification_state: verified
+    ticket_source: 'docs/AUDIT_REMEDIATION_PLAYBOOK.md#AUD-005'
+    exec_plan: 'docs/exec-plans/completed/AUD-005.md'
+    exec_plan_status: completed
+  - id: AUD-006
+    status: closed
+    severity: medium
+    priority: P1
+    area: 'command-validation'
+    compatibility_sensitive: false
+    verified_commit: 'f34b42d'
+    verification_state: verified
+    ticket_source: 'docs/AUDIT_REMEDIATION_PLAYBOOK.md#AUD-006'
+    exec_plan: null
+    exec_plan_status: none
+  - id: AUD-007
+    status: closed
+    severity: medium
+    priority: P1
+    area: 'save-validation'
+    compatibility_sensitive: true
+    verified_commit: '1474e1b2'
+    verification_state: verified
+    ticket_source: 'docs/AUDIT_REMEDIATION_PLAYBOOK.md#AUD-007'
+    exec_plan: null
+    exec_plan_status: none
+  - id: AUD-008
+    status: open
+    severity: medium
+    priority: P2
+    area: 'event-delivery'
+    compatibility_sensitive: true
+    verified_commit: null
+    verification_state: unresolved
+    ticket_source: 'docs/AUDIT_REMEDIATION_PLAYBOOK.md#AUD-008'
+    exec_plan: null
+    exec_plan_status: none
+    unresolved: 'Observer-failure semantics have not been implemented or verified.'
+  - id: AUD-009
+    status: open
+    severity: low
+    priority: P2
+    area: 'quality-gates'
+    compatibility_sensitive: false
+    verified_commit: null
+    verification_state: unresolved
+    ticket_source: 'docs/AUDIT_REMEDIATION_PLAYBOOK.md#AUD-009'
+    exec_plan: null
+    exec_plan_status: none
+    unresolved: 'The ordinary verification and exhaustive coverage gates have not been reconciled.'
+```
+<!-- END GENERATED: audit-status -->
+
 ## 4. Machine-readable remediation index
 
 ```yaml
@@ -156,7 +266,12 @@ remediations:
     compatibility_sensitive: false
 ```
 
-**Status note:** The four status changes above reflect current-`HEAD` verification evidence for AUD-001, AUD-002, AUD-005, and AUD-007; AUD-006 was already closed. Per-packet status and verified-commit provenance should be reconciled from the canonical ticket/exec-plan ledger. `docs/BUILD_STATUS.md` remains verification history, and `docs/gates/AUDIT-P0.md` remains a historical snapshot.
+**Status authority (current):** `docs/audit-status.json` is the canonical
+ticket/exec-plan ledger for current AUD-packet status, priority, severity,
+compatibility sensitivity, and verification provenance. This playbook section
+and the P0 gate are derived views; `docs/BUILD_STATUS.md` remains append-only
+verification history. Field precedence and the update/check commands are
+documented in [`docs/engineering/audit-status.md`](engineering/audit-status.md).
 
 ---
 

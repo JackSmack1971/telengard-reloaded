@@ -2252,3 +2252,34 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
   process-scoped execution-policy bypass because the host rejects unsigned
   local scripts and `core.autocrlf=false` to avoid unrelated dirty-file
   line-ending warnings. A separate coverage gate was not required by AUD-005.
+
+## TEL-119 verification
+
+- Status: implemented and verified; `docs/audit-status.json` is now the
+  canonical machine-readable audit packet ledger, with deterministic derived
+  status/provenance sections in the remediation playbook and P0 gate.
+- Tests added: `eng/audit-status.tests.ps1` covers byte-stable repeated
+  generation, canonical-field propagation, ticket-over-plan precedence,
+  preservation of human-authored sections, stale-output failure, marker
+  uniqueness, and active/completed plan/provenance validation.
+- Files/modules affected: `docs/audit-status.json`,
+  `eng/audit-status.ps1`, `eng/audit-status.tests.ps1`,
+  `docs/engineering/audit-status.md`, the generated sections in
+  `docs/AUDIT_REMEDIATION_PLAYBOOK.md` and `docs/gates/AUDIT-P0.md`,
+  `.github/workflows/verification.yml`, and required status/changelog/ledger
+  documentation.
+- New public APIs: none.
+- New events: none.
+- Save-schema impact: none; simulation, generator, content, and save versions
+  are unchanged.
+- Known follow-up work: AUD-003, AUD-008, and AUD-009 remain explicitly open
+  in the canonical ledger. TEL-119 does not implement any next TEL ticket and
+  does not depend on TEL-117.
+- Acceptance: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File
+  .\eng\audit-status.tests.ps1` passed; synchronized-output check passed;
+  repository-local doctor resolved SDK 8.0.100; formatter verification
+  passed; Release build passed with 0 warnings and 0 errors; the full Release
+  suite passed 343 tests; and
+  `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\eng\verify.ps1
+  -Mode Full` passed all stages with `core.autocrlf=false` for unrelated
+  dirty-file line-ending warnings.

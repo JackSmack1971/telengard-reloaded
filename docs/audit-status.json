@@ -1,0 +1,139 @@
+{
+  "schema_version": 1,
+  "packets": [
+    {
+      "id": "AUD-001",
+      "ticket": {
+        "source": "docs/AUDIT_REMEDIATION_PLAYBOOK.md#AUD-001",
+        "status": "closed",
+        "severity": "high",
+        "priority": "P0",
+        "area": "determinism",
+        "compatibility_sensitive": true,
+        "verified_commit": "1c1a1262"
+      },
+      "exec_plan": {
+        "path": "docs/exec-plans/completed/AUD-001.md",
+        "status": "completed",
+        "verified_commit": "1c1a1262"
+      },
+      "unresolved": null
+    },
+    {
+      "id": "AUD-002",
+      "ticket": {
+        "source": "docs/AUDIT_REMEDIATION_PLAYBOOK.md#AUD-002",
+        "status": "closed",
+        "severity": "high",
+        "priority": "P0",
+        "area": "authoritative-state",
+        "compatibility_sensitive": false,
+        "verified_commit": "d976c4c4"
+      },
+      "exec_plan": null,
+      "unresolved": null
+    },
+    {
+      "id": "AUD-003",
+      "ticket": {
+        "source": "docs/AUDIT_REMEDIATION_PLAYBOOK.md#AUD-003",
+        "status": "open",
+        "severity": "high",
+        "priority": "P1",
+        "area": "toolchain-security",
+        "compatibility_sensitive": false,
+        "verified_commit": null
+      },
+      "exec_plan": null,
+      "unresolved": "No implementation or verification evidence is recorded for the SDK security-patch update."
+    },
+    {
+      "id": "AUD-004",
+      "ticket": {
+        "source": "docs/AUDIT_REMEDIATION_PLAYBOOK.md#AUD-004",
+        "status": "closed",
+        "severity": "high",
+        "priority": "P1",
+        "area": "repository-controls",
+        "compatibility_sensitive": false,
+        "verified_commit": "3957084"
+      },
+      "exec_plan": null,
+      "unresolved": null
+    },
+    {
+      "id": "AUD-005",
+      "ticket": {
+        "source": "docs/AUDIT_REMEDIATION_PLAYBOOK.md#AUD-005",
+        "status": "closed",
+        "severity": "medium",
+        "priority": "P1",
+        "area": "expedition-identity",
+        "compatibility_sensitive": true,
+        "verified_commit": "9cbd2021"
+      },
+      "exec_plan": {
+        "path": "docs/exec-plans/completed/AUD-005.md",
+        "status": "completed",
+        "verified_commit": "9cbd2021"
+      },
+      "unresolved": null
+    },
+    {
+      "id": "AUD-006",
+      "ticket": {
+        "source": "docs/AUDIT_REMEDIATION_PLAYBOOK.md#AUD-006",
+        "status": "closed",
+        "severity": "medium",
+        "priority": "P1",
+        "area": "command-validation",
+        "compatibility_sensitive": false,
+        "verified_commit": "f34b42d"
+      },
+      "exec_plan": null,
+      "unresolved": null
+    },
+    {
+      "id": "AUD-007",
+      "ticket": {
+        "source": "docs/AUDIT_REMEDIATION_PLAYBOOK.md#AUD-007",
+        "status": "closed",
+        "severity": "medium",
+        "priority": "P1",
+        "area": "save-validation",
+        "compatibility_sensitive": true,
+        "verified_commit": "1474e1b2"
+      },
+      "exec_plan": null,
+      "unresolved": null
+    },
+    {
+      "id": "AUD-008",
+      "ticket": {
+        "source": "docs/AUDIT_REMEDIATION_PLAYBOOK.md#AUD-008",
+        "status": "open",
+        "severity": "medium",
+        "priority": "P2",
+        "area": "event-delivery",
+        "compatibility_sensitive": true,
+        "verified_commit": null
+      },
+      "exec_plan": null,
+      "unresolved": "Observer-failure semantics have not been implemented or verified."
+    },
+    {
+      "id": "AUD-009",
+      "ticket": {
+        "source": "docs/AUDIT_REMEDIATION_PLAYBOOK.md#AUD-009",
+        "status": "open",
+        "severity": "low",
+        "priority": "P2",
+        "area": "quality-gates",
+        "compatibility_sensitive": false,
+        "verified_commit": null
+      },
+      "exec_plan": null,
+      "unresolved": "The ordinary verification and exhaustive coverage gates have not been reconciled."
+    }
+  ]
+}

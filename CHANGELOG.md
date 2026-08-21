@@ -12,3 +12,4 @@ All notable changes to this project will be documented in this file.
 - Added Legacy dead-hero records with explicit save/load persistence and version-10 migration support
 - Added Legacy grave markers with explicit save/load persistence and version-11 migration support
 - Added Legacy heirloom records with explicit save/load persistence and version-12 migration support
+- Added a canonical audit-status ledger with deterministic generated playbook and P0-gate projections and stale-output validation
