@@ -86,11 +86,11 @@ Mutation hardening is not advanced in this checkout because the required
   implementation base.
 - Coverage command: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File
   .\tests\Tooling\TEL-117.Tooling.Tests.ps1`.
-- Coverage evidence: production totals are reported separately as
-  3,210/3,224 lines and 1,466/1,542 branches; TestHarness is visible as
-  test-support at 42/42 lines and 32/32 branches and is excluded from the
-  production gate. The production gate therefore returned nonzero, preserving
-  the existing failure behavior for incomplete production coverage.
+- Coverage evidence on the merge-target branch: production totals are reported
+  separately as 3,344/3,393 lines and 1,475/1,556 branches; TestHarness is
+  visible as test-support at 42/42 lines and 32/32 branches and is excluded
+  from the production gate. The production gate therefore returned nonzero,
+  preserving the existing failure behavior for incomplete production coverage.
 - Mutation evidence: both guarded default-baseline forms returned nonzero.
   A separate Basic `Telengard.Terminal` run succeeded with
   `--since=dadb01c253ee7a4e05c5cc385a1f13ed45493b94` in
@@ -102,7 +102,7 @@ Mutation hardening is not advanced in this checkout because the required
   Bypass -File .\eng\mutation.ps1 -MutationLevel Basic` completed for all four
   production projects in `TestResults/mutation-baseline`; its manifest recorded
   an empty additional-arguments list and the unchanged default scope.
-- Final repository gate: `powershell.exe -NoProfile -ExecutionPolicy Bypass
-  -File .\eng\verify.ps1 -Mode Full` passed with a zero-warning Release build
-  and 334/334 Release tests. The clean worktree required the process-scoped
+- Final merge-target repository gate: `powershell.exe -NoProfile
+  -ExecutionPolicy Bypass -File .\eng\verify.ps1 -Mode Full` passed with a
+  zero-warning Release build and 338/338 Release tests. The clean worktree required the process-scoped
   `core.autocrlf=false` override and an ignored `.codex` stamp directory.
