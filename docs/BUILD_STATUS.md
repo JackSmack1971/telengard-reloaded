@@ -2429,3 +2429,43 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
   `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\eng\verify.ps1
   -Mode Full` passed all stages with a process-scoped
   `core.autocrlf=false` override.
+
+## TEL-101 verification
+
+- Status: implemented and verified; `ROLLED` character creation now generates
+  six bounded attributes through a simulation-owned provider and the existing
+  character-creation command boundary.
+- Tests added: six-attribute/range coverage, named-stream deterministic replay,
+  distinctive configured ranges, simulation-version versus generator-version
+  scoping, invalid configuration and provider-boundary rejection, preservation
+  of unrelated player state, committed event/state behavior, and explicit save
+  round-trip coverage.
+- Files/modules affected: `src/Telengard.Core/Simulation/CharacterCreation.cs`,
+  `tests/Telengard.Architecture.Tests/CharacterCreationTests.cs`,
+  `docs/tasks/TEL-101.md`, `docs/tasks/README.md`, `CHANGELOG.md`, and this
+  status document.
+- New public APIs: additive `RolledAttributeRange`,
+  `RolledCharacterCreationConfiguration`, and
+  `RolledCharacterCreationProvider`; existing command and event contracts are
+  unchanged.
+- New events: none; `CharacterCreatedEvent` remains limited to committed player
+  identity and selected mode.
+- Save-schema impact: none; `PlayerAttributes` already use the explicit save
+  DTO, save version 14 remains current, and no migration was required.
+- Design choices: rolling is caller-supplied through six immutable inclusive
+  ranges and an explicit policy version; the provider uses the named
+  `character-creation` stream scoped by rolled mode, player identity, and
+  policy version, with simulation version as the RNG compatibility version.
+  No permanent roll formula, reroll limit, anti-reroll rule, or hidden RNG
+  input was added to the product contract.
+- Known follow-up work: TEL-102 and TEL-103 remain not started; starting
+  loadout, balance, and anti-reroll policy remain out of scope.
+- Invariants: state remains simulation-owned, configuration failures occur
+  before the resolver commits a new state/event, equal seed/version/state/
+  configuration inputs replay identically, and no renderer, knowledge, wealth,
+  or hidden-information boundary changed.
+- Acceptance: focused TEL-101 tests (14 passed), determinism scan (fast and
+  full with no pattern hits), formatter verification, Release build with 0
+  warnings, and the full Release suite (356 passed) all passed. The final gate
+  passed with a process-scoped PowerShell execution-policy bypass because the
+  repository wrapper is unsigned.
