@@ -22,4 +22,5 @@ All notable changes to this project will be documented in this file.
 - Added renderer-independent initial game setup with deterministic world-seed selection and ready-at-inn state
 - Added renderer-independent treasure acquisition with unsecured expedition loot and deterministic content loot-table selection
 - Added the deterministic terminal renderer prototype with ASCII/symbolic state and safe event-cue output
+- Added validated Legacy character replacement that preserves persistent knowledge and Legacy history across death
 - Added a canonical audit-status ledger with deterministic generated playbook and P0-gate projections and stale-output validation
