@@ -18,7 +18,7 @@ The following commands are the configured headless verification commands for the
 | Build | `./eng/dotnet.ps1 build Telengard.sln --configuration Release` |
 | Tests | `./eng/dotnet.ps1 test Telengard.sln --configuration Release --no-restore` |
 | Formatter/linter | `./eng/dotnet.ps1 format Telengard.sln --verify-no-changes` |
-| Deterministic test mode | No user-facing game executable exists yet. The repository's deterministic test harness accepts `--seed <seed> --deterministic`; the specification requires an equivalent user-facing mode. |
+| Deterministic test mode | The headless test harness accepts `--seed <seed> --deterministic --script <path>` and emits stable JSON Lines while comparing replayed final saves/events. |
 
 ### Coverage and mutation scope
 

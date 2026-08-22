@@ -25,3 +25,4 @@ All notable changes to this project will be documented in this file.
 - Added validated Legacy character replacement that preserves persistent knowledge and Legacy history across death
 - Added a canonical audit-status ledger with deterministic generated playbook and P0-gate projections and stale-output validation
 - Added a deterministic Core Alpha vertical-slice integration proof covering success, Legacy failure/restart, save reload, knowledge, and wealth boundaries
+- Added deterministic headless developer debug scripts with simulation-routed state setup, stable JSON Lines output, and save/load replay comparison

@@ -2650,3 +2650,38 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
   verification passed, and `./eng/verify.ps1 -Mode Full` passed on the final
   diff. Production content expansion and TEL-108 debug commands remain
   deferred.
+
+## TEL-108 verification
+
+- Status: implemented and verified; the headless test harness now executes
+  deterministic line-oriented debug scripts with stable compact JSON Lines
+  output for the §43 command surface and explicit save/load checkpoints.
+- Tests added: `DeveloperDebugTests` covers simulation-routed teleport,
+  setters, grants, spawns, reveal, and death commands; committed debug event
+  output; deterministic replay; save/load equivalence; and invalid input or
+  unavailable-system diagnostics.
+- Files/modules affected: `src/Telengard.Core/Simulation/DeveloperDebug.cs`,
+  `tools/Telengard.TestHarness/DebugScript.cs`,
+  `tools/Telengard.TestHarness/Program.cs`,
+  `tests/Telengard.Architecture.Tests/DeveloperDebugTests.cs`,
+  `docs/tasks/TEL-108.md`, `docs/tasks/README.md`, `docs/DEVELOPMENT.md`,
+  `CHANGELOG.md`, and this status document.
+- New public APIs: additive simulation-owned developer debug commands and
+  committed debug events for teleport, state setup, grants, spawning, and map
+  reveal; the harness adds `DebugScriptSession` and `DebugScriptResult`.
+- New events: `DebugTeleportedEvent`, `DebugHitPointsSetEvent`,
+  `DebugLevelSetEvent`, `DebugItemGrantedEvent`, `DebugGoldGrantedEvent`,
+  `DebugMonsterSpawnedEvent`, `DebugFeatureSpawnedEvent`, and
+  `DebugMapRevealedEvent`.
+- Save-schema impact: none; debug state uses existing persisted fields and
+  save version 14 remains current. Save/load continues through the explicit
+  DTO/migration boundary.
+- Invariants: state-changing debug commands validate and commit in Core;
+  normal movement, treasure, combat, and death use their existing public
+  resolvers; RNG inspection uses a fresh scoped stream; the tool does not own
+  authoritative state or renderer logic. `set danger` remains transient
+  session configuration because no canonical persisted danger mechanic exists.
+- Acceptance: focused `DeveloperDebugTests` passed (4), full Release tests
+  passed (408), formatter verification passed, and the focused Release build
+  passed with zero warnings and zero errors. The canonical
+  `./eng/verify.ps1 -Mode Full` gate passed on the completed diff.
