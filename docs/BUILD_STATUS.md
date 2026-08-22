@@ -2597,3 +2597,29 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
 - Acceptance: focused TEL-092 tests (3 passed), formatter verification,
   Release build with 0 warnings and 0 errors, the full Release suite (384
   passed), and `./eng/verify.ps1 -Mode Full` all passed.
+
+## TEL-106 verification
+
+- Status: implemented and verified; Legacy character replacement now commits
+  through a renderer-independent simulation command after a recorded Legacy
+  death.
+- Tests added: `LegacyCharacterReplacementTests` covers retained knowledge and
+  Legacy history, reset replacement/expedition state, save round trip,
+  deterministic replay, validation-before-mutation, and post-commit event
+  publication.
+- Files/modules affected: `src/Telengard.Core/Simulation/LegacyCharacterReplacement.cs`,
+  `tests/Telengard.Architecture.Tests/LegacyCharacterReplacementTests.cs`,
+  `docs/tasks/TEL-106.md`, `docs/tasks/README.md`, `docs/BUILD_STATUS.md`, and
+  `CHANGELOG.md`.
+- New public APIs: `ReplaceLegacyCharacterCommand`,
+  `LegacyCharacterReplacedEvent`, and `LegacyCharacterReplacementResolver`.
+- Save-schema impact: none; existing explicit DTOs persist the retained
+  `KnowledgeState` and `LegacyState`, and save version 14 remains current.
+- Invariants: replacement requires Legacy mode, a recorded dead hero, an
+  inactive expedition at the inn, and a fresh valid living character. The
+  simulation preserves persistent knowledge and hidden-information boundaries,
+  resets only the failed character/expedition run state, and publishes the
+  committed event after state assignment.
+- Acceptance: focused tests passed (6), formatter verification passed, Release
+  build passed with 0 warnings and 0 errors, and the canonical
+  `./eng/verify.ps1 -Mode Full` gate passed with 390 Release tests.
