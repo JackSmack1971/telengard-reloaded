@@ -2488,3 +2488,35 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
   the full Release suite passed 364 tests. The final
   `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\eng\verify.ps1
   -Mode Full` gate passed with a process-scoped `core.autocrlf=false` override.
+
+## TEL-104 verification
+
+- Status: implemented and verified; the new-game setup boundary now combines a
+  supplied world seed, game mode, and completed character result into a
+  ready-at-inn authoritative state.
+- Tests added: valid state initialization and committed event, zero-seed
+  support, invalid seed, mode, character, dead-player, non-initial-player,
+  null-attribute, and scalar-state rejection, deterministic replay, explicit
+  save round trip, and entry into the existing generated floor-1 dungeon.
+- Files/modules affected: `src/Telengard.Core/Simulation/NewGameSetup.cs`,
+  `tests/Telengard.Architecture.Tests/NewGameSetupTests.cs`,
+  `docs/tasks/TEL-104.md`, `docs/tasks/README.md`, `CHANGELOG.md`, and this
+  status document.
+- New public APIs: `NewGameSetupRequest`, `NewGameSetupResolver`, and
+  `NewGameCreatedEvent`.
+- Save-schema impact: none; existing explicit DTOs preserve the selected world
+  seed, versions, mode, player, and initialized state; save version 14 remains
+  current.
+- Design choices: the caller must supply a stable `long` seed; nullable input
+  is rejected so zero remains a valid seed, and no seed-generation, calendar,
+  loadout, or balance policy was invented. Setup reuses `GameState.Create` as
+  the canonical initializer and rejects dead or non-initial character results.
+- Invariants: state remains simulation-owned, validation occurs before state
+  creation, the committed event describes the resulting setup, equal inputs
+  replay equally, and no hidden-information, wealth, content, or renderer
+  boundary changes.
+- Acceptance: focused TEL-104 tests (5 passed), formatter verification,
+  Release build with 0 warnings and 0 errors, and the full Release suite (369
+  passed) all passed. The final gate passed with a process-scoped `PATH`
+  fallback to the pinned repository SDK because the isolated worktree did not
+  contain the ignored `.dotnet` directory.
