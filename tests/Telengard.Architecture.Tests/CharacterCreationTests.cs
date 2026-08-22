@@ -205,9 +205,12 @@ public sealed class CharacterCreationTests
             .CreateStream("character-creation", "mode:rolled", $"player:{PlayerId}", "policy:stream-v1");
 
         var expected = new PlayerAttributes(
-            (int)stream.NextLong(3, 19), (int)stream.NextLong(3, 19),
-            (int)stream.NextLong(3, 19), (int)stream.NextLong(3, 19),
-            (int)stream.NextLong(3, 19), (int)stream.NextLong(3, 19));
+            (int)stream.NextLong(3, 19),
+            (int)stream.NextLong(3, 19),
+            (int)stream.NextLong(3, 19),
+            (int)stream.NextLong(3, 19),
+            (int)stream.NextLong(3, 19),
+            (int)stream.NextLong(3, 19));
         Assert.Equal(first.State, second.State);
         Assert.Equal(first.Events, second.Events);
         Assert.Equal(expected, first.State.Player.Attributes);
