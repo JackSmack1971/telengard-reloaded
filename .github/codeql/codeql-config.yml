@@ -1,0 +1,25 @@
+name: "Telengard Reloaded CodeQL configuration"
+
+# Telengard is primarily a local game rather than a network service.
+# Include taint sources such as files, command-line arguments,
+# environment variables, stdin, and databases.
+#
+# This is particularly relevant to save-game deserialization and
+# future terminal / launcher input handling.
+threat-models: local
+
+# Keep the default CodeQL security queries and add the extended suite
+# for broader security coverage on this relatively small codebase.
+queries:
+  - uses: security-extended
+
+# Analyze production C# only.
+#
+# src/Telengard.Godot contains GDScript and Godot assets, which the C#
+# extractor does not analyze. Tests and the test harness are also omitted
+# so alerts remain focused on shipped/runtime code.
+paths:
+  - src/Telengard.Core
+  - src/Telengard.Content
+  - src/Telengard.Save
+  - src/Telengard.Terminal
