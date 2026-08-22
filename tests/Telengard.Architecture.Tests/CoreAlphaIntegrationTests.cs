@@ -54,6 +54,15 @@ public sealed class CoreAlphaIntegrationTests
         Assert.False(state.Expedition.Active);
         Assert.Equal(0, state.Player.CarriedGold);
         Assert.Equal(17, state.SecuredProgress.SecuredGold);
+        Assert.Contains(layout.StairsUp, state.Legacy.PersistentMap.VisitedPositions);
+        Assert.Contains(neighbor, state.Legacy.PersistentMap.VisitedPositions);
+        var unknownWalkable = Enumerable.Range(0, layout.Width)
+            .SelectMany(x => Enumerable.Range(0, layout.Height)
+                .Select(y => new DungeonPosition(layout.Floor, x, y)))
+            .FirstOrDefault(position => layout.IsWalkable(position) &&
+                !state.Legacy.PersistentMap.ObservedPositions.Contains(position));
+        Assert.NotNull(unknownWalkable);
+        Assert.DoesNotContain(unknownWalkable, state.Legacy.PersistentMap.ObservedPositions);
         Assert.Equal(["amulet"], state.Player.Inventory);
         Assert.Equal(1, state.Expedition.MonstersDefeated);
         Assert.Equal(1, state.Dungeon.Features.Single().ActivationCount);
