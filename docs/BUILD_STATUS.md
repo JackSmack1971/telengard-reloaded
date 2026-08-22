@@ -113,8 +113,8 @@ content-expansion ticket. TEL-107 is an integration/evidence task using
 fixtures. Monster appearance and feature/monster journal ownership remain with
 the existing TEL-030/TEL-031 and TEL-051/TEL-054/TEL-055 tickets.
 
-This review changed documentation only. No implementation, build, or test
-verification was run for TEL-100–TEL-108; all new tickets remain Not started.
+This review changed documentation only. TEL-100 was subsequently implemented
+and verified; TEL-101–TEL-108 remain Not started.
 
 ## TEL-040 verification
 
@@ -1109,7 +1109,7 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
   TEL-010–TEL-016, TEL-020–TEL-025, TEL-030–TEL-037, TEL-040–TEL-045,
   TEL-050–TEL-056, TEL-060–TEL-065, TEL-070–TEL-074, TEL-080–TEL-085, and
   TEL-090–TEL-093 series, plus project-local TEL-100–TEL-119 extensions.
-- Open project-local work: TEL-100–TEL-117 remains not started in
+- Open project-local work: TEL-101–TEL-117 remains not started in
   the task ledger; TEL-118 is implemented and verified by the documentation
   reconciliation recorded in its task. Depth ecology, broad content counts,
   and other post-alpha systems remain intentionally outside this extension
@@ -2194,7 +2194,7 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
 
 ## Known technical debt
 
-- The implementation stack is selected in [ADR-001](adr/ADR-001-technology-stack.md), and the documented renderer-independent gameplay slices through Phase 4 are implemented. Character creation, authored Core Alpha content, renderer prototypes, and later persistence/gameplay remain scaffolded or not started.
+- The implementation stack is selected in [ADR-001](adr/ADR-001-technology-stack.md), and the documented renderer-independent gameplay slices through Phase 4 are implemented. Mode-specific character creation, authored Core Alpha content, renderer prototypes, and later persistence/gameplay remain scaffolded or not started; the TEL-100 character-creation boundary is implemented.
 - Gameplay remains incremental: expedition state, the inn boundary, carried
   gold, secured gold, encounters, combat, features, knowledge, items,
   progression, legacy death policies, and presentation-state projection are
