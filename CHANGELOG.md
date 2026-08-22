@@ -16,6 +16,7 @@ All notable changes to this project will be documented in this file.
 - Added an immutable renderer-facing presentation-state adapter that filters undiscovered features and internal monster details
 - Added role-aware coverage reporting and safely scoped mutation-tooling arguments
 - Added the renderer-independent character-creation command boundary for ROLLED, POINT_ALLOCATION, and DAILY_SEED providers
+- Added configurable deterministic rolled character creation through the simulation boundary
 - Added configurable point-allocation character creation with deterministic validation through the simulation boundary
 - Added configurable daily-seed character creation with deterministic, cross-player attribute generation
 - Added renderer-independent initial game setup with deterministic world-seed selection and ready-at-inn state

@@ -2430,6 +2430,15 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
   -Mode Full` passed all stages with a process-scoped
   `core.autocrlf=false` override.
 
+## TEL-101 verification
+
+- Status: implemented and verified; `ROLLED` character creation now generates six bounded attributes through a simulation-owned provider and the existing character-creation command boundary.
+- Tests added: six-attribute/range coverage, named-stream deterministic replay, simulation-version versus generator-version scoping, invalid configuration and provider-boundary rejection, preservation of unrelated player state, committed event/state behavior, and explicit save round-trip coverage.
+- Files/modules affected: `src/Telengard.Core/Simulation/CharacterCreation.cs`, `tests/Telengard.Architecture.Tests/CharacterCreationTests.cs`, `docs/tasks/TEL-101.md`, `docs/tasks/README.md`, `CHANGELOG.md`, and this status document.
+- Save-schema impact: none; `PlayerAttributes` already use the explicit save DTO, save version 14 remains current, and no migration was required.
+- Design choices: rolling is caller-supplied through six immutable inclusive ranges and an explicit policy version; the provider uses the named `character-creation` stream scoped by rolled mode, player identity, and policy version, with simulation version as the RNG compatibility version. No permanent roll formula, reroll limit, anti-reroll rule, or hidden RNG input was added to the product contract.
+- Acceptance: focused TEL-101 tests, formatter verification, Release build, and the full Release suite passed; the final gate is rerun on this merged branch below.
+
 ## TEL-102 verification
 
 - Status: implemented and verified; point-allocation character creation now

@@ -111,7 +111,7 @@ narrow implementation extensions and remain `Not started` until implemented
 and verified.
 
 - [TEL-100.md](TEL-100.md) — Define character creation command boundary — Implemented and verified
-- [TEL-101.md](TEL-101.md) — Implement rolled character creation — Not started
+- [TEL-101.md](TEL-101.md) — Implement rolled character creation — Implemented and verified
 - [TEL-102.md](TEL-102.md) — Implement point-allocation character creation — Implemented and verified
 - [TEL-103.md](TEL-103.md) — Implement daily-seed character creation — Implemented and verified
 - [TEL-104.md](TEL-104.md) — Implement initial player setup and world-seed selection — Implemented and verified

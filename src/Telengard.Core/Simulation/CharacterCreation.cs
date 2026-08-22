@@ -208,6 +208,95 @@ public sealed record CharacterCreationResult
     public PlayerState Player { get; }
 }
 
+public sealed record RolledAttributeRange
+{
+    public RolledAttributeRange(int minimumInclusive, int maximumInclusive)
+    {
+        if (minimumInclusive > maximumInclusive)
+        {
+            throw new ArgumentException("The minimum attribute must not exceed the maximum attribute.");
+        }
+
+        MinimumInclusive = minimumInclusive;
+        MaximumInclusive = maximumInclusive;
+    }
+
+    public int MinimumInclusive { get; }
+    public int MaximumInclusive { get; }
+}
+
+public sealed record RolledCharacterCreationConfiguration
+{
+    private readonly IReadOnlyList<RolledAttributeRange> _attributeRanges;
+
+    public RolledCharacterCreationConfiguration(
+        string policyVersion,
+        IEnumerable<RolledAttributeRange> attributeRanges)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(policyVersion);
+        ArgumentNullException.ThrowIfNull(attributeRanges);
+
+        var ranges = attributeRanges.ToArray();
+        if (ranges.Length != 6)
+        {
+            throw new ArgumentException("Exactly six attribute ranges are required.", nameof(attributeRanges));
+        }
+
+        if (ranges.Any(range => range is null))
+        {
+            throw new ArgumentException("Attribute ranges cannot contain null values.", nameof(attributeRanges));
+        }
+
+        PolicyVersion = policyVersion;
+        _attributeRanges = Array.AsReadOnly(ranges);
+    }
+
+    public string PolicyVersion { get; }
+    public IReadOnlyList<RolledAttributeRange> AttributeRanges => _attributeRanges;
+}
+
+public sealed class RolledCharacterCreationProvider : ICharacterCreationProvider
+{
+    private readonly RolledCharacterCreationConfiguration _configuration;
+
+    public RolledCharacterCreationProvider(RolledCharacterCreationConfiguration configuration)
+    {
+        _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+    }
+
+    public CharacterCreationMode Mode => CharacterCreationMode.Rolled;
+
+    public CharacterCreationResult Create(GameState state, CharacterCreationRequest request)
+    {
+        ArgumentNullException.ThrowIfNull(state);
+        ArgumentNullException.ThrowIfNull(request);
+
+        if (request.Mode != Mode)
+        {
+            throw new InvalidOperationException("The rolled provider requires the rolled creation mode.");
+        }
+
+        var stream = new DeterministicRng(state.WorldSeed, state.Versions.SimulationVersion)
+            .CreateStream(
+                "character-creation",
+                "mode:rolled",
+                $"player:{state.Player.Id}",
+                $"policy:{_configuration.PolicyVersion}");
+        var attributes = new PlayerAttributes(
+            RollAttribute(stream, _configuration.AttributeRanges[0]),
+            RollAttribute(stream, _configuration.AttributeRanges[1]),
+            RollAttribute(stream, _configuration.AttributeRanges[2]),
+            RollAttribute(stream, _configuration.AttributeRanges[3]),
+            RollAttribute(stream, _configuration.AttributeRanges[4]),
+            RollAttribute(stream, _configuration.AttributeRanges[5]));
+
+        return new CharacterCreationResult(state.Player with { Attributes = attributes });
+    }
+
+    private static int RollAttribute(DeterministicRngStream stream, RolledAttributeRange range) =>
+        (int)stream.NextLong(range.MinimumInclusive, (long)range.MaximumInclusive + 1);
+}
+
 public interface ICharacterCreationProvider
 {
     CharacterCreationMode Mode { get; }
