@@ -165,9 +165,9 @@ The audit compares §26 Character Creation, §48 Recommended First Vertical
 Slice, and §51 Definition of Core Alpha with the existing ledger and current
 implementation evidence:
 
-- **Character creation:** no existing ticket owned the common boundary or any
-  of the three required modes; TEL-100–TEL-103 are separate because each mode
-  has different validation and determinism decisions.
+- **Character creation:** TEL-100 owns the common boundary, while TEL-101–TEL-103
+  own the three required modes; each mode has different validation and
+  determinism decisions.
 - **Initial player setup and deterministic world-seed selection:** no existing
   ticket owned selecting/persisting the seed and creating a ready-at-inn game;
   TEL-104 owns that boundary.
