@@ -195,15 +195,20 @@ public sealed class CharacterCreationTests
             new PlayerAttributes(12, 13, 14, 15, 16, finalAttribute));
         var provider = new PointAllocationCharacterCreationProvider(
             new PointAllocationCharacterCreationConfiguration(78, 3, 18));
+        var bus = new DomainEventBus();
+        var published = 0;
+        bus.Subscribe<CharacterCreatedEvent>(_ => published++);
+        var dispatcher = new CommandDispatcher(state, bus);
+        dispatcher.Register<CreateCharacterCommand>((current, command) =>
+            CharacterCreationResolver.Resolve(current, command, provider));
 
-        Assert.Throws<ArgumentException>(() => CharacterCreationResolver.Resolve(
-            state,
+        Assert.Throws<ArgumentException>(() => dispatcher.Dispatch(
             new CreateCharacterCommand(new CharacterCreationRequest(
                 CharacterCreationMode.PointAllocation,
-                input)),
-            provider));
+                input))));
 
-        Assert.Equal(before, SaveGameSerializer.Serialize(state));
+        Assert.Equal(before, SaveGameSerializer.Serialize(dispatcher.CurrentState));
+        Assert.Equal(0, published);
     }
 
     [Fact]

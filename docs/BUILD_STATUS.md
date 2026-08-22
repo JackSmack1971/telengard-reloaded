@@ -1,6 +1,6 @@
 # Modern Telengard build status
 
-Last verified: 2026-08-20
+Last verified: 2026-08-22
 
 This document is append-only verification history, not the current TEL-ticket
 status ledger. Use [the task ledger](tasks/README.md) for current TEL status.
