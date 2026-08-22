@@ -2529,3 +2529,39 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
   passed) all passed. The final gate passed with a process-scoped `PATH`
   fallback to the pinned repository SDK because the isolated worktree did not
   contain the ignored `.dotnet` directory.
+
+## TEL-105 verification
+
+- Status: implemented and verified; active expeditions can now acquire
+  content-resolved gold and item identifiers as unsecured treasure through a
+  validated simulation command, and the existing return boundary secures item
+  identifiers into player inventory.
+- Tests added: `TreasureAcquisitionTests` covers gold and item acquisition,
+  item-only treasure, committed opaque event summaries, invalid expedition and
+  dead-player/overflow boundaries, deterministic replay, save and
+  suspend/resume round trips, return-to-inn securing, and weighted content loot
+  selection.
+- Files/modules affected: `src/Telengard.Core/economy/TreasureAcquisition.cs`,
+  `src/Telengard.Core/world/generation/DungeonWalking.cs`,
+  `src/Telengard.Content/Items/LootTable.cs`,
+  `tests/Telengard.Architecture.Tests/TreasureAcquisitionTests.cs`,
+  `docs/tasks/TEL-105.md`, `docs/tasks/README.md`, `CHANGELOG.md`, and this
+  status document.
+- New public APIs: `AcquireTreasureCommand`, `TreasureAcquiredEvent`,
+  `TreasureItemsSecuredEvent`, `TreasureAcquisitionResolver`, `LootTable`,
+  `LootTableEntry`, and `LootTableEngine`.
+- Save-schema impact: none; `ExpeditionState.AcquiredItems` and carried gold
+  already use the explicit expedition DTO, so save version 14 and existing
+  migrations remain unchanged.
+- Design choices: this slice consumes content-resolved item identifiers and
+  does not add production loot files, item-instance inventory ownership, drop
+  rates, rarity formulas, or balance policy. `LootTableEngine` performs only
+  configured weighted selection using a named scoped deterministic stream;
+  authored first-slice tables remain TEL-114.
+- Invariants: acquisition requires a live active dungeon expedition, validates
+  mirrored carried gold before mutation, never writes secured gold directly,
+  and emits only gold/count facts rather than item definitions. Return moves
+  acquired items into secured player inventory before completing the expedition.
+  Content selection remains separate from Core state mutation and presentation.
+- Acceptance: focused TEL-105 tests (8 passed) and formatter verification
+  passed; the canonical full verification gate passed on the final diff.

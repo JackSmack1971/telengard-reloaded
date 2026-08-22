@@ -1,3 +1,4 @@
+using Telengard.Core.Economy;
 using Telengard.Core.Combat;
 using Telengard.Core.Simulation;
 using Telengard.Core.World.Visibility;
@@ -122,25 +123,35 @@ public static class DungeonWalkingResolver
             throw new OverflowException("Secured gold exceeds the supported range.");
 
         var securedGold = state.SecuredProgress.SecuredGold + state.Player.CarriedGold;
+        var acquiredItems = state.Expedition.AcquiredItems;
         var next = state with
         {
             Inn = state.Inn with { IsAtInn = true },
-            Player = state.Player with { CarriedGold = 0 },
-            Expedition = state.Expedition with { CarriedGold = 0, Active = false },
+            Player = state.Player with
+            {
+                CarriedGold = 0,
+                Inventory = state.Player.Inventory.Concat(acquiredItems).ToArray()
+            },
+            Expedition = state.Expedition with
+            {
+                CarriedGold = 0,
+                AcquiredItems = [],
+                Active = false
+            },
             SecuredProgress = state.SecuredProgress with { SecuredGold = securedGold }
         };
-        var events = state.Player.CarriedGold > 0
-            ? new IDomainEvent[]
-            {
-                new DungeonLeftEvent(state.Player.Position),
-                new GoldSecuredEvent(state.Player.CarriedGold, securedGold),
-                new ExpeditionSucceededEvent(state.Expedition.ExpeditionId, state.Expedition.DeepestFloorReached)
-            }
-            :
-            [
-                new DungeonLeftEvent(state.Player.Position),
-                new ExpeditionSucceededEvent(state.Expedition.ExpeditionId, state.Expedition.DeepestFloorReached)
-            ];
+        var events = new List<IDomainEvent> { new DungeonLeftEvent(state.Player.Position) };
+        if (state.Player.CarriedGold > 0)
+        {
+            events.Add(new GoldSecuredEvent(state.Player.CarriedGold, securedGold));
+        }
+
+        if (acquiredItems.Count > 0)
+        {
+            events.Add(new TreasureItemsSecuredEvent(acquiredItems.Count));
+        }
+
+        events.Add(new ExpeditionSucceededEvent(state.Expedition.ExpeditionId, state.Expedition.DeepestFloorReached));
         return new CommandResult(next, events);
     }
 
