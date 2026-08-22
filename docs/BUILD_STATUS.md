@@ -1,6 +1,6 @@
 # Modern Telengard build status
 
-Last verified: 2026-08-20
+Last verified: 2026-08-22
 
 This document is append-only verification history, not the current TEL-ticket
 status ledger. Use [the task ledger](tasks/README.md) for current TEL status.
@@ -2432,40 +2432,100 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
 
 ## TEL-101 verification
 
-- Status: implemented and verified; `ROLLED` character creation now generates
-  six bounded attributes through a simulation-owned provider and the existing
-  character-creation command boundary.
-- Tests added: six-attribute/range coverage, named-stream deterministic replay,
-  distinctive configured ranges, simulation-version versus generator-version
-  scoping, invalid configuration and provider-boundary rejection, preservation
-  of unrelated player state, committed event/state behavior, and explicit save
-  round-trip coverage.
+- Status: implemented and verified; `ROLLED` character creation now generates six bounded attributes through a simulation-owned provider and the existing character-creation command boundary.
+- Tests added: six-attribute/range coverage, named-stream deterministic replay, simulation-version versus generator-version scoping, invalid configuration and provider-boundary rejection, preservation of unrelated player state, committed event/state behavior, and explicit save round-trip coverage.
+- Files/modules affected: `src/Telengard.Core/Simulation/CharacterCreation.cs`, `tests/Telengard.Architecture.Tests/CharacterCreationTests.cs`, `docs/tasks/TEL-101.md`, `docs/tasks/README.md`, `CHANGELOG.md`, and this status document.
+- Save-schema impact: none; `PlayerAttributes` already use the explicit save DTO, save version 14 remains current, and no migration was required.
+- Design choices: rolling is caller-supplied through six immutable inclusive ranges and an explicit policy version; the provider uses the named `character-creation` stream scoped by rolled mode, player identity, and policy version, with simulation version as the RNG compatibility version. No permanent roll formula, reroll limit, anti-reroll rule, or hidden RNG input was added to the product contract.
+- Acceptance: focused TEL-101 tests, formatter verification, Release build, and the full Release suite passed; the final gate is rerun on this merged branch below.
+
+## TEL-102 verification
+
+- Status: implemented and verified; point-allocation character creation now
+  validates a configured six-attribute budget and inclusive bounds through
+  the TEL-100 simulation boundary.
+- Tests added: exact-budget commit with event and save round trip, under/over
+  budget rejection before mutation, bounds and malformed-input rejection,
+  dispatcher no-event rejection, and equal-input replay.
 - Files/modules affected: `src/Telengard.Core/Simulation/CharacterCreation.cs`,
   `tests/Telengard.Architecture.Tests/CharacterCreationTests.cs`,
-  `docs/tasks/TEL-101.md`, `docs/tasks/README.md`, `CHANGELOG.md`, and this
+  `docs/tasks/TEL-102.md`, `docs/tasks/README.md`, `CHANGELOG.md`, and this
   status document.
-- New public APIs: additive `RolledAttributeRange`,
-  `RolledCharacterCreationConfiguration`, and
-  `RolledCharacterCreationProvider`; existing command and event contracts are
-  unchanged.
-- New events: none; `CharacterCreatedEvent` remains limited to committed player
-  identity and selected mode.
-- Save-schema impact: none; `PlayerAttributes` already use the explicit save
-  DTO, save version 14 remains current, and no migration was required.
-- Design choices: rolling is caller-supplied through six immutable inclusive
-  ranges and an explicit policy version; the provider uses the named
-  `character-creation` stream scoped by rolled mode, player identity, and
-  policy version, with simulation version as the RNG compatibility version.
-  No permanent roll formula, reroll limit, anti-reroll rule, or hidden RNG
-  input was added to the product contract.
-- Known follow-up work: TEL-102 and TEL-103 remain not started; starting
-  loadout, balance, and anti-reroll policy remain out of scope.
-- Invariants: state remains simulation-owned, configuration failures occur
-  before the resolver commits a new state/event, equal seed/version/state/
-  configuration inputs replay identically, and no renderer, knowledge, wealth,
-  or hidden-information boundary changed.
-- Acceptance: focused TEL-101 tests (14 passed), determinism scan (fast and
-  full with no pattern hits), formatter verification, Release build with 0
-  warnings, and the full Release suite (356 passed) all passed. The final gate
-  passed with a process-scoped PowerShell execution-policy bypass because the
-  repository wrapper is unsigned.
+- New public APIs: `PointAllocationCharacterCreationInput`,
+  `PointAllocationCharacterCreationConfiguration`, and
+  `PointAllocationCharacterCreationProvider`.
+- New events: none; the existing `CharacterCreatedEvent` remains the
+  committed boundary event with its stable minimal payload.
+- Save-schema impact: none; player attributes continue to use the existing
+  explicit DTO and save version 14 remains current.
+- Design choices: the configured budget is the sum of the six supplied
+  allocation values; no permanent budget, cost curve, derived-stat formula,
+  renderer behavior, or other tuning policy was added.
+- Known follow-up work: TEL-103 remains not started; daily-seed creation,
+  starting loadout, and balance policy remain outside this slice.
+- Acceptance: focused character-creation tests passed (19), formatter
+  verification passed, and `./eng/verify.ps1 -Mode Full` passed with 361
+  Release tests, zero build warnings, and zero errors.
+
+## TEL-103 verification
+
+- Status: implemented and verified; daily-seed character creation now derives
+  six bounded attributes from a stable caller-supplied token through the
+  renderer-independent simulation boundary.
+- Tests added: cross-player replay independent of world seed and player ID,
+  different-seed divergence, bounds and malformed-input rejection,
+  validation-before-mutation, committed event behavior, and save round trip.
+- Files/modules affected: `src/Telengard.Core/Simulation/CharacterCreation.cs`,
+  `tests/Telengard.Architecture.Tests/CharacterCreationTests.cs`,
+  `docs/tasks/TEL-103.md`, `docs/tasks/README.md`, `CHANGELOG.md`, and this
+  status document.
+- New public APIs: `DailySeedCharacterCreationInput`,
+  `DailySeedCharacterCreationConfiguration`, and
+  `DailySeedCharacterCreationProvider`.
+- New events: none; the existing `CharacterCreatedEvent` remains the
+  committed boundary event with its stable minimal payload.
+- Save-schema impact: none; generated attributes use the existing explicit
+  player DTO and save version 14 remains current.
+- Design choices: the explicit policy version is the RNG compatibility
+  version, and daily-seed streams use a fixed world-seed-independent input so
+  the same token produces equal results for all players. Calendar, timezone,
+  reset-time, and anti-reroll policies remain deferred.
+- Known follow-up work: TEL-101 remains not started on the remote baseline;
+  TEL-104 and later Core Alpha setup/content work remain outside this slice.
+- Acceptance: focused character-creation tests passed (22), formatter
+  verification passed, Release build passed with 0 warnings and 0 errors, and
+  the full Release suite passed 364 tests. The final
+  `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\eng\verify.ps1
+  -Mode Full` gate passed with a process-scoped `core.autocrlf=false` override.
+
+## TEL-104 verification
+
+- Status: implemented and verified; the new-game setup boundary now combines a
+  supplied world seed, game mode, and completed character result into a
+  ready-at-inn authoritative state.
+- Tests added: valid state initialization and committed event, zero-seed
+  support, invalid seed, mode, character, dead-player, non-initial-player,
+  null-attribute, and scalar-state rejection, deterministic replay, explicit
+  save round trip, and entry into the existing generated floor-1 dungeon.
+- Files/modules affected: `src/Telengard.Core/Simulation/NewGameSetup.cs`,
+  `tests/Telengard.Architecture.Tests/NewGameSetupTests.cs`,
+  `docs/tasks/TEL-104.md`, `docs/tasks/README.md`, `CHANGELOG.md`, and this
+  status document.
+- New public APIs: `NewGameSetupRequest`, `NewGameSetupResolver`, and
+  `NewGameCreatedEvent`.
+- Save-schema impact: none; existing explicit DTOs preserve the selected world
+  seed, versions, mode, player, and initialized state; save version 14 remains
+  current.
+- Design choices: the caller must supply a stable `long` seed; nullable input
+  is rejected so zero remains a valid seed, and no seed-generation, calendar,
+  loadout, or balance policy was invented. Setup reuses `GameState.Create` as
+  the canonical initializer and rejects dead or non-initial character results.
+- Invariants: state remains simulation-owned, validation occurs before state
+  creation, the committed event describes the resulting setup, equal inputs
+  replay equally, and no hidden-information, wealth, content, or renderer
+  boundary changes.
+- Acceptance: focused TEL-104 tests (5 passed), formatter verification,
+  Release build with 0 warnings and 0 errors, and the full Release suite (369
+  passed) all passed. The final gate passed with a process-scoped `PATH`
+  fallback to the pinned repository SDK because the isolated worktree did not
+  contain the ignored `.dotnet` directory.

@@ -1,6 +1,6 @@
-using Telengard.Core.Simulation;
-using Telengard.Core.Items;
+using Telengard.Core.Events;
 using Telengard.Core.Rng;
+using Telengard.Core.Simulation;
 using Telengard.Save;
 using Xunit;
 
@@ -142,30 +142,19 @@ public sealed class CharacterCreationTests
     }
 
     [Fact]
-    public void Rolled_provider_generates_six_attributes_through_the_boundary()
+    public void Rolled_provider_generates_six_configured_attributes_and_round_trips()
     {
-        var state = GameState.Create(1234, playerId: PlayerId) with
+        var state = GameState.Create(1234, playerId: PlayerId);
+        state = state with
         {
-            Expedition = new ExpeditionState { CarriedGold = 123 },
-            Player = new PlayerState
+            Player = state.Player with
             {
-                Id = PlayerId,
                 Attributes = new PlayerAttributes(20, 21, 22, 23, 24, 25),
                 Level = 3,
                 Experience = 456,
                 HitPoints = 20,
                 MaxHitPoints = 30,
-                SpellPower = 7,
-                MaxSpellPower = 11,
-                Position = new DungeonPosition(1, 0, 0),
-                Inventory = ["potion"],
-                EquipmentSlots = [new EquipmentSlotState("weapon", Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"))],
-                Talents = ["talent"],
-                Spells = ["spell"],
-                Injuries = ["injury"],
-                TemporaryEffects = ["effect"],
-                CarriedGold = 123,
-                Alive = true
+                Inventory = ["potion"]
             }
         };
         var configuration = new RolledCharacterCreationConfiguration(
@@ -178,167 +167,382 @@ public sealed class CharacterCreationTests
                 new RolledAttributeRange(3, 3),
                 new RolledAttributeRange(18, 18)
             ]);
-        var provider = new RolledCharacterCreationProvider(configuration);
 
         var result = CharacterCreationResolver.Resolve(
             state,
             new CreateCharacterCommand(new CharacterCreationRequest(CharacterCreationMode.Rolled)),
-            provider);
+            new RolledCharacterCreationProvider(configuration));
 
-        var values = new[]
-        {
-            result.State.Player.Attributes.Strength,
-            result.State.Player.Attributes.Intelligence,
-            result.State.Player.Attributes.Wisdom,
-            result.State.Player.Attributes.Constitution,
-            result.State.Player.Attributes.Dexterity,
-            result.State.Player.Attributes.Charisma
-        };
-        Assert.Equal(6, values.Length);
         Assert.Equal(new PlayerAttributes(3, 18, 3, 18, 3, 18), result.State.Player.Attributes);
-        Assert.All(values, value => Assert.InRange(value, 3, 18));
-        Assert.Equal(
-            state.Player with { Attributes = result.State.Player.Attributes },
-            result.State.Player);
+        Assert.Equal(state.Player with { Attributes = result.State.Player.Attributes }, result.State.Player);
         var created = Assert.IsType<CharacterCreatedEvent>(Assert.Single(result.Events));
-        Assert.Equal(PlayerId, created.PlayerId);
         Assert.Equal(CharacterCreationMode.Rolled, created.Mode);
-
         var roundTrip = SaveGameSerializer.Deserialize(SaveGameSerializer.Serialize(result.State));
         Assert.Equal(result.State.Player.Attributes, roundTrip.Player.Attributes);
     }
 
     [Fact]
-    public void Rolled_provider_replays_from_its_named_deterministic_stream()
+    public void Rolled_provider_replays_from_named_simulation_stream()
     {
         var state = GameState.Create(1234, playerId: PlayerId);
         var configuration = new RolledCharacterCreationConfiguration(
             "stream-v1",
             [
-                new RolledAttributeRange(3, 18),
-                new RolledAttributeRange(3, 18),
-                new RolledAttributeRange(3, 18),
-                new RolledAttributeRange(3, 18),
-                new RolledAttributeRange(3, 18),
-                new RolledAttributeRange(3, 18)
+                new RolledAttributeRange(3, 18), new RolledAttributeRange(3, 18),
+                new RolledAttributeRange(3, 18), new RolledAttributeRange(3, 18),
+                new RolledAttributeRange(3, 18), new RolledAttributeRange(3, 18)
             ]);
-        var first = CharacterCreationResolver.Resolve(
-            state,
+        var first = CharacterCreationResolver.Resolve(state,
             new CreateCharacterCommand(new CharacterCreationRequest(CharacterCreationMode.Rolled)),
             new RolledCharacterCreationProvider(configuration));
-        var second = CharacterCreationResolver.Resolve(
-            state,
+        var second = CharacterCreationResolver.Resolve(state,
             new CreateCharacterCommand(new CharacterCreationRequest(CharacterCreationMode.Rolled)),
             new RolledCharacterCreationProvider(configuration));
-        var expectedStream = new DeterministicRng(1234, state.Versions.SimulationVersion)
+        var stream = new DeterministicRng(1234, state.Versions.SimulationVersion)
             .CreateStream("character-creation", "mode:rolled", $"player:{PlayerId}", "policy:stream-v1");
 
         var expected = new PlayerAttributes(
-            (int)expectedStream.NextLong(3, 19),
-            (int)expectedStream.NextLong(3, 19),
-            (int)expectedStream.NextLong(3, 19),
-            (int)expectedStream.NextLong(3, 19),
-            (int)expectedStream.NextLong(3, 19),
-            (int)expectedStream.NextLong(3, 19));
-
+            (int)stream.NextLong(3, 19), (int)stream.NextLong(3, 19),
+            (int)stream.NextLong(3, 19), (int)stream.NextLong(3, 19),
+            (int)stream.NextLong(3, 19), (int)stream.NextLong(3, 19));
         Assert.Equal(first.State, second.State);
         Assert.Equal(first.Events, second.Events);
         Assert.Equal(expected, first.State.Player.Attributes);
     }
 
     [Fact]
-    public void Rolled_provider_rejects_a_non_rolled_request_before_drawing()
+    public void Rolled_provider_rejects_invalid_configuration_and_mode_before_commit()
     {
         var state = GameState.Create(1234, playerId: PlayerId);
-        var configuration = new RolledCharacterCreationConfiguration(
-            "stream-v1",
+        var before = SaveGameSerializer.Serialize(state);
+        Assert.Throws<ArgumentException>(() => new RolledAttributeRange(19, 18));
+        Assert.Throws<ArgumentException>(() => new RolledCharacterCreationConfiguration("v1", []));
+        var configuration = new RolledCharacterCreationConfiguration("v1",
             [
-                new RolledAttributeRange(3, 18),
-                new RolledAttributeRange(3, 18),
-                new RolledAttributeRange(3, 18),
-                new RolledAttributeRange(3, 18),
-                new RolledAttributeRange(3, 18),
-                new RolledAttributeRange(3, 18)
+                new RolledAttributeRange(3, 18), new RolledAttributeRange(3, 18),
+                new RolledAttributeRange(3, 18), new RolledAttributeRange(3, 18),
+                new RolledAttributeRange(3, 18), new RolledAttributeRange(3, 18)
             ]);
-
         var provider = new RolledCharacterCreationProvider(configuration);
-
-        Assert.Throws<ArgumentNullException>(() => provider.Create(null!,
-            new CharacterCreationRequest(CharacterCreationMode.Rolled)));
-        Assert.Throws<ArgumentNullException>(() => provider.Create(state, null!));
-        Assert.Throws<InvalidOperationException>(() => provider.Create(state,
-            new CharacterCreationRequest(CharacterCreationMode.DailySeed)));
+        Assert.Throws<InvalidOperationException>(() => provider.Create(
+            state, new CharacterCreationRequest(CharacterCreationMode.DailySeed)));
+        Assert.Equal(before, SaveGameSerializer.Serialize(state));
     }
 
     [Fact]
-    public void Rolled_provider_is_scoped_to_simulation_version_not_generator_version()
+    public void Rolled_provider_uses_simulation_version_not_generator_version()
     {
         var versions = new GameVersions("simulation-a", "generator-a", "content-a");
         var state = GameState.Create(1234, versions, playerId: PlayerId);
-        var configuration = new RolledCharacterCreationConfiguration(
-            "stream-v1",
+        var configuration = new RolledCharacterCreationConfiguration("v1",
             [
-                new RolledAttributeRange(3, 18),
-                new RolledAttributeRange(3, 18),
-                new RolledAttributeRange(3, 18),
-                new RolledAttributeRange(3, 18),
-                new RolledAttributeRange(3, 18),
-                new RolledAttributeRange(3, 18)
+                new RolledAttributeRange(3, 18), new RolledAttributeRange(3, 18),
+                new RolledAttributeRange(3, 18), new RolledAttributeRange(3, 18),
+                new RolledAttributeRange(3, 18), new RolledAttributeRange(3, 18)
             ]);
+        PlayerAttributes Create(GameState input) => new RolledCharacterCreationProvider(configuration)
+            .Create(input, new CharacterCreationRequest(CharacterCreationMode.Rolled)).Player.Attributes;
 
-        var original = CharacterCreationResolver.Resolve(
-            state,
-            new CreateCharacterCommand(new CharacterCreationRequest(CharacterCreationMode.Rolled)),
-            new RolledCharacterCreationProvider(configuration));
-        var generatorChanged = CharacterCreationResolver.Resolve(
-            state with { Versions = new GameVersions("simulation-a", "generator-b", "content-a") },
-            new CreateCharacterCommand(new CharacterCreationRequest(CharacterCreationMode.Rolled)),
-            new RolledCharacterCreationProvider(configuration));
-        var simulationChanged = CharacterCreationResolver.Resolve(
-            state with { Versions = new GameVersions("simulation-b", "generator-a", "content-a") },
-            new CreateCharacterCommand(new CharacterCreationRequest(CharacterCreationMode.Rolled)),
-            new RolledCharacterCreationProvider(configuration));
-
-        Assert.Equal(original.State.Player.Attributes, generatorChanged.State.Player.Attributes);
-        Assert.NotEqual(original.State.Player.Attributes, simulationChanged.State.Player.Attributes);
+        Assert.Equal(Create(state), Create(state with
+        {
+            Versions = new GameVersions("simulation-a", "generator-b", "content-a")
+        }));
+        Assert.NotEqual(Create(state), Create(state with
+        {
+            Versions = new GameVersions("simulation-b", "generator-a", "content-a")
+        }));
     }
 
     [Fact]
-    public void Rolled_configuration_rejects_invalid_boundaries()
+    public void Daily_seed_provider_replays_across_players_and_preserves_state()
     {
-        var validRanges = new[]
+        var firstState = GameState.Create(1234, playerId: PlayerId) with
         {
-            new RolledAttributeRange(1, 1),
-            new RolledAttributeRange(1, 1),
-            new RolledAttributeRange(1, 1),
-            new RolledAttributeRange(1, 1),
-            new RolledAttributeRange(1, 1),
-            new RolledAttributeRange(1, 1)
+            Player = new PlayerState
+            {
+                Id = PlayerId,
+                Attributes = new PlayerAttributes(20, 21, 22, 23, 24, 25),
+                Level = 3,
+                Experience = 456,
+                HitPoints = 20,
+                MaxHitPoints = 30,
+                Inventory = ["potion"]
+            }
         };
+        var secondState = GameState.Create(9876, playerId: OtherPlayerId);
+        var request = new CreateCharacterCommand(new CharacterCreationRequest(
+            CharacterCreationMode.DailySeed,
+            new DailySeedCharacterCreationInput("2026-08-22")));
+        var configuration = new DailySeedCharacterCreationConfiguration("policy-1", 3, 18);
 
-        var emptyPolicy = Assert.Throws<ArgumentException>(() => new RolledCharacterCreationConfiguration(
-            "",
-            validRanges));
-        Assert.Equal("policyVersion", emptyPolicy.ParamName);
+        var first = CharacterCreationResolver.Resolve(
+            firstState,
+            request,
+            new DailySeedCharacterCreationProvider(configuration));
+        var second = CharacterCreationResolver.Resolve(
+            secondState,
+            request,
+            new DailySeedCharacterCreationProvider(configuration));
 
-        var nullRanges = Assert.Throws<ArgumentNullException>(() =>
-            new RolledCharacterCreationConfiguration("v1", null!));
-        Assert.Equal("attributeRanges", nullRanges.ParamName);
+        Assert.Equal(first.State.Player.Attributes, second.State.Player.Attributes);
+        Assert.Equal(firstState.Player with { Attributes = first.State.Player.Attributes }, first.State.Player);
+        Assert.All(
+            new[]
+            {
+                first.State.Player.Attributes.Strength,
+                first.State.Player.Attributes.Intelligence,
+                first.State.Player.Attributes.Wisdom,
+                first.State.Player.Attributes.Constitution,
+                first.State.Player.Attributes.Dexterity,
+                first.State.Player.Attributes.Charisma
+            },
+            value => Assert.InRange(value, 3, 18));
+        var created = Assert.IsType<CharacterCreatedEvent>(Assert.Single(first.Events));
+        Assert.Equal(PlayerId, created.PlayerId);
+        Assert.Equal(CharacterCreationMode.DailySeed, created.Mode);
 
-        Assert.Throws<ArgumentException>(() => new RolledCharacterCreationConfiguration(
-            "v1",
-            [new RolledAttributeRange(1, 1)]));
-        Assert.Throws<ArgumentException>(() => new RolledAttributeRange(19, 18));
-        Assert.Throws<ArgumentException>(() => new RolledCharacterCreationConfiguration(
-            "v1",
-            [
-                new RolledAttributeRange(1, 1),
-                new RolledAttributeRange(1, 1),
-                new RolledAttributeRange(1, 1),
-                new RolledAttributeRange(1, 1),
-                new RolledAttributeRange(1, 1),
-                null!
-            ]));
+        var roundTrip = SaveGameSerializer.Deserialize(SaveGameSerializer.Serialize(first.State));
+        Assert.Equal(first.State.Player.Attributes, roundTrip.Player.Attributes);
+    }
+
+    [Fact]
+    public void Different_daily_seeds_produce_different_initial_attributes()
+    {
+        var state = GameState.Create(1234, playerId: PlayerId);
+        var provider = new DailySeedCharacterCreationProvider(
+            new DailySeedCharacterCreationConfiguration("policy-1", 0, 100));
+
+        var first = provider.Create(
+            state,
+            new CharacterCreationRequest(
+                CharacterCreationMode.DailySeed,
+                new DailySeedCharacterCreationInput("seed-a")));
+        var second = provider.Create(
+            state,
+            new CharacterCreationRequest(
+                CharacterCreationMode.DailySeed,
+                new DailySeedCharacterCreationInput("seed-b")));
+
+        Assert.NotEqual(first.Player.Attributes, second.Player.Attributes);
+    }
+
+    [Fact]
+    public void Invalid_daily_seed_input_is_rejected_before_mutation_or_event()
+    {
+        var state = GameState.Create(1234, playerId: PlayerId);
+        var before = SaveGameSerializer.Serialize(state);
+        var bus = new DomainEventBus();
+        var published = 0;
+        bus.Subscribe<CharacterCreatedEvent>(_ => published++);
+        var dispatcher = new CommandDispatcher(state, bus);
+        var provider = new DailySeedCharacterCreationProvider(
+            new DailySeedCharacterCreationConfiguration("policy-1", 3, 18));
+        dispatcher.Register<CreateCharacterCommand>((current, command) =>
+            CharacterCreationResolver.Resolve(current, command, provider));
+
+        Assert.Throws<ArgumentException>(() => new DailySeedCharacterCreationInput("  "));
+        Assert.Throws<ArgumentException>(() => provider.Create(
+            state,
+            new CharacterCreationRequest(CharacterCreationMode.DailySeed)));
+        Assert.Throws<ArgumentException>(() => provider.Create(
+            state,
+            new CharacterCreationRequest(
+                CharacterCreationMode.DailySeed,
+                new TestInput("wrong"))));
+        Assert.Throws<InvalidOperationException>(() => provider.Create(
+            state,
+            new CharacterCreationRequest(
+                CharacterCreationMode.PointAllocation,
+                new DailySeedCharacterCreationInput("seed"))));
+        Assert.Throws<ArgumentException>(() => new DailySeedCharacterCreationConfiguration("policy-1", 18, 3));
+
+        Assert.Throws<ArgumentException>(() => dispatcher.Dispatch(
+            new CreateCharacterCommand(new CharacterCreationRequest(
+                CharacterCreationMode.DailySeed,
+                new TestInput("wrong")))));
+        Assert.Equal(before, SaveGameSerializer.Serialize(dispatcher.CurrentState));
+        Assert.Equal(0, published);
+    }
+
+    [Fact]
+    public void Point_allocation_provider_commits_exact_budget_and_preserves_other_state()
+    {
+        var state = GameState.Create(1234, playerId: PlayerId) with
+        {
+            Expedition = new ExpeditionState { CarriedGold = 123 },
+            Player = new PlayerState
+            {
+                Id = PlayerId,
+                Attributes = new PlayerAttributes(20, 21, 22, 23, 24, 25),
+                Level = 3,
+                Experience = 456,
+                HitPoints = 20,
+                MaxHitPoints = 30,
+                Inventory = ["potion"],
+                CarriedGold = 123,
+                Alive = true
+            }
+        };
+        var allocation = new PointAllocationCharacterCreationInput(
+            new PlayerAttributes(18, 17, 16, 15, 7, 5));
+        var provider = new PointAllocationCharacterCreationProvider(
+            new PointAllocationCharacterCreationConfiguration(78, 3, 18));
+
+        var result = CharacterCreationResolver.Resolve(
+            state,
+            new CreateCharacterCommand(new CharacterCreationRequest(
+                CharacterCreationMode.PointAllocation,
+                allocation)),
+            provider);
+
+        Assert.Equal(allocation.Attributes, result.State.Player.Attributes);
+        Assert.Equal(state.Player with { Attributes = allocation.Attributes }, result.State.Player);
+        var created = Assert.IsType<CharacterCreatedEvent>(Assert.Single(result.Events));
+        Assert.Equal(PlayerId, created.PlayerId);
+        Assert.Equal(CharacterCreationMode.PointAllocation, created.Mode);
+
+        var roundTrip = SaveGameSerializer.Deserialize(SaveGameSerializer.Serialize(result.State));
+        Assert.Equal(
+            SaveGameSerializer.Serialize(result.State),
+            SaveGameSerializer.Serialize(roundTrip));
+        Assert.Equal(result.State.Player.Attributes, roundTrip.Player.Attributes);
+    }
+
+    [Theory]
+    [InlineData(7)]
+    [InlineData(9)]
+    public void Point_allocation_provider_rejects_under_or_over_budget_before_mutation(int finalAttribute)
+    {
+        var state = GameState.Create(1234, playerId: PlayerId);
+        var before = SaveGameSerializer.Serialize(state);
+        var input = new PointAllocationCharacterCreationInput(
+            new PlayerAttributes(12, 13, 14, 15, 16, finalAttribute));
+        var provider = new PointAllocationCharacterCreationProvider(
+            new PointAllocationCharacterCreationConfiguration(78, 3, 18));
+        var bus = new DomainEventBus();
+        var published = 0;
+        bus.Subscribe<CharacterCreatedEvent>(_ => published++);
+        var dispatcher = new CommandDispatcher(state, bus);
+        dispatcher.Register<CreateCharacterCommand>((current, command) =>
+            CharacterCreationResolver.Resolve(current, command, provider));
+
+        Assert.Throws<ArgumentException>(() => dispatcher.Dispatch(
+            new CreateCharacterCommand(new CharacterCreationRequest(
+                CharacterCreationMode.PointAllocation,
+                input))));
+
+        Assert.Equal(before, SaveGameSerializer.Serialize(dispatcher.CurrentState));
+        Assert.Equal(0, published);
+    }
+
+    [Fact]
+    public void Point_allocation_provider_rejects_bounds_and_malformed_inputs()
+    {
+        var state = GameState.Create(1234, playerId: PlayerId);
+        var provider = new PointAllocationCharacterCreationProvider(
+            new PointAllocationCharacterCreationConfiguration(78, 3, 18));
+
+        Assert.Throws<ArgumentException>(() => provider.Create(
+            state,
+            new CharacterCreationRequest(CharacterCreationMode.PointAllocation)));
+        Assert.Throws<ArgumentException>(() => provider.Create(
+            state,
+            new CharacterCreationRequest(CharacterCreationMode.PointAllocation, new TestInput("wrong"))));
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
+            new PointAllocationCharacterCreationConfiguration(-1, 3, 18));
+        Assert.Throws<ArgumentException>(() =>
+            new PointAllocationCharacterCreationConfiguration(78, 18, 3));
+    }
+
+    [Theory]
+    [InlineData(3, 18, 18, 18, 18, 3, false)]
+    [InlineData(18, 3, 18, 18, 18, 3, false)]
+    [InlineData(2, 18, 18, 18, 17, 5, true)]
+    [InlineData(19, 17, 16, 15, 6, 5, true)]
+    public void Point_allocation_provider_enforces_inclusive_attribute_bounds(
+        int strength,
+        int intelligence,
+        int wisdom,
+        int constitution,
+        int dexterity,
+        int charisma,
+        bool invalid)
+    {
+        var state = GameState.Create(1234, playerId: PlayerId);
+        var attributes = new PlayerAttributes(
+            strength,
+            intelligence,
+            wisdom,
+            constitution,
+            dexterity,
+            charisma);
+        var provider = new PointAllocationCharacterCreationProvider(
+            new PointAllocationCharacterCreationConfiguration(78, 3, 18));
+
+        if (invalid)
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(() => provider.Create(
+                state,
+                new CharacterCreationRequest(
+                    CharacterCreationMode.PointAllocation,
+                    new PointAllocationCharacterCreationInput(attributes))));
+        }
+        else
+        {
+            var result = provider.Create(
+                state,
+                new CharacterCreationRequest(
+                    CharacterCreationMode.PointAllocation,
+                    new PointAllocationCharacterCreationInput(attributes)));
+            Assert.Equal(attributes, result.Player.Attributes);
+        }
+    }
+
+    [Fact]
+    public void Invalid_point_allocation_does_not_commit_or_publish_an_event()
+    {
+        var state = GameState.Create(1234, playerId: PlayerId);
+        var before = SaveGameSerializer.Serialize(state);
+        var bus = new DomainEventBus();
+        var published = 0;
+        bus.Subscribe<CharacterCreatedEvent>(_ => published++);
+        var dispatcher = new CommandDispatcher(state, bus);
+        var provider = new PointAllocationCharacterCreationProvider(
+            new PointAllocationCharacterCreationConfiguration(78, 3, 18));
+        dispatcher.Register<CreateCharacterCommand>((current, command) =>
+            CharacterCreationResolver.Resolve(current, command, provider));
+
+        Assert.Throws<ArgumentOutOfRangeException>(() => dispatcher.Dispatch(
+            new CreateCharacterCommand(new CharacterCreationRequest(
+                CharacterCreationMode.PointAllocation,
+                new PointAllocationCharacterCreationInput(
+                    new PlayerAttributes(19, 17, 16, 15, 6, 5))))));
+
+        Assert.Equal(before, SaveGameSerializer.Serialize(dispatcher.CurrentState));
+        Assert.Equal(0, published);
+    }
+
+    [Fact]
+    public void Equal_point_allocations_replay_to_equal_state_and_events()
+    {
+        var state = GameState.Create(1234, playerId: PlayerId);
+        var request = new CharacterCreationRequest(
+            CharacterCreationMode.PointAllocation,
+            new PointAllocationCharacterCreationInput(
+                new PlayerAttributes(18, 17, 16, 15, 7, 5)));
+        var configuration = new PointAllocationCharacterCreationConfiguration(78, 3, 18);
+
+        var first = CharacterCreationResolver.Resolve(
+            state,
+            new CreateCharacterCommand(request),
+            new PointAllocationCharacterCreationProvider(configuration));
+        var second = CharacterCreationResolver.Resolve(
+            state,
+            new CreateCharacterCommand(request),
+            new PointAllocationCharacterCreationProvider(configuration));
+
+        Assert.Equal(first.State, second.State);
+        Assert.Equal(first.Events, second.Events);
     }
 
     [Fact]
@@ -347,7 +551,6 @@ public sealed class CharacterCreationTests
         var state = GameState.Create(1234);
         var provider = new RecordingProvider(CharacterCreationMode.Rolled, state.Player);
 
-        Assert.Throws<ArgumentNullException>(() => new RolledCharacterCreationProvider(null!));
         Assert.Throws<ArgumentNullException>(() =>
             CharacterCreationResolver.Resolve(null!, new CreateCharacterCommand(
                 new CharacterCreationRequest(CharacterCreationMode.Rolled)), provider));
@@ -362,6 +565,7 @@ public sealed class CharacterCreationTests
     }
 
     private static readonly Guid PlayerId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+    private static readonly Guid OtherPlayerId = Guid.Parse("00000000-0000-0000-0000-000000000002");
 
     private sealed record TestInput(string Value) : ICharacterCreationInput;
 

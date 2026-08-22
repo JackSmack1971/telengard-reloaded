@@ -17,6 +17,187 @@ public sealed record CharacterCreationRequest(
 
 public sealed record CreateCharacterCommand(CharacterCreationRequest Request) : ICommand;
 
+public sealed record PointAllocationCharacterCreationInput : ICharacterCreationInput
+{
+    public PointAllocationCharacterCreationInput(PlayerAttributes attributes)
+    {
+        Attributes = attributes ?? throw new ArgumentNullException(nameof(attributes));
+    }
+
+    public PlayerAttributes Attributes { get; }
+}
+
+public sealed record PointAllocationCharacterCreationConfiguration
+{
+    public PointAllocationCharacterCreationConfiguration(
+        int pointBudget,
+        int minimumAttribute,
+        int maximumAttribute)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(pointBudget);
+        if (minimumAttribute > maximumAttribute)
+        {
+            throw new ArgumentException("The minimum attribute must not exceed the maximum attribute.");
+        }
+
+        PointBudget = pointBudget;
+        MinimumAttribute = minimumAttribute;
+        MaximumAttribute = maximumAttribute;
+    }
+
+    public int PointBudget { get; }
+    public int MinimumAttribute { get; }
+    public int MaximumAttribute { get; }
+}
+
+public sealed class PointAllocationCharacterCreationProvider : ICharacterCreationProvider
+{
+    private readonly PointAllocationCharacterCreationConfiguration _configuration;
+
+    public PointAllocationCharacterCreationProvider(
+        PointAllocationCharacterCreationConfiguration configuration)
+    {
+        _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+    }
+
+    public CharacterCreationMode Mode => CharacterCreationMode.PointAllocation;
+
+    public CharacterCreationResult Create(GameState state, CharacterCreationRequest request)
+    {
+        ArgumentNullException.ThrowIfNull(state);
+        ArgumentNullException.ThrowIfNull(request);
+
+        if (request.Mode != Mode)
+        {
+            throw new InvalidOperationException("The point-allocation provider requires the point-allocation creation mode.");
+        }
+
+        if (request.Input is not PointAllocationCharacterCreationInput input)
+        {
+            throw new ArgumentException(
+                "Point allocation requires six attribute values.",
+                nameof(request));
+        }
+
+        var attributes = input.Attributes;
+        ValidateAttribute(attributes.Strength, nameof(attributes.Strength));
+        ValidateAttribute(attributes.Intelligence, nameof(attributes.Intelligence));
+        ValidateAttribute(attributes.Wisdom, nameof(attributes.Wisdom));
+        ValidateAttribute(attributes.Constitution, nameof(attributes.Constitution));
+        ValidateAttribute(attributes.Dexterity, nameof(attributes.Dexterity));
+        ValidateAttribute(attributes.Charisma, nameof(attributes.Charisma));
+
+        var total = (long)attributes.Strength
+            + attributes.Intelligence
+            + attributes.Wisdom
+            + attributes.Constitution
+            + attributes.Dexterity
+            + attributes.Charisma;
+        if (total != _configuration.PointBudget)
+        {
+            throw new ArgumentException(
+                $"The six attribute allocations must total {_configuration.PointBudget} points.",
+                nameof(request));
+        }
+
+        return new CharacterCreationResult(state.Player with { Attributes = attributes });
+    }
+
+    private void ValidateAttribute(int value, string parameterName)
+    {
+        if (value < _configuration.MinimumAttribute || value > _configuration.MaximumAttribute)
+        {
+            throw new ArgumentOutOfRangeException(
+                parameterName,
+                value,
+                $"Attribute values must be between {_configuration.MinimumAttribute} and {_configuration.MaximumAttribute}.");
+        }
+    }
+}
+
+public sealed record DailySeedCharacterCreationInput : ICharacterCreationInput
+{
+    public DailySeedCharacterCreationInput(string dailySeed)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(dailySeed);
+        DailySeed = dailySeed;
+    }
+
+    public string DailySeed { get; }
+}
+
+public sealed record DailySeedCharacterCreationConfiguration
+{
+    public DailySeedCharacterCreationConfiguration(
+        string policyVersion,
+        int minimumAttribute,
+        int maximumAttribute)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(policyVersion);
+        if (minimumAttribute > maximumAttribute)
+        {
+            throw new ArgumentException("The minimum attribute must not exceed the maximum attribute.");
+        }
+
+        PolicyVersion = policyVersion;
+        MinimumAttribute = minimumAttribute;
+        MaximumAttribute = maximumAttribute;
+    }
+
+    public string PolicyVersion { get; }
+    public int MinimumAttribute { get; }
+    public int MaximumAttribute { get; }
+}
+
+public sealed class DailySeedCharacterCreationProvider : ICharacterCreationProvider
+{
+    private readonly DailySeedCharacterCreationConfiguration _configuration;
+
+    public DailySeedCharacterCreationProvider(DailySeedCharacterCreationConfiguration configuration)
+    {
+        _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+    }
+
+    public CharacterCreationMode Mode => CharacterCreationMode.DailySeed;
+
+    public CharacterCreationResult Create(GameState state, CharacterCreationRequest request)
+    {
+        ArgumentNullException.ThrowIfNull(state);
+        ArgumentNullException.ThrowIfNull(request);
+
+        if (request.Mode != Mode)
+        {
+            throw new InvalidOperationException("The daily-seed provider requires the daily-seed creation mode.");
+        }
+
+        if (request.Input is not DailySeedCharacterCreationInput input)
+        {
+            throw new ArgumentException(
+                "Daily-seed creation requires a stable daily-seed value.",
+                nameof(request));
+        }
+
+        var stream = new DeterministicRng(0, _configuration.PolicyVersion)
+            .CreateStream("character-creation", "daily-seed", input.DailySeed);
+        var attributes = new PlayerAttributes(
+            RollAttribute(stream),
+            RollAttribute(stream),
+            RollAttribute(stream),
+            RollAttribute(stream),
+            RollAttribute(stream),
+            RollAttribute(stream));
+
+        return new CharacterCreationResult(state.Player with { Attributes = attributes });
+    }
+
+    private int RollAttribute(DeterministicRngStream stream)
+    {
+        return checked((int)stream.NextLong(
+            _configuration.MinimumAttribute,
+            (long)_configuration.MaximumAttribute + 1));
+    }
+}
+
 public sealed record CharacterCreationResult
 {
     public CharacterCreationResult(PlayerState player)
