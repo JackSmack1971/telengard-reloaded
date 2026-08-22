@@ -1109,7 +1109,7 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
   TEL-010–TEL-016, TEL-020–TEL-025, TEL-030–TEL-037, TEL-040–TEL-045,
   TEL-050–TEL-056, TEL-060–TEL-065, TEL-070–TEL-074, TEL-080–TEL-085, and
   TEL-090–TEL-093 series, plus project-local TEL-100–TEL-119 extensions.
-- Open project-local work: TEL-100–TEL-117 remains not started in
+- Open project-local work: TEL-101–TEL-117 remains not started in
   the task ledger; TEL-118 is implemented and verified by the documentation
   reconciliation recorded in its task. Depth ecology, broad content counts,
   and other post-alpha systems remain intentionally outside this extension
