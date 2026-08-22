@@ -140,6 +140,121 @@ public sealed class CharacterCreationTests
     }
 
     [Fact]
+    public void Point_allocation_provider_commits_exact_budget_and_preserves_other_state()
+    {
+        var state = GameState.Create(1234, playerId: PlayerId) with
+        {
+            Expedition = new ExpeditionState { CarriedGold = 123 },
+            Player = new PlayerState
+            {
+                Id = PlayerId,
+                Attributes = new PlayerAttributes(20, 21, 22, 23, 24, 25),
+                Level = 3,
+                Experience = 456,
+                HitPoints = 20,
+                MaxHitPoints = 30,
+                Inventory = ["potion"],
+                CarriedGold = 123,
+                Alive = true
+            }
+        };
+        var allocation = new PointAllocationCharacterCreationInput(
+            new PlayerAttributes(18, 17, 16, 15, 7, 5));
+        var provider = new PointAllocationCharacterCreationProvider(
+            new PointAllocationCharacterCreationConfiguration(78, 3, 18));
+
+        var result = CharacterCreationResolver.Resolve(
+            state,
+            new CreateCharacterCommand(new CharacterCreationRequest(
+                CharacterCreationMode.PointAllocation,
+                allocation)),
+            provider);
+
+        Assert.Equal(allocation.Attributes, result.State.Player.Attributes);
+        Assert.Equal(state.Player with { Attributes = allocation.Attributes }, result.State.Player);
+        var created = Assert.IsType<CharacterCreatedEvent>(Assert.Single(result.Events));
+        Assert.Equal(PlayerId, created.PlayerId);
+        Assert.Equal(CharacterCreationMode.PointAllocation, created.Mode);
+
+        var roundTrip = SaveGameSerializer.Deserialize(SaveGameSerializer.Serialize(result.State));
+        Assert.Equal(
+            SaveGameSerializer.Serialize(result.State),
+            SaveGameSerializer.Serialize(roundTrip));
+        Assert.Equal(result.State.Player.Attributes, roundTrip.Player.Attributes);
+    }
+
+    [Theory]
+    [InlineData(7)]
+    [InlineData(9)]
+    public void Point_allocation_provider_rejects_under_or_over_budget_before_mutation(int finalAttribute)
+    {
+        var state = GameState.Create(1234, playerId: PlayerId);
+        var before = SaveGameSerializer.Serialize(state);
+        var input = new PointAllocationCharacterCreationInput(
+            new PlayerAttributes(12, 13, 14, 15, 16, finalAttribute));
+        var provider = new PointAllocationCharacterCreationProvider(
+            new PointAllocationCharacterCreationConfiguration(78, 3, 18));
+
+        Assert.Throws<ArgumentException>(() => CharacterCreationResolver.Resolve(
+            state,
+            new CreateCharacterCommand(new CharacterCreationRequest(
+                CharacterCreationMode.PointAllocation,
+                input)),
+            provider));
+
+        Assert.Equal(before, SaveGameSerializer.Serialize(state));
+    }
+
+    [Fact]
+    public void Point_allocation_provider_rejects_bounds_and_malformed_inputs()
+    {
+        var state = GameState.Create(1234, playerId: PlayerId);
+        var provider = new PointAllocationCharacterCreationProvider(
+            new PointAllocationCharacterCreationConfiguration(78, 3, 18));
+
+        Assert.Throws<ArgumentException>(() => provider.Create(
+            state,
+            new CharacterCreationRequest(CharacterCreationMode.PointAllocation)));
+        Assert.Throws<ArgumentException>(() => provider.Create(
+            state,
+            new CharacterCreationRequest(CharacterCreationMode.PointAllocation, new TestInput("wrong"))));
+        Assert.Throws<ArgumentOutOfRangeException>(() => provider.Create(
+            state,
+            new CharacterCreationRequest(
+                CharacterCreationMode.PointAllocation,
+                new PointAllocationCharacterCreationInput(
+                    new PlayerAttributes(19, 17, 16, 15, 6, 5)))));
+
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
+            new PointAllocationCharacterCreationConfiguration(-1, 3, 18));
+        Assert.Throws<ArgumentException>(() =>
+            new PointAllocationCharacterCreationConfiguration(78, 18, 3));
+    }
+
+    [Fact]
+    public void Equal_point_allocations_replay_to_equal_state_and_events()
+    {
+        var state = GameState.Create(1234, playerId: PlayerId);
+        var request = new CharacterCreationRequest(
+            CharacterCreationMode.PointAllocation,
+            new PointAllocationCharacterCreationInput(
+                new PlayerAttributes(18, 17, 16, 15, 7, 5)));
+        var configuration = new PointAllocationCharacterCreationConfiguration(78, 3, 18);
+
+        var first = CharacterCreationResolver.Resolve(
+            state,
+            new CreateCharacterCommand(request),
+            new PointAllocationCharacterCreationProvider(configuration));
+        var second = CharacterCreationResolver.Resolve(
+            state,
+            new CreateCharacterCommand(request),
+            new PointAllocationCharacterCreationProvider(configuration));
+
+        Assert.Equal(first.State, second.State);
+        Assert.Equal(first.Events, second.Events);
+    }
+
+    [Fact]
     public void Null_boundaries_are_rejected()
     {
         var state = GameState.Create(1234);
