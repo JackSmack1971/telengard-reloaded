@@ -188,9 +188,12 @@ public sealed class CharacterCreationTests
         var configuration = new RolledCharacterCreationConfiguration(
             "stream-v1",
             [
-                new RolledAttributeRange(3, 18), new RolledAttributeRange(3, 18),
-                new RolledAttributeRange(3, 18), new RolledAttributeRange(3, 18),
-                new RolledAttributeRange(3, 18), new RolledAttributeRange(3, 18)
+                new RolledAttributeRange(3, 18),
+                new RolledAttributeRange(3, 18),
+                new RolledAttributeRange(3, 18),
+                new RolledAttributeRange(3, 18),
+                new RolledAttributeRange(3, 18),
+                new RolledAttributeRange(3, 18)
             ]);
         var first = CharacterCreationResolver.Resolve(state,
             new CreateCharacterCommand(new CharacterCreationRequest(CharacterCreationMode.Rolled)),
@@ -219,9 +222,12 @@ public sealed class CharacterCreationTests
         Assert.Throws<ArgumentException>(() => new RolledCharacterCreationConfiguration("v1", []));
         var configuration = new RolledCharacterCreationConfiguration("v1",
             [
-                new RolledAttributeRange(3, 18), new RolledAttributeRange(3, 18),
-                new RolledAttributeRange(3, 18), new RolledAttributeRange(3, 18),
-                new RolledAttributeRange(3, 18), new RolledAttributeRange(3, 18)
+                new RolledAttributeRange(3, 18),
+                new RolledAttributeRange(3, 18),
+                new RolledAttributeRange(3, 18),
+                new RolledAttributeRange(3, 18),
+                new RolledAttributeRange(3, 18),
+                new RolledAttributeRange(3, 18)
             ]);
         var provider = new RolledCharacterCreationProvider(configuration);
         Assert.Throws<InvalidOperationException>(() => provider.Create(
@@ -236,9 +242,12 @@ public sealed class CharacterCreationTests
         var state = GameState.Create(1234, versions, playerId: PlayerId);
         var configuration = new RolledCharacterCreationConfiguration("v1",
             [
-                new RolledAttributeRange(3, 18), new RolledAttributeRange(3, 18),
-                new RolledAttributeRange(3, 18), new RolledAttributeRange(3, 18),
-                new RolledAttributeRange(3, 18), new RolledAttributeRange(3, 18)
+                new RolledAttributeRange(3, 18),
+                new RolledAttributeRange(3, 18),
+                new RolledAttributeRange(3, 18),
+                new RolledAttributeRange(3, 18),
+                new RolledAttributeRange(3, 18),
+                new RolledAttributeRange(3, 18)
             ]);
         PlayerAttributes Create(GameState input) => new RolledCharacterCreationProvider(configuration)
             .Create(input, new CharacterCreationRequest(CharacterCreationMode.Rolled)).Player.Attributes;
