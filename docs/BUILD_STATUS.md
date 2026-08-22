@@ -113,8 +113,8 @@ content-expansion ticket. TEL-107 is an integration/evidence task using
 fixtures. Monster appearance and feature/monster journal ownership remain with
 the existing TEL-030/TEL-031 and TEL-051/TEL-054/TEL-055 tickets.
 
-This review changed documentation only. No implementation, build, or test
-verification was run for TEL-100–TEL-108; all new tickets remain Not started.
+This review changed documentation only. TEL-100 was subsequently implemented
+and verified; TEL-101–TEL-108 remain Not started.
 
 ## TEL-040 verification
 
