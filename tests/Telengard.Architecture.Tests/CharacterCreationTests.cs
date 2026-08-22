@@ -141,6 +141,117 @@ public sealed class CharacterCreationTests
     }
 
     [Fact]
+    public void Daily_seed_provider_replays_across_players_and_preserves_state()
+    {
+        var firstState = GameState.Create(1234, playerId: PlayerId) with
+        {
+            Player = new PlayerState
+            {
+                Id = PlayerId,
+                Attributes = new PlayerAttributes(20, 21, 22, 23, 24, 25),
+                Level = 3,
+                Experience = 456,
+                HitPoints = 20,
+                MaxHitPoints = 30,
+                Inventory = ["potion"]
+            }
+        };
+        var secondState = GameState.Create(9876, playerId: OtherPlayerId);
+        var request = new CreateCharacterCommand(new CharacterCreationRequest(
+            CharacterCreationMode.DailySeed,
+            new DailySeedCharacterCreationInput("2026-08-22")));
+        var configuration = new DailySeedCharacterCreationConfiguration("policy-1", 3, 18);
+
+        var first = CharacterCreationResolver.Resolve(
+            firstState,
+            request,
+            new DailySeedCharacterCreationProvider(configuration));
+        var second = CharacterCreationResolver.Resolve(
+            secondState,
+            request,
+            new DailySeedCharacterCreationProvider(configuration));
+
+        Assert.Equal(first.State.Player.Attributes, second.State.Player.Attributes);
+        Assert.Equal(firstState.Player with { Attributes = first.State.Player.Attributes }, first.State.Player);
+        Assert.All(
+            new[]
+            {
+                first.State.Player.Attributes.Strength,
+                first.State.Player.Attributes.Intelligence,
+                first.State.Player.Attributes.Wisdom,
+                first.State.Player.Attributes.Constitution,
+                first.State.Player.Attributes.Dexterity,
+                first.State.Player.Attributes.Charisma
+            },
+            value => Assert.InRange(value, 3, 18));
+        var created = Assert.IsType<CharacterCreatedEvent>(Assert.Single(first.Events));
+        Assert.Equal(PlayerId, created.PlayerId);
+        Assert.Equal(CharacterCreationMode.DailySeed, created.Mode);
+
+        var roundTrip = SaveGameSerializer.Deserialize(SaveGameSerializer.Serialize(first.State));
+        Assert.Equal(first.State.Player.Attributes, roundTrip.Player.Attributes);
+    }
+
+    [Fact]
+    public void Different_daily_seeds_produce_different_initial_attributes()
+    {
+        var state = GameState.Create(1234, playerId: PlayerId);
+        var provider = new DailySeedCharacterCreationProvider(
+            new DailySeedCharacterCreationConfiguration("policy-1", 0, 100));
+
+        var first = provider.Create(
+            state,
+            new CharacterCreationRequest(
+                CharacterCreationMode.DailySeed,
+                new DailySeedCharacterCreationInput("seed-a")));
+        var second = provider.Create(
+            state,
+            new CharacterCreationRequest(
+                CharacterCreationMode.DailySeed,
+                new DailySeedCharacterCreationInput("seed-b")));
+
+        Assert.NotEqual(first.Player.Attributes, second.Player.Attributes);
+    }
+
+    [Fact]
+    public void Invalid_daily_seed_input_is_rejected_before_mutation_or_event()
+    {
+        var state = GameState.Create(1234, playerId: PlayerId);
+        var before = SaveGameSerializer.Serialize(state);
+        var bus = new DomainEventBus();
+        var published = 0;
+        bus.Subscribe<CharacterCreatedEvent>(_ => published++);
+        var dispatcher = new CommandDispatcher(state, bus);
+        var provider = new DailySeedCharacterCreationProvider(
+            new DailySeedCharacterCreationConfiguration("policy-1", 3, 18));
+        dispatcher.Register<CreateCharacterCommand>((current, command) =>
+            CharacterCreationResolver.Resolve(current, command, provider));
+
+        Assert.Throws<ArgumentException>(() => new DailySeedCharacterCreationInput("  "));
+        Assert.Throws<ArgumentException>(() => provider.Create(
+            state,
+            new CharacterCreationRequest(CharacterCreationMode.DailySeed)));
+        Assert.Throws<ArgumentException>(() => provider.Create(
+            state,
+            new CharacterCreationRequest(
+                CharacterCreationMode.DailySeed,
+                new TestInput("wrong"))));
+        Assert.Throws<InvalidOperationException>(() => provider.Create(
+            state,
+            new CharacterCreationRequest(
+                CharacterCreationMode.PointAllocation,
+                new DailySeedCharacterCreationInput("seed"))));
+        Assert.Throws<ArgumentException>(() => new DailySeedCharacterCreationConfiguration("policy-1", 18, 3));
+
+        Assert.Throws<ArgumentException>(() => dispatcher.Dispatch(
+            new CreateCharacterCommand(new CharacterCreationRequest(
+                CharacterCreationMode.DailySeed,
+                new TestInput("wrong")))));
+        Assert.Equal(before, SaveGameSerializer.Serialize(dispatcher.CurrentState));
+        Assert.Equal(0, published);
+    }
+
+    [Fact]
     public void Point_allocation_provider_commits_exact_budget_and_preserves_other_state()
     {
         var state = GameState.Create(1234, playerId: PlayerId) with
@@ -341,6 +452,7 @@ public sealed class CharacterCreationTests
     }
 
     private static readonly Guid PlayerId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+    private static readonly Guid OtherPlayerId = Guid.Parse("00000000-0000-0000-0000-000000000002");
 
     private sealed record TestInput(string Value) : ICharacterCreationInput;
 

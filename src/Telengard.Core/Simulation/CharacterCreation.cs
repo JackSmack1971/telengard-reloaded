@@ -1,3 +1,5 @@
+using Telengard.Core.Rng;
+
 namespace Telengard.Core.Simulation;
 
 public enum CharacterCreationMode
@@ -110,6 +112,89 @@ public sealed class PointAllocationCharacterCreationProvider : ICharacterCreatio
                 value,
                 $"Attribute values must be between {_configuration.MinimumAttribute} and {_configuration.MaximumAttribute}.");
         }
+    }
+}
+
+public sealed record DailySeedCharacterCreationInput : ICharacterCreationInput
+{
+    public DailySeedCharacterCreationInput(string dailySeed)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(dailySeed);
+        DailySeed = dailySeed;
+    }
+
+    public string DailySeed { get; }
+}
+
+public sealed record DailySeedCharacterCreationConfiguration
+{
+    public DailySeedCharacterCreationConfiguration(
+        string policyVersion,
+        int minimumAttribute,
+        int maximumAttribute)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(policyVersion);
+        if (minimumAttribute > maximumAttribute)
+        {
+            throw new ArgumentException("The minimum attribute must not exceed the maximum attribute.");
+        }
+
+        PolicyVersion = policyVersion;
+        MinimumAttribute = minimumAttribute;
+        MaximumAttribute = maximumAttribute;
+    }
+
+    public string PolicyVersion { get; }
+    public int MinimumAttribute { get; }
+    public int MaximumAttribute { get; }
+}
+
+public sealed class DailySeedCharacterCreationProvider : ICharacterCreationProvider
+{
+    private readonly DailySeedCharacterCreationConfiguration _configuration;
+
+    public DailySeedCharacterCreationProvider(DailySeedCharacterCreationConfiguration configuration)
+    {
+        _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+    }
+
+    public CharacterCreationMode Mode => CharacterCreationMode.DailySeed;
+
+    public CharacterCreationResult Create(GameState state, CharacterCreationRequest request)
+    {
+        ArgumentNullException.ThrowIfNull(state);
+        ArgumentNullException.ThrowIfNull(request);
+
+        if (request.Mode != Mode)
+        {
+            throw new InvalidOperationException("The daily-seed provider requires the daily-seed creation mode.");
+        }
+
+        if (request.Input is not DailySeedCharacterCreationInput input)
+        {
+            throw new ArgumentException(
+                "Daily-seed creation requires a stable daily-seed value.",
+                nameof(request));
+        }
+
+        var stream = new DeterministicRng(0, _configuration.PolicyVersion)
+            .CreateStream("character-creation", "daily-seed", input.DailySeed);
+        var attributes = new PlayerAttributes(
+            RollAttribute(stream),
+            RollAttribute(stream),
+            RollAttribute(stream),
+            RollAttribute(stream),
+            RollAttribute(stream),
+            RollAttribute(stream));
+
+        return new CharacterCreationResult(state.Player with { Attributes = attributes });
+    }
+
+    private int RollAttribute(DeterministicRngStream stream)
+    {
+        return checked((int)stream.NextLong(
+            _configuration.MinimumAttribute,
+            (long)_configuration.MaximumAttribute + 1));
     }
 }
 

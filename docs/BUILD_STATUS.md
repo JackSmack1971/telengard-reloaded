@@ -2457,3 +2457,34 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
 - Acceptance: focused character-creation tests passed (19), formatter
   verification passed, and `./eng/verify.ps1 -Mode Full` passed with 361
   Release tests, zero build warnings, and zero errors.
+
+## TEL-103 verification
+
+- Status: implemented and verified; daily-seed character creation now derives
+  six bounded attributes from a stable caller-supplied token through the
+  renderer-independent simulation boundary.
+- Tests added: cross-player replay independent of world seed and player ID,
+  different-seed divergence, bounds and malformed-input rejection,
+  validation-before-mutation, committed event behavior, and save round trip.
+- Files/modules affected: `src/Telengard.Core/Simulation/CharacterCreation.cs`,
+  `tests/Telengard.Architecture.Tests/CharacterCreationTests.cs`,
+  `docs/tasks/TEL-103.md`, `docs/tasks/README.md`, `CHANGELOG.md`, and this
+  status document.
+- New public APIs: `DailySeedCharacterCreationInput`,
+  `DailySeedCharacterCreationConfiguration`, and
+  `DailySeedCharacterCreationProvider`.
+- New events: none; the existing `CharacterCreatedEvent` remains the
+  committed boundary event with its stable minimal payload.
+- Save-schema impact: none; generated attributes use the existing explicit
+  player DTO and save version 14 remains current.
+- Design choices: the explicit policy version is the RNG compatibility
+  version, and daily-seed streams use a fixed world-seed-independent input so
+  the same token produces equal results for all players. Calendar, timezone,
+  reset-time, and anti-reroll policies remain deferred.
+- Known follow-up work: TEL-101 remains not started on the remote baseline;
+  TEL-104 and later Core Alpha setup/content work remain outside this slice.
+- Acceptance: focused character-creation tests passed (22), formatter
+  verification passed, Release build passed with 0 warnings and 0 errors, and
+  the full Release suite passed 364 tests. The final
+  `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\eng\verify.ps1
+  -Mode Full` gate passed with a process-scoped `core.autocrlf=false` override.

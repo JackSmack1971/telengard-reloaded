@@ -113,7 +113,7 @@ and verified.
 - [TEL-100.md](TEL-100.md) — Define character creation command boundary — Implemented and verified
 - [TEL-101.md](TEL-101.md) — Implement rolled character creation — Not started
 - [TEL-102.md](TEL-102.md) — Implement point-allocation character creation — Implemented and verified
-- [TEL-103.md](TEL-103.md) — Implement daily-seed character creation — Not started
+- [TEL-103.md](TEL-103.md) — Implement daily-seed character creation — Implemented and verified
 - [TEL-104.md](TEL-104.md) — Implement initial player setup and world-seed selection — Not started
 - [TEL-105.md](TEL-105.md) — Implement treasure acquisition and loot resolution — Not started
 - [TEL-106.md](TEL-106.md) — Preserve Legacy knowledge across character replacement — Not started
