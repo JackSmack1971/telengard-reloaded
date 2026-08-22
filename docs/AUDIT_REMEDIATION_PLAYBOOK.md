@@ -106,8 +106,8 @@ remediations:
     verified_commit: '1c1a1262'
     verification_state: verified
     ticket_source: 'docs/AUDIT_REMEDIATION_PLAYBOOK.md#AUD-001'
-    exec_plan: 'docs/exec-plans/active/AUD-001.md'
-    exec_plan_status: active
+    exec_plan: 'docs/exec-plans/completed/AUD-001.md'
+    exec_plan_status: completed
   - id: AUD-002
     status: closed
     severity: high
@@ -201,6 +201,13 @@ remediations:
     unresolved: 'The ordinary verification and exhaustive coverage gates have not been reconciled.'
 ```
 <!-- END GENERATED: audit-status -->
+
+**Status authority (current):** `docs/audit-status.json` is the canonical
+ticket/exec-plan ledger for current AUD-packet status, priority, severity,
+compatibility sensitivity, and verification provenance. This playbook section
+and the P0 gate are derived views; `docs/BUILD_STATUS.md` remains append-only
+verification history. Field precedence and the update/check commands are
+documented in [`docs/engineering/audit-status.md`](engineering/audit-status.md).
 
 # AUD-001 — Canonicalize deterministic RNG seed encoding
 

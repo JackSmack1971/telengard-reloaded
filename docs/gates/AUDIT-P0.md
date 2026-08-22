@@ -28,8 +28,8 @@ remediations:
     verified_commit: '1c1a1262'
     verification_state: verified
     ticket_source: 'docs/AUDIT_REMEDIATION_PLAYBOOK.md#AUD-001'
-    exec_plan: 'docs/exec-plans/active/AUD-001.md'
-    exec_plan_status: active
+    exec_plan: 'docs/exec-plans/completed/AUD-001.md'
+    exec_plan_status: completed
   - id: AUD-002
     status: closed
     severity: high

@@ -13,8 +13,8 @@
         "verified_commit": "1c1a1262"
       },
       "exec_plan": {
-        "path": "docs/exec-plans/active/AUD-001.md",
-        "status": "active",
+        "path": "docs/exec-plans/completed/AUD-001.md",
+        "status": "completed",
         "verified_commit": "1c1a1262"
       },
       "unresolved": null

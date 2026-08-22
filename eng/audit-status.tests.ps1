@@ -87,7 +87,7 @@ try {
     $stalePlaybook = $afterPlaybook.Replace("    area: 'determinism'", "    area: 'stale-edit'")
     [System.IO.File]::WriteAllText($playbookPath, $stalePlaybook, (New-Object System.Text.UTF8Encoding($false)))
     $stale = Invoke-Generator -Mode Check
-    Assert-Condition ($stale.Code -ne 0) 'Stale playbook output did not fail with an actionable section message.'
+    Assert-Condition ($stale.Code -ne 0 -and $stale.Output -match 'Stale generated audit-status section') 'Stale playbook output did not fail with an actionable section message.'
     $restore = Invoke-Generator -Mode Generate
     Assert-Condition ($restore.Code -eq 0) "Restoring generated output failed: $($restore.Output)"
 
