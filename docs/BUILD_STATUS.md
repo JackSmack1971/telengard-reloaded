@@ -2194,7 +2194,7 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
 
 ## Known technical debt
 
-- The implementation stack is selected in [ADR-001](adr/ADR-001-technology-stack.md), and the documented renderer-independent gameplay slices through Phase 4 are implemented. Character creation, authored Core Alpha content, renderer prototypes, and later persistence/gameplay remain scaffolded or not started.
+- The implementation stack is selected in [ADR-001](adr/ADR-001-technology-stack.md), and the documented renderer-independent gameplay slices through Phase 4 are implemented. Mode-specific character creation, authored Core Alpha content, renderer prototypes, and later persistence/gameplay remain scaffolded or not started; the TEL-100 character-creation boundary is implemented.
 - Gameplay remains incremental: expedition state, the inn boundary, carried
   gold, secured gold, encounters, combat, features, knowledge, items,
   progression, legacy death policies, and presentation-state projection are
