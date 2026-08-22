@@ -2565,3 +2565,35 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
   Content selection remains separate from Core state mutation and presentation.
 - Acceptance: focused TEL-105 tests (8 passed) and formatter verification
   passed; the canonical full verification gate passed on the final diff.
+
+## TEL-092 verification
+
+- Status: implemented and verified; `Telengard.Terminal` now renders the
+  existing immutable presentation state as stable ASCII/symbolic lines for
+  inn and dungeon scenes, including known map positions, player/expedition
+  status, discovered features, knowledge summaries, and redacted combat state.
+  Committed domain events are projected to ordered safe cues without exposing
+  hidden encounter payloads.
+- Tests added: `TerminalRendererTests` covers deterministic dungeon projection
+  and ordering, inn output, null boundaries, event-cue ordering, and hidden
+  encounter-detail redaction.
+- Files/modules affected: `src/Telengard.Terminal/TerminalRenderer.cs`,
+  `tests/Telengard.Architecture.Tests/TerminalRendererTests.cs`,
+  `docs/tasks/TEL-092.md`, `docs/tasks/README.md`, `CHANGELOG.md`, and this
+  status document.
+- New public APIs: `TerminalRenderer.Render`.
+- Save-schema impact: none; the renderer consumes existing
+  `PresentationState` and does not change authoritative state, DTOs,
+  migrations, or save/version markers.
+- Design choices: output uses explicit invariant numeric formatting and `\n`
+  separators; map, feature, and knowledge lines are deterministically sorted;
+  encounter-start and other event cues summarize committed facts without
+  forwarding hidden monster definition details. Command input, gameplay, and
+  terminal-loop integration remain deferred.
+- Invariants: the terminal boundary reads only renderer-facing state and
+  committed events, never mutates `GameState`, consumes RNG, resolves commands,
+  or exposes undiscovered features/internal monster fields. Carried and
+  secured gold remain distinct in the projection.
+- Acceptance: focused TEL-092 tests (3 passed), formatter verification,
+  Release build with 0 warnings and 0 errors, the full Release suite (384
+  passed), and `./eng/verify.ps1 -Mode Full` all passed.
