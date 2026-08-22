@@ -1,3 +1,4 @@
+using Telengard.Core.Events;
 using Telengard.Core.Simulation;
 using Telengard.Save;
 using Xunit;
@@ -218,17 +219,78 @@ public sealed class CharacterCreationTests
         Assert.Throws<ArgumentException>(() => provider.Create(
             state,
             new CharacterCreationRequest(CharacterCreationMode.PointAllocation, new TestInput("wrong"))));
-        Assert.Throws<ArgumentOutOfRangeException>(() => provider.Create(
-            state,
-            new CharacterCreationRequest(
-                CharacterCreationMode.PointAllocation,
-                new PointAllocationCharacterCreationInput(
-                    new PlayerAttributes(19, 17, 16, 15, 6, 5)))));
-
         Assert.Throws<ArgumentOutOfRangeException>(() =>
             new PointAllocationCharacterCreationConfiguration(-1, 3, 18));
         Assert.Throws<ArgumentException>(() =>
             new PointAllocationCharacterCreationConfiguration(78, 18, 3));
+    }
+
+    [Theory]
+    [InlineData(3, 18, 18, 18, 18, 3, false)]
+    [InlineData(18, 3, 18, 18, 18, 3, false)]
+    [InlineData(2, 18, 18, 18, 17, 5, true)]
+    [InlineData(19, 17, 16, 15, 6, 5, true)]
+    public void Point_allocation_provider_enforces_inclusive_attribute_bounds(
+        int strength,
+        int intelligence,
+        int wisdom,
+        int constitution,
+        int dexterity,
+        int charisma,
+        bool invalid)
+    {
+        var state = GameState.Create(1234, playerId: PlayerId);
+        var attributes = new PlayerAttributes(
+            strength,
+            intelligence,
+            wisdom,
+            constitution,
+            dexterity,
+            charisma);
+        var provider = new PointAllocationCharacterCreationProvider(
+            new PointAllocationCharacterCreationConfiguration(78, 3, 18));
+
+        if (invalid)
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(() => provider.Create(
+                state,
+                new CharacterCreationRequest(
+                    CharacterCreationMode.PointAllocation,
+                    new PointAllocationCharacterCreationInput(attributes))));
+        }
+        else
+        {
+            var result = provider.Create(
+                state,
+                new CharacterCreationRequest(
+                    CharacterCreationMode.PointAllocation,
+                    new PointAllocationCharacterCreationInput(attributes)));
+            Assert.Equal(attributes, result.Player.Attributes);
+        }
+    }
+
+    [Fact]
+    public void Invalid_point_allocation_does_not_commit_or_publish_an_event()
+    {
+        var state = GameState.Create(1234, playerId: PlayerId);
+        var before = SaveGameSerializer.Serialize(state);
+        var bus = new DomainEventBus();
+        var published = 0;
+        bus.Subscribe<CharacterCreatedEvent>(_ => published++);
+        var dispatcher = new CommandDispatcher(state, bus);
+        var provider = new PointAllocationCharacterCreationProvider(
+            new PointAllocationCharacterCreationConfiguration(78, 3, 18));
+        dispatcher.Register<CreateCharacterCommand>((current, command) =>
+            CharacterCreationResolver.Resolve(current, command, provider));
+
+        Assert.Throws<ArgumentOutOfRangeException>(() => dispatcher.Dispatch(
+            new CreateCharacterCommand(new CharacterCreationRequest(
+                CharacterCreationMode.PointAllocation,
+                new PointAllocationCharacterCreationInput(
+                    new PlayerAttributes(19, 17, 16, 15, 6, 5))))));
+
+        Assert.Equal(before, SaveGameSerializer.Serialize(dispatcher.CurrentState));
+        Assert.Equal(0, published);
     }
 
     [Fact]
