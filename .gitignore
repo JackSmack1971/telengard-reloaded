@@ -1,8 +1,9 @@
 # Local Codex and repository-control files
 /.agents/
-/.codex/
+/.codex/*
+!/.codex/skills/
+!/.codex/skills/**
 /.changelog/
-AGENTS.md
 
 # Bundled local SDK
 /.dotnet/
