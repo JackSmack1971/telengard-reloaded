@@ -17,4 +17,5 @@ All notable changes to this project will be documented in this file.
 - Added role-aware coverage reporting and safely scoped mutation-tooling arguments
 - Added the renderer-independent character-creation command boundary for ROLLED, POINT_ALLOCATION, and DAILY_SEED providers
 - Added configurable point-allocation character creation with deterministic validation through the simulation boundary
+- Added configurable daily-seed character creation with deterministic, cross-player attribute generation
 - Added a canonical audit-status ledger with deterministic generated playbook and P0-gate projections and stale-output validation
