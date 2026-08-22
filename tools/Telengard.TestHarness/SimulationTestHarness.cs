@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Telengard.Core.Simulation;
 using Telengard.Save;
 
@@ -15,12 +16,20 @@ public static class SimulationTestHarness
         Action<CommandDispatcher> registerHandlers,
         IEnumerable<Func<CommandDispatcher, CommandResult>> commands,
         IEnumerable<int>? saveAndReloadAfter = null)
+        => Run(GameState.Create(seed), registerHandlers, commands, saveAndReloadAfter);
+
+    public static SimulationRunResult Run(
+        GameState initialState,
+        Action<CommandDispatcher> registerHandlers,
+        IEnumerable<Func<CommandDispatcher, CommandResult>> commands,
+        IEnumerable<int>? saveAndReloadAfter = null)
     {
+        ArgumentNullException.ThrowIfNull(initialState);
         ArgumentNullException.ThrowIfNull(registerHandlers);
         ArgumentNullException.ThrowIfNull(commands);
 
         var reloadAfter = saveAndReloadAfter?.ToHashSet() ?? [];
-        var dispatcher = CreateDispatcher(seed, registerHandlers);
+        var dispatcher = CreateDispatcher(initialState, registerHandlers);
         var events = new List<IDomainEvent>();
         var commandNumber = 0;
 
@@ -47,21 +56,26 @@ public static class SimulationTestHarness
         Action<CommandDispatcher> registerHandlers,
         IEnumerable<Func<CommandDispatcher, CommandResult>> commands,
         IEnumerable<int>? saveAndReloadAfter = null)
+        => AssertDeterministic(GameState.Create(seed), registerHandlers, commands, saveAndReloadAfter);
+
+    public static void AssertDeterministic(
+        GameState initialState,
+        Action<CommandDispatcher> registerHandlers,
+        IEnumerable<Func<CommandDispatcher, CommandResult>> commands,
+        IEnumerable<int>? saveAndReloadAfter = null)
     {
+        ArgumentNullException.ThrowIfNull(initialState);
         ArgumentNullException.ThrowIfNull(commands);
         var scriptedCommands = commands.ToArray();
         var checkpoints = saveAndReloadAfter?.ToArray();
-        var first = Run(seed, registerHandlers, scriptedCommands, checkpoints);
-        var second = Run(seed, registerHandlers, scriptedCommands, checkpoints);
+        var first = Run(initialState, registerHandlers, scriptedCommands, checkpoints);
+        var second = Run(initialState, registerHandlers, scriptedCommands, checkpoints);
 
         if (first.FinalSave != second.FinalSave || !EventSignatures(first.Events).SequenceEqual(EventSignatures(second.Events)))
         {
             throw new InvalidOperationException("The scripted simulation was not deterministic.");
         }
     }
-
-    private static CommandDispatcher CreateDispatcher(long seed, Action<CommandDispatcher> registerHandlers)
-        => CreateDispatcher(GameState.Create(seed), registerHandlers);
 
     private static CommandDispatcher CreateDispatcher(GameState state, Action<CommandDispatcher> registerHandlers)
     {
@@ -71,5 +85,6 @@ public static class SimulationTestHarness
     }
 
     private static IEnumerable<string> EventSignatures(IEnumerable<IDomainEvent> events)
-        => events.Select(domainEvent => $"{domainEvent.GetType().AssemblyQualifiedName}:{domainEvent}");
+        => events.Select(domainEvent =>
+            $"{domainEvent.GetType().AssemblyQualifiedName}:{JsonSerializer.Serialize(domainEvent, domainEvent.GetType())}");
 }

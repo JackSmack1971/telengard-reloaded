@@ -2623,3 +2623,30 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
 - Acceptance: focused tests passed (6), formatter verification passed, Release
   build passed with 0 warnings and 0 errors, and the canonical
   `./eng/verify.ps1 -Mode Full` gate passed with 390 Release tests.
+
+## TEL-107 verification
+
+- Status: implemented and verified; the repository now has a deterministic,
+  headless Core Alpha integration proof using configured test fixtures and the
+  existing simulation command boundaries.
+- Tests added: `CoreAlphaIntegrationTests` covers the setup-derived success
+  loop through feature activation, encounter/threat/attack, explicit monster
+  knowledge, carried treasure, suspension, save/reload continuation, retreat,
+  and banking; a Legacy failure path covers death, treasure loss, save/reload,
+  and knowledge-preserving character replacement.
+- Files/modules affected: `tools/Telengard.TestHarness/SimulationTestHarness.cs`,
+  `tests/Telengard.Architecture.Tests/CoreAlphaIntegrationTests.cs`,
+  `docs/tasks/TEL-107.md`, `docs/tasks/README.md`, `CHANGELOG.md`, and this
+  status document.
+- New public APIs: initial-state overloads for the existing test harness only;
+  no gameplay or renderer API changed.
+- Save-schema impact: none; save version 14, DTOs, migrations, simulation,
+  generator, and content versions are unchanged.
+- Invariants: repeated scripts and uninterrupted versus save/reload scripts
+  produce equal final saves and event signatures; hidden monster knowledge is
+  added only by an explicit observation command; carried wealth remains
+  unsecured until retreat; Legacy knowledge survives replacement.
+- Acceptance: focused `CoreAlphaIntegrationTests` passed (2), formatter
+  verification passed, and `./eng/verify.ps1 -Mode Full` passed on the final
+  diff. Production content expansion and TEL-108 debug commands remain
+  deferred.
