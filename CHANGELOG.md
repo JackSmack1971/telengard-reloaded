@@ -20,4 +20,5 @@ All notable changes to this project will be documented in this file.
 - Added configurable point-allocation character creation with deterministic validation through the simulation boundary
 - Added configurable daily-seed character creation with deterministic, cross-player attribute generation
 - Added renderer-independent initial game setup with deterministic world-seed selection and ready-at-inn state
+- Added renderer-independent treasure acquisition with unsecured expedition loot and deterministic content loot-table selection
 - Added a canonical audit-status ledger with deterministic generated playbook and P0-gate projections and stale-output validation
