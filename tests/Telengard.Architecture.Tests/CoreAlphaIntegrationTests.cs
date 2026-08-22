@@ -80,7 +80,10 @@ public sealed class CoreAlphaIntegrationTests
         Assert.Equal("crypt-stalker", encounter.Monster.DefinitionId);
         Assert.Equal(ThreatLevel.Unknown, Assert.IsType<ThreatAssessedEvent>(
             checkpointed.Events.Single(domainEvent => domainEvent is ThreatAssessedEvent)).Level);
-        Assert.True(IndexOf<GoldSecuredEvent>(checkpointed.Events) > IndexOf<TreasureAcquiredEvent>(checkpointed.Events));
+        var treasureIndex = IndexOf<TreasureAcquiredEvent>(checkpointed.Events);
+        var securedIndex = IndexOf<GoldSecuredEvent>(checkpointed.Events);
+        Assert.True(treasureIndex >= 0);
+        Assert.True(securedIndex > treasureIndex);
         Assert.Contains(checkpointed.Events, domainEvent => domainEvent is GameSuspendedEvent);
         var fountain = Assert.IsType<FountainOutcomeResolvedEvent>(
             checkpointed.Events.Single(domainEvent => domainEvent is FountainOutcomeResolvedEvent));
@@ -141,10 +144,13 @@ public sealed class CoreAlphaIntegrationTests
         Assert.True(state.Player.Alive);
         Assert.True(state.Inn.IsAtInn);
         Assert.False(state.Expedition.Active);
+        Assert.Equal(0, state.Player.CarriedGold);
+        Assert.Equal(0, state.Expedition.CarriedGold);
         Assert.Empty(state.Expedition.AcquiredItems);
         Assert.Empty(state.Player.Inventory);
         Assert.Equal(0, state.SecuredProgress.SecuredGold);
-        Assert.Single(state.Legacy.PreviousHeroes);
+        var deadHero = Assert.Single(state.Legacy.PreviousHeroes);
+        Assert.Equal(initial.Player.Id, deadHero.HeroId);
         var retainedKnowledge = Assert.Single(state.Knowledge.Entries);
         Assert.Equal("monster:crypt-stalker", retainedKnowledge.SubjectId);
         Assert.Equal(["observed-small"], retainedKnowledge.Observations);
@@ -163,12 +169,12 @@ public sealed class CoreAlphaIntegrationTests
         var state = GameState.Create(seed, mode: mode, playerId: playerId);
         var provider = new PointAllocationCharacterCreationProvider(
             new PointAllocationCharacterCreationConfiguration(33, 0, 20));
-        var creation = CharacterCreationResolver.Resolve(
-            state,
-            new CreateCharacterCommand(new CharacterCreationRequest(
-                CharacterCreationMode.PointAllocation,
-                new PointAllocationCharacterCreationInput(new PlayerAttributes(3, 4, 5, 6, 7, 8)))),
-            provider);
+        var dispatcher = new CommandDispatcher(state);
+        dispatcher.Register<CreateCharacterCommand>((current, command) =>
+            CharacterCreationResolver.Resolve(current, command, provider));
+        var creation = dispatcher.Dispatch(new CreateCharacterCommand(new CharacterCreationRequest(
+            CharacterCreationMode.PointAllocation,
+            new PointAllocationCharacterCreationInput(new PlayerAttributes(3, 4, 5, 6, 7, 8)))));
         var setup = NewGameSetupResolver.Create(new NewGameSetupRequest(
             seed,
             mode,
