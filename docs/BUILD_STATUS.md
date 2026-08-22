@@ -2429,3 +2429,31 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
   `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\eng\verify.ps1
   -Mode Full` passed all stages with a process-scoped
   `core.autocrlf=false` override.
+
+## TEL-102 verification
+
+- Status: implemented and verified; point-allocation character creation now
+  validates a configured six-attribute budget and inclusive bounds through
+  the TEL-100 simulation boundary.
+- Tests added: exact-budget commit with event and save round trip, under/over
+  budget rejection before mutation, bounds and malformed-input rejection,
+  dispatcher no-event rejection, and equal-input replay.
+- Files/modules affected: `src/Telengard.Core/Simulation/CharacterCreation.cs`,
+  `tests/Telengard.Architecture.Tests/CharacterCreationTests.cs`,
+  `docs/tasks/TEL-102.md`, `docs/tasks/README.md`, `CHANGELOG.md`, and this
+  status document.
+- New public APIs: `PointAllocationCharacterCreationInput`,
+  `PointAllocationCharacterCreationConfiguration`, and
+  `PointAllocationCharacterCreationProvider`.
+- New events: none; the existing `CharacterCreatedEvent` remains the
+  committed boundary event with its stable minimal payload.
+- Save-schema impact: none; player attributes continue to use the existing
+  explicit DTO and save version 14 remains current.
+- Design choices: the configured budget is the sum of the six supplied
+  allocation values; no permanent budget, cost curve, derived-stat formula,
+  renderer behavior, or other tuning policy was added.
+- Known follow-up work: TEL-103 remains not started; daily-seed creation,
+  starting loadout, and balance policy remain outside this slice.
+- Acceptance: focused character-creation tests passed (19), formatter
+  verification passed, and `./eng/verify.ps1 -Mode Full` passed with 361
+  Release tests, zero build warnings, and zero errors.
