@@ -202,78 +202,12 @@ remediations:
 ```
 <!-- END GENERATED: audit-status -->
 
-## 4. Machine-readable remediation index
-
-```yaml
-remediations:
-  - id: AUD-001
-    severity: high
-    priority: P0
-    status: closed
-    verified_commit: 1c1a1262
-    area: determinism
-    compatibility_sensitive: true
-  - id: AUD-002
-    severity: high
-    priority: P0
-    status: closed
-    verified_commit: d976c4c4
-    area: authoritative-state
-    compatibility_sensitive: false
-  - id: AUD-003
-    severity: high
-    priority: P1
-    status: open
-    area: toolchain-security
-    compatibility_sensitive: false
-  - id: AUD-004
-    severity: high
-    priority: P1
-    status: open
-    area: repository-controls
-    compatibility_sensitive: false
-  - id: AUD-005
-    severity: medium
-    priority: P1
-    status: closed
-    verified_commit: 9cbd2021
-    area: expedition-identity
-    compatibility_sensitive: true
-  - id: AUD-006
-    severity: medium
-    priority: P1
-    status: closed
-    area: command-validation
-    compatibility_sensitive: false
-  - id: AUD-007
-    severity: medium
-    priority: P1
-    status: closed
-    verified_commit: 1474e1b2
-    area: save-validation
-    compatibility_sensitive: true
-  - id: AUD-008
-    severity: medium
-    priority: P2
-    status: open
-    area: event-delivery
-    compatibility_sensitive: true
-  - id: AUD-009
-    severity: low
-    priority: P2
-    status: open
-    area: quality-gates
-    compatibility_sensitive: false
-```
-
 **Status authority (current):** `docs/audit-status.json` is the canonical
 ticket/exec-plan ledger for current AUD-packet status, priority, severity,
 compatibility sensitivity, and verification provenance. This playbook section
 and the P0 gate are derived views; `docs/BUILD_STATUS.md` remains append-only
 verification history. Field precedence and the update/check commands are
 documented in [`docs/engineering/audit-status.md`](engineering/audit-status.md).
-
----
 
 # AUD-001 — Canonicalize deterministic RNG seed encoding
 

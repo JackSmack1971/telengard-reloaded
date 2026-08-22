@@ -226,7 +226,13 @@ function Replace-GeneratedSection {
     if ($anchorIndex -lt 0) { throw "$Target has no bootstrap anchor '$anchor'." }
 
     $prefix = $Text.Substring(0, $anchorIndex).TrimEnd("`r", "`n")
-    $suffix = $Text.Substring($anchorIndex)
+    if ($Target -eq 'Playbook') {
+        $humanSection = $Text.IndexOf('# AUD-001', $anchorIndex, [StringComparison]::Ordinal)
+        if ($humanSection -lt 0) { throw "$Target has no human-authored AUD-001 anchor after the generated index." }
+        $suffix = $Text.Substring($humanSection)
+    } else {
+        $suffix = $Text.Substring($anchorIndex)
+    }
     return $prefix + $NewLine + $NewLine + $Section + $NewLine + $NewLine + $suffix
 }
 

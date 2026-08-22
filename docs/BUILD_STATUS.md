@@ -1,6 +1,11 @@
 # Modern Telengard build status
 
-Last verified: 2026-08-18
+Last verified: 2026-08-20
+
+This document is append-only verification history, not the current TEL-ticket
+status ledger. Use [the task ledger](tasks/README.md) for current TEL status.
+Audit-remediation status is maintained in the canonical ledger and its
+generated views described in [the audit-status engineering guide](engineering/audit-status.md).
 
 ## AUD-004 verification
 
@@ -33,9 +38,10 @@ Last verified: 2026-08-18
   implementation time, the GitHub API reported no required status checks for
   `main`.
 
-## Current implementation phase
+## Implementation status through Phase 4
 
-Phase 1 — Dungeon Walking Prototype implemented and gated. The headless,
+Implementation is complete and gated through Phase 4. Phase 1 — Dungeon
+Walking Prototype is implemented and gated. The headless,
 renderer-independent simulation enters seeded floors, walks valid space,
 rejects walls, changes floors, leaves, and revisits identical geography. See
 [the Phase 1 gate](gates/PHASE-1.md).
@@ -965,7 +971,7 @@ verification was run for TEL-100–TEL-108; all new tickets remain Not started.
   `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\eng\verify.ps1
   -Mode Full` passed with 290 Release tests.
 
-## Production coverage gate
+## Historical production coverage gate — 2026-08-16
 
 Verified 2026-08-16 with the repository-local pinned SDK 8.0.100, Coverlet
 collector 6.0.4 (test-only), and the complete xUnit suite. Run:
@@ -1099,11 +1105,16 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
   integration, and explicit active-combat save support.
 - Active: None assigned.
 - Blocked: None recorded.
-- Ledger documents: TEL-001–TEL-006, TEL-010–TEL-016, TEL-020–TEL-025, TEL-030–TEL-037, TEL-040–TEL-045, TEL-050–TEL-056, TEL-060–TEL-065, TEL-070–TEL-074, TEL-080–TEL-085, TEL-090–TEL-093, and project-local Core Alpha extensions TEL-100–TEL-108.
-- Open Core Alpha extensions: TEL-100–TEL-108 are not started. Depth ecology,
-  broad content counts, and other post-alpha systems remain intentionally
-  outside this extension set. Encounter probability and spawn options remain
-  explicit configuration until their content/balance owners define them.
+- Ledger documents: the specification-defined TEL-001–TEL-006,
+  TEL-010–TEL-016, TEL-020–TEL-025, TEL-030–TEL-037, TEL-040–TEL-045,
+  TEL-050–TEL-056, TEL-060–TEL-065, TEL-070–TEL-074, TEL-080–TEL-085, and
+  TEL-090–TEL-093 series, plus project-local TEL-100–TEL-119 extensions.
+- Open project-local work: TEL-100–TEL-117 remains not started in
+  the task ledger; TEL-118 is implemented and verified by the documentation
+  reconciliation recorded in its task. Depth ecology, broad content counts,
+  and other post-alpha systems remain intentionally outside this extension
+  set. Encounter probability and spawn options remain explicit configuration
+  until their content/balance owners define them.
 
 ## TEL-001 verification
 
@@ -2183,13 +2194,16 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
 
 ## Known technical debt
 
-- The implementation stack is selected in [ADR-001](adr/ADR-001-technology-stack.md); project manifests are scaffolded, but gameplay implementation does not exist yet.
+- The implementation stack is selected in [ADR-001](adr/ADR-001-technology-stack.md), and the documented renderer-independent gameplay slices through Phase 4 are implemented. Character creation, authored Core Alpha content, renderer prototypes, and later persistence/gameplay remain scaffolded or not started.
 - Gameplay remains incremental: expedition state, the inn boundary, carried
-  gold, and secured gold are implemented, while later gameplay and persistence
-  remain scaffolded.
+  gold, secured gold, encounters, combat, features, knowledge, items,
+  progression, legacy death policies, and presentation-state projection are
+  implemented in the completed slices; later content and policy decisions
+  remain open.
 - Undefined formulas and anti-save-scumming policy still require explicit design decisions before implementation.
-- The proposed architecture has only been validated against the Phase 0
-  synthetic command/replay slice; gameplay remains unimplemented.
+- The architecture was initially validated against the Phase 0 synthetic
+  command/replay slice and has since gained focused acceptance evidence for
+  the completed gameplay slices documented above.
 
 ## AUD-006 verification
 
@@ -2253,6 +2267,72 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
   local scripts and `core.autocrlf=false` to avoid unrelated dirty-file
   line-ending warnings. A separate coverage gate was not required by AUD-005.
 
+## TEL-090 verification
+
+- Status: implemented and verified; `PresentationStateAdapter.Create` now
+  projects immutable renderer-facing state from authoritative `GameState`.
+- Tests added: four focused adapter tests covering state projection,
+  undiscovered-feature filtering, hidden monster-detail redaction, and
+  read-only projection collections.
+- Files/modules affected: `src/Telengard.Core/presentation/PresentationStateAdapter.cs`,
+  `tests/Telengard.Architecture.Tests/PresentationStateAdapterTests.cs`,
+  `docs/tasks/TEL-090.md`, `docs/tasks/README.md`, `CHANGELOG.md`, and this
+  status document.
+- New public APIs: additive `PresentationStateAdapter.Create(GameState)` and
+  the immutable `PresentationState`, `PresentationPlayerState`,
+  `PresentationExpeditionState`, `PresentationFeatureState`,
+  `PresentationCombatState`, and `PresentationMonsterState` projections.
+- New events: none. Existing command and domain-event contracts are unchanged.
+- Save-schema impact: none; no authoritative state or DTO changed, and save,
+  simulation, generator, and content versions remain unchanged.
+- Known follow-up work: renderer prototypes and renderer-independent save
+  compatibility remain TEL-091–TEL-093. No next TEL ticket was started.
+- Invariants: presentation only reads committed simulation state; hidden
+  features are omitted, internal monster level/behavior/effects are not
+  projected, and no randomness, save, wealth, knowledge, or renderer-authority
+  boundary changed.
+- Acceptance: focused adapter tests (4 passed), full Release tests (343
+  passed), formatter verification, and zero-warning Release build passed via
+  `./eng/verify.ps1 -Mode Full` using the repository-local SDK and a
+  process-scoped execution-policy bypass for unsigned local scripts.
+
+## TEL-117 verification
+
+- Status: implemented and verified on a clean isolated branch anchored to
+  `70c8f51b415c45d9b98928dc0478304ae94ac947`; the original anchored worktree
+  was dirty and was preserved unchanged.
+- Tests added: `tests/Tooling/TEL-117.Tooling.Tests.ps1` verifies role-based
+  coverage aggregation, TestHarness visibility/exclusion, both default
+  mutation-baseline guards, and an independent scoped Stryker invocation.
+- Files/modules affected: `eng/coverage.ps1`, `eng/mutation.ps1`, the tooling
+  regression script, `docs/DEVELOPMENT.md`,
+  `docs/test-quality-current-audit.md`, this status document, the TEL task
+  ledger, and `docs/tasks/TEL-117.md`.
+- New public APIs: none. New events: none. Save-schema impact: none.
+- Coverage behavior: production (`Core`, `Content`, `Save`, `Terminal`) is the
+  gated aggregate; `TestHarness` remains measured and visible as test support.
+- Mutation behavior: `-AdditionalStrykerArgs` is additive; scoped options are
+  rejected for `mutation-baseline`, and scoped manifests record the forwarded
+  arguments.
+- Focused evidence on the merge-target branch: production coverage reported
+  3,344/3,393 lines and 1,475/1,556 branches; TestHarness reported 42/42
+  lines and 32/32 branches.
+  Both guarded mutation forms returned nonzero, and the Basic Terminal scoped
+  run succeeded in `TestResults/mutation-tel-117-scoped` with merge-target
+  parent `3b9e01fe31317dbe447ec5f8b2fb06aca2bb7e44` recorded in the manifest.
+- Default mutation evidence: `powershell.exe -NoProfile
+  -ExecutionPolicy Bypass -File .\eng\mutation.ps1 -MutationLevel Basic`
+  completed for Core, Content, Save, and Terminal in
+  `TestResults/mutation-baseline`; the manifest recorded an empty additional
+  argument list and the unchanged four-project production scope.
+- Final merge-target gate: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File
+  .\eng\verify.ps1 -Mode Full` passed with formatter verification, a zero-warning
+  Release build, and 338/338 Release tests. The gate required a process-scoped
+  `core.autocrlf=false` override and an ignored `.codex` stamp directory in the
+  clean isolated worktree.
+- Known follow-up work: production coverage deficits remain the existing
+  coverage-remediation work; no gameplay or next TEL ticket was started.
+
 ## TEL-119 verification
 
 - Status: implemented and verified; `docs/audit-status.json` is now the
@@ -2266,7 +2346,7 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
   `eng/audit-status.ps1`, `eng/audit-status.tests.ps1`,
   `docs/engineering/audit-status.md`, the generated sections in
   `docs/AUDIT_REMEDIATION_PLAYBOOK.md` and `docs/gates/AUDIT-P0.md`,
-  `.github/workflows/verification.yml`, and required status/changelog/ledger
+  `.github/workflows/verification.yml`, and this status/changelog/task
   documentation.
 - New public APIs: none.
 - New events: none.
@@ -2275,11 +2355,77 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
 - Known follow-up work: AUD-003, AUD-008, and AUD-009 remain explicitly open
   in the canonical ledger. TEL-119 does not implement any next TEL ticket and
   does not depend on TEL-117.
-- Acceptance: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File
-  .\eng\audit-status.tests.ps1` passed; synchronized-output check passed;
-  repository-local doctor resolved SDK 8.0.100; formatter verification
-  passed; Release build passed with 0 warnings and 0 errors; the full Release
-  suite passed 343 tests; and
+- Acceptance: focused audit-status tests, synchronized-output check,
+  formatter verification, Release build, full Release tests, and the full
+  repository verification gate passed on the merge-target branch.
+
+## TEL-100 verification
+
+- Status: implemented and verified; the renderer-independent character
+  creation boundary validates one of the three named modes and delegates
+  generation to a matching simulation-owned provider.
+- Tests added: all three mode selections, invalid mode and provider mismatch
+  rejection before provider/state change, committed event delivery after state
+  commit, provider input forwarding, deterministic replay, null boundaries,
+  and explicit save round-trip coverage.
+- Files/modules affected: `src/Telengard.Core/Simulation/CharacterCreation.cs`,
+  `tests/Telengard.Architecture.Tests/CharacterCreationTests.cs`,
+  `docs/tasks/TEL-100.md`, `docs/tasks/README.md`, `CHANGELOG.md`, and this
+  status document.
+- New public APIs: `CharacterCreationMode`, `CharacterCreationRequest`,
+  `CreateCharacterCommand`, `CharacterCreationResult`,
+  `ICharacterCreationInput`, `ICharacterCreationProvider`, and
+  `CharacterCreationResolver`.
+- New events: `CharacterCreatedEvent`, with only the committed player identity
+  and selected mode.
+- Save-schema impact: none; `PlayerState` is reused, the explicit DTOs and
+  migrations are unchanged, and save version 14 remains current.
+- Design choices: mode mechanics remain provider-owned for TEL-101–TEL-103;
+  no rolled formula, point budget, daily-calendar rule, random source, or
+  anti-reroll policy was invented. The event does not expose generation input
+  or attributes.
+- Known follow-up work: TEL-101–TEL-103 implement the three mode mechanics;
+  no next TEL ticket was started.
+- Invariants: mode validation precedes provider invocation and state
+  replacement; equal provider inputs reproduce equal state/events; the
+  simulation owns the transition and event; no renderer, hidden-information,
+  wealth, or persistence boundary changed.
+- Acceptance: focused TEL-100 tests (9 passed), formatter verification, and
+  the final `./eng/verify.ps1 -Mode Full` gate passed with 352 Release tests,
+  zero build warnings, and formatter verification. The pre-change baseline
+  passed 343 Release tests.
+## TEL-091 verification
+
+- Status: implemented and verified; the Modern presentation now has a
+  deterministic renderer frame/cue projection plus an optional Godot visual
+  prototype.
+- Tests added: `ModernRendererTests` covers known-map projection and stable
+  ordering, current-tile marking, hidden-feature and hidden-monster-detail
+  redaction, committed-event cue ordering, read-only collections, and null
+  validation.
+- Files/modules affected: `src/Telengard.Core/presentation/ModernRenderer.cs`,
+  `tests/Telengard.Architecture.Tests/ModernRendererTests.cs`,
+  `src/Telengard.Godot/ModernRenderer.gd`,
+  `src/Telengard.Godot/ModernRenderer.tscn`,
+  `src/Telengard.Godot/project.godot`, `src/Telengard.Godot/README.md`,
+  `docs/tasks/TEL-091.md`, `docs/tasks/README.md`, `CHANGELOG.md`, and this
+  status document.
+- New public APIs: additive `ModernRenderer.Create`, `ModernRenderFrame`, and
+  the renderer-only frame, marker, HUD, combat, environment, cue, and enum
+  types. Existing commands, event payloads, and `PresentationState` are
+  unchanged.
+- New events: none. Existing committed events are reduced to safe visual cues;
+  hidden `EncounterStartedEvent` monster internals are not forwarded.
+- Save-schema impact: none; no authoritative state or version marker changed.
+- Known follow-up work: a future host integration can adapt the C# frame to the
+  Godot dictionary contract and bind input to simulation commands. TEL-092 and
+  TEL-093 remain not started; no next TEL ticket was started.
+- Invariants: the renderer only reads immutable presentation state and
+  committed events; hidden map/features/details remain filtered; no randomness,
+  save, wealth, knowledge, command, or simulation-authority boundary changed.
+- Acceptance: focused presentation tests passed (8 total), formatter
+  verification passed, Release build passed with 0 warnings and 0 errors, the
+  full Release suite passed 347 tests, and
   `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\eng\verify.ps1
-  -Mode Full` passed all stages with `core.autocrlf=false` for unrelated
-  dirty-file line-ending warnings.
+  -Mode Full` passed all stages with a process-scoped
+  `core.autocrlf=false` override.

@@ -10,8 +10,9 @@ The verified implementation commits for that P0 result were AUD-001
 reference is stale. At that snapshot, P1 remediation had not yet started.
 This statement is historical and is not the current P1 status.
 Subsequent current-`HEAD` records verify AUD-006, AUD-007, and AUD-005 work;
-the current status is projected below from `docs/audit-status.json`. This gate
-remains historical and is not a competing current-status source.
+the current P1 status is projected from the canonical audit-status ledger
+below. This gate remains historical and is not a competing current-status
+source.
 
 <!-- BEGIN GENERATED: audit-status -->
 ## Current audit status and provenance (generated)

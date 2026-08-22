@@ -18,7 +18,21 @@ The following commands are the configured headless verification commands for the
 | Build | `./eng/dotnet.ps1 build Telengard.sln --configuration Release` |
 | Tests | `./eng/dotnet.ps1 test Telengard.sln --configuration Release --no-restore` |
 | Formatter/linter | `./eng/dotnet.ps1 format Telengard.sln --verify-no-changes` |
-| Deterministic test mode | Unknown — no executable exists yet; the specification requires an equivalent of `game --seed <seed> --deterministic` |
+| Deterministic test mode | No user-facing game executable exists yet. The repository's deterministic test harness accepts `--seed <seed> --deterministic`; the specification requires an equivalent user-facing mode. |
+
+### Coverage and mutation scope
+
+`./eng/coverage.ps1` reports role-tagged rows for the four production projects
+(`Telengard.Core`, `Telengard.Content`, `Telengard.Save`, and
+`Telengard.Terminal`) and for `Telengard.TestHarness` as test support. Only
+the production aggregate is gated; test-support totals remain visible in the
+generated reports.
+
+`./eng/mutation.ps1` preserves the default all-production-project baseline
+under `TestResults/mutation-baseline`. Pass scoped Stryker options through
+`-AdditionalStrykerArgs` with a distinct `-ResultsDirectoryName`; `--since`
+and `--with-baseline` are rejected when the default baseline directory is
+selected. Use an explicit branch, tag, or commit as the Stryker diff target.
 
 ### Provisioning the repository-local SDK
 
@@ -44,13 +58,15 @@ PowerShell wrapper at `eng/dotnet.ps1`, which selects `.dotnet/dotnet.exe`.
 Run `./eng/doctor.ps1` when SDK or environment behavior is uncertain. Godot is
 not required for headless verification.
 
-GitHub Actions uses the Windows `Repository verification` workflow to read the
-same `global.json` through `actions/setup-dotnet` and then invokes
-`./eng/verify.ps1 -Mode Full`. CI does not need to populate the ignored
-`.dotnet/` directory: the wrapper's supported fallback to the SDK provisioned
-on `PATH` keeps the server check aligned with the repository's pinned SDK
-policy. If `global.json` changes, the workflow follows that file rather than
-duplicating the SDK version in YAML.
+GitHub Actions uses the Windows `Repository verification` workflow to provision
+SDK `8.0.100` through `actions/setup-dotnet` and then invokes
+`./eng/verify.ps1 -Mode Full`. The workflow uses the explicit version because
+`actions/setup-dotnet`'s `global-json-file` mode can leave `dotnet format`
+unable to locate its SDK build host on hosted Windows runners. Keep this
+workflow value synchronized with `global.json` when the repository SDK pin
+changes. CI does not need to populate the ignored `.dotnet/` directory: the
+wrapper's supported fallback to the SDK provisioned on `PATH` keeps the server
+check aligned with the repository's pinned SDK policy.
 
 ## Project structure
 
