@@ -142,6 +142,9 @@ public sealed class RendererSaveCompatibilityTests
         Assert.Equal(
             [ModernCueKind.DungeonEntered, ModernCueKind.PlayerMoved, ModernCueKind.CombatStarted],
             actualModern.Cues.Select(cue => cue.Kind));
+        Assert.Equal(new ModernCue(ModernCueKind.DungeonEntered, entered.State.Player.Position), actualModern.Cues[0]);
+        Assert.Equal(new ModernCue(ModernCueKind.PlayerMoved, position), actualModern.Cues[1]);
+        Assert.Equal(new ModernCue(ModernCueKind.CombatStarted), actualModern.Cues[2]);
         Assert.DoesNotContain(typeof(ModernMonsterMarker).GetProperties(), property =>
             property.Name is nameof(MonsterInstance.Level) or
                 nameof(MonsterInstance.TemporaryEffects) or
