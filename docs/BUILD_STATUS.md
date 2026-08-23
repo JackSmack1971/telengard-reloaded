@@ -2692,8 +2692,8 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
   boundary now has a focused cross-boundary proof that a loaded authoritative
   state produces equivalent Modern and Terminal presentation output.
 - Tests added: `RendererSaveCompatibilityTests` covers canonical save equality,
-  command-dispatched enter/move/encounter events, deterministic continuation
-  after reload, Modern projection equality, deterministic Terminal output,
+  command-dispatched enter/move/encounter events, deterministic RNG-consuming
+  continuation after reload, Modern projection equality, deterministic Terminal output,
   committed event cues, hidden feature and internal monster-detail redaction,
   and source-state immutability across rendering.
 - Files/modules affected: `tests/Telengard.Architecture.Tests/RendererSaveCompatibilityTests.cs`,

@@ -102,10 +102,8 @@ public sealed class RendererSaveCompatibilityTests
         var actualPresentation = PresentationStateAdapter.Create(reloaded);
         var actualModern = ModernRenderer.Create(actualPresentation, events);
         var actualTerminal = TerminalRenderer.Render(actualPresentation, events);
-        var originalContinuation = CreateCombatDispatcher(state)
-            .Dispatch(new AdvanceCombatCommand());
-        var reloadedContinuation = CreateCombatDispatcher(reloaded)
-            .Dispatch(new AdvanceCombatCommand());
+        var originalContinuation = ContinueCombat(state);
+        var reloadedContinuation = ContinueCombat(reloaded);
 
         Assert.Collection(
             events,
@@ -117,7 +115,13 @@ public sealed class RendererSaveCompatibilityTests
         Assert.Equal(entered.State.Player.Position, movedEvent.From);
         Assert.Equal(state.Player.Position, movedEvent.To);
         var encounterEvent = Assert.IsType<EncounterStartedEvent>(events[3]);
-        Assert.Equal(state.Combat!.EncounterId, encounterEvent.Monster.InstanceId);
+        var committedMonster = encounter.State.Combat!.Monster;
+        Assert.Equal(committedMonster, encounterEvent.Monster);
+        Assert.Equal(committedMonster.InstanceId, encounterEvent.Monster.InstanceId);
+        Assert.Equal(committedMonster.DefinitionId, encounterEvent.Monster.DefinitionId);
+        Assert.Equal(committedMonster.Level, encounterEvent.Monster.Level);
+        Assert.Equal(committedMonster.CurrentHitPoints, encounterEvent.Monster.CurrentHitPoints);
+        Assert.Equal(committedMonster.Position, encounterEvent.Monster.Position);
         Assert.Equal(originalSave, SaveGameSerializer.Serialize(reloaded));
         Assert.Equal(
             SaveGameSerializer.Serialize(originalContinuation.State),
@@ -132,6 +136,9 @@ public sealed class RendererSaveCompatibilityTests
         Assert.Equal(expectedModern.Hud, actualModern.Hud);
         Assert.Equal(expectedModern.Combat, actualModern.Combat);
         Assert.Equal(expectedModern.Cues, actualModern.Cues);
+        Assert.Equal(state.Combat!.Monster.DefinitionId, actualModern.Combat!.Monster.DefinitionId);
+        Assert.Equal(state.Combat.Monster.CurrentHitPoints, actualModern.Combat.Monster.CurrentHitPoints);
+        Assert.Equal(state.Combat.Monster.Position, actualModern.Combat.Monster.Position);
         Assert.Equal(
             [ModernCueKind.DungeonEntered, ModernCueKind.PlayerMoved, ModernCueKind.CombatStarted],
             actualModern.Cues.Select(cue => cue.Kind));
@@ -150,6 +157,7 @@ public sealed class RendererSaveCompatibilityTests
         Assert.DoesNotContain(hiddenFeatureId.ToString("N"), actualTerminal, StringComparison.Ordinal);
         Assert.DoesNotContain("hidden-effect", actualTerminal, StringComparison.Ordinal);
         Assert.DoesNotContain("ambush", actualTerminal, StringComparison.Ordinal);
+        Assert.DoesNotContain("level=4", actualTerminal, StringComparison.Ordinal);
         Assert.Equal(originalSave, SaveGameSerializer.Serialize(state));
     }
 
@@ -157,7 +165,36 @@ public sealed class RendererSaveCompatibilityTests
     {
         var dispatcher = new CommandDispatcher(state);
         dispatcher.Register<AdvanceCombatCommand>(CombatStateResolver.Advance);
+        dispatcher.Register<SelectCombatActionCommand>(CombatStateResolver.SelectAction);
+        dispatcher.Register<FleeCommand>((current, command) =>
+            FleeResolver.Resolve(current, command, new FleeConfiguration(1)));
         return dispatcher;
+    }
+
+    private static (GameState State, IReadOnlyList<IDomainEvent> Events) ContinueCombat(GameState state)
+    {
+        var dispatcher = CreateCombatDispatcher(state);
+        var events = new List<IDomainEvent>();
+
+        foreach (var command in new ICommand[]
+        {
+            new AdvanceCombatCommand(),
+            new AdvanceCombatCommand(),
+            new SelectCombatActionCommand(CombatAction.Flee),
+            new FleeCommand()
+        })
+        {
+            var result = command switch
+            {
+                AdvanceCombatCommand advance => dispatcher.Dispatch(advance),
+                SelectCombatActionCommand select => dispatcher.Dispatch(select),
+                FleeCommand flee => dispatcher.Dispatch(flee),
+                _ => throw new ArgumentOutOfRangeException(nameof(command))
+            };
+            events.AddRange(result.Events);
+        }
+
+        return (dispatcher.CurrentState, events);
     }
 
     private static DungeonPosition FindWalkableNeighbor(FloorLayout layout, DungeonPosition origin)
