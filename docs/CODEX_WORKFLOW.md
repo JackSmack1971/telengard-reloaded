@@ -46,13 +46,13 @@ HANDOFF + EXIT
 
 A later run starts again from fresh `main` and re-evaluates the repository. This prevents the selection decision for ticket N+1 from being based on pre-merge assumptions from ticket N.
 
-## Current convergence milestone
+## Current convergence
 
-The current milestone is **Playable Godot Vertical Slice**, not merely Core Alpha mechanics.
+The current product sequence is **Playable Godot Vertical Slice** followed by the separate **Art Production Ready** handoff.
 
-The repository has already proven the renderer-independent Core Alpha composition headlessly and has completed the TEL-090–TEL-093 presentation-separation proof. TEL-091 is a visual renderer prototype, not a complete client.
+The repository has already proven renderer-independent Core Alpha composition headlessly and completed the TEL-090–TEL-093 presentation-separation proof. TEL-091 is a visual renderer prototype, not a complete client.
 
-The current development methodology therefore coordinates two tracks:
+The current methodology coordinates two tracks:
 
 ```text
 TEL-110..116 representative authored content
@@ -60,10 +60,10 @@ TEL-110..116 representative authored content
 TEL-120..127 playable Godot client
                 |
                 v
-GODOT-PLAYABLE-SLICE gate
+TEL-127 / GODOT-PLAYABLE-SLICE gate
                 |
                 v
-ART-PRODUCTION-READY gate
+TEL-128 / ART-PRODUCTION-READY gate
                 |
                 v
 future production-art batches
@@ -77,19 +77,18 @@ Read [`presentation/GODOT_CLIENT_BLUEPRINT.md`](presentation/GODOT_CLIENT_BLUEPR
 
 A ticket must have satisfied dependencies, no overlapping active PR, sufficiently defined acceptance criteria, reviewable scope, available required verification/observation, and a clear relationship to the nearest milestone.
 
-For the current milestone the selector must examine both tracks. TEL-120–TEL-123 intentionally may proceed while TEL-110–TEL-116 are still being authored. TEL-124 onward declares content dependencies that force the two tracks to converge.
+For the current convergence the selector must examine both tracks. TEL-120–TEL-123 intentionally may proceed while TEL-110–TEL-116 are still being authored. TEL-124 onward declares content dependencies that force the two tracks to converge. TEL-127 proves playability; TEL-128 separately determines whether final production assets are eligible.
 
 Eligible tickets are favored by dependency leverage toward the playable slice, continuity, acceptance-gate blocker value, ability to unlock the other track, focused verification clarity, and small coherent scope. Numerical TEL order is not itself a scheduling rule.
 
-This lets Codex choose intelligently while keeping the decision auditable.
-
 ## Placeholder-first presentation policy
 
-The repository distinguishes three different kinds of visual work:
+The repository distinguishes four presentation stages:
 
 1. **Visual development** — style studies, UI wireframes, lighting tests, silhouettes, technical experiments. Allowed before the playable client is complete.
-2. **Graybox/placeholder implementation** — production-shaped client architecture and resource paths using cheap placeholder visuals. This is the expected TEL-120–TEL-127 presentation strategy.
-3. **Production assets** — final tiles, sprites, animation, VFX, UI art, icons, and production audio. These are gated by `docs/gates/ART-PRODUCTION-READY.md`.
+2. **Graybox/placeholder implementation** — production-shaped client architecture and resource paths using cheap placeholder visuals. This is the expected TEL-120–TEL-126 strategy.
+3. **Playable-client acceptance** — TEL-127 proves the full first-slice loop in Godot with real content and placeholder/graybox presentation.
+4. **Production readiness/assets** — TEL-128 must pass `docs/gates/ART-PRODUCTION-READY.md` before final tiles, sprites, animation, VFX, UI-art, icons, or production audio are systematically ticketed.
 
 The workflow must not turn a client-infrastructure ticket into an opportunistic art-production batch.
 
@@ -100,6 +99,8 @@ A headless projection test proves a renderer contract; it does not prove a usabl
 When a TEL ticket or gate requires Godot-visible acceptance, the workflow records the Godot/runtime version and exercises the relevant surface. Keyboard acceptance is required where specified; controller acceptance is required by the full playable-client gate and any ticket that explicitly owns it.
 
 If the current execution environment cannot perform required Godot observation, the selector should prefer another eligible content/headless/client-contract slice. If no such slice exists, the run stops with a concrete environment blocker rather than weakening the acceptance criteria.
+
+TEL-128 is additionally allowed to stop `blocked` when the Art Production Ready gate requires a visual-direction, binary/LFS, or other product/repository policy decision that is not already authoritative. Codex must not invent such a decision simply to pass the gate.
 
 ## Invoking the workflow manually
 
@@ -147,9 +148,11 @@ Self-review is useful but not independent. The `telengard-review` skill separate
 - correctness and edge cases;
 - architecture, invariants, determinism, and save/version impact;
 - tests and regression evidence;
-- documentation and status provenance.
+- documentation and status provenance;
+- presentation/resource ownership when relevant;
+- security when relevant.
 
-Presentation and security lanes are added when relevant. Godot/client reviews must explicitly inspect simulation authority, input-command boundaries, projection redaction, resource ownership, and premature production-art scope. Any unresolved P0/P1/P2 finding blocks merge.
+Godot/client reviews explicitly inspect simulation authority, input-command boundaries, projection redaction, resource ownership, required manual observation, and premature production-art scope. TEL-128 reviews also check that missing art/pipeline policy was not invented. Any unresolved P0/P1/P2 finding blocks merge.
 
 ## Documentation behavior
 
@@ -159,7 +162,8 @@ The workflow distinguishes current status from historical evidence:
 - individual `docs/tasks/TEL-*.md` files define slice scope and acceptance;
 - `docs/presentation/GODOT_CLIENT_BLUEPRINT.md` defines the current presentation development methodology;
 - `docs/exec-plans/active/GODOT-PLAYABLE-VERTICAL-SLICE.md` coordinates the multi-ticket Godot milestone but does not replace ticket status;
-- `docs/gates/GODOT-PLAYABLE-SLICE.md` and `docs/gates/ART-PRODUCTION-READY.md` define the two presentation transition gates;
+- `docs/gates/GODOT-PLAYABLE-SLICE.md` is owned by TEL-127;
+- `docs/gates/ART-PRODUCTION-READY.md` is separately owned by TEL-128;
 - `docs/BUILD_STATUS.md` is append-only verification history;
 - other ExecPlans live under `docs/exec-plans/` when `docs/PLANS.md` requires them;
 - generated audit/status projections must be updated through repository tooling.
