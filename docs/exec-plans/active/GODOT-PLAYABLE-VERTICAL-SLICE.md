@@ -4,25 +4,25 @@
 
 Coordinate the multi-ticket transition from the TEL-091 Modern renderer
 prototype to a complete playable Godot floors 1-5 vertical slice while the
-representative content pack is authored in parallel.
+representative content pack is authored in parallel, then carry the project to
+an explicit Art Production Ready handoff.
 
 When this plan is complete, a player can launch Godot and complete the
 representative Telengard loop using normal keyboard/controller interaction,
 real first-slice content, explicit save/resume, and renderer-safe presentation
-boundaries. Final production art is intentionally deferred until the separate
-Art Production Ready gate passes.
+boundaries. The repository will also have passed the separate readiness gate
+required before systematic final production-art/audio batches are authored.
 
 ## Scope and non-goals
 
 In scope:
 
-- Godot client tickets TEL-120 through TEL-127;
+- Godot client/readiness tickets TEL-120 through TEL-128;
 - coordination with TEL-110 through TEL-116 first-slice content dependencies;
 - host/bootstrap, input/clock, scene/session, presentation/asset contracts,
   graybox rendering, UX, persistence, and full playable integration;
-- acceptance evidence for `docs/gates/GODOT-PLAYABLE-SLICE.md`;
-- readiness evidence for `docs/gates/ART-PRODUCTION-READY.md` where owned by
-  TEL-127.
+- acceptance evidence for `docs/gates/GODOT-PLAYABLE-SLICE.md` owned by TEL-127;
+- readiness evidence for `docs/gates/ART-PRODUCTION-READY.md` owned by TEL-128.
 
 Non-goals:
 
@@ -38,7 +38,7 @@ Non-goals:
 - `AGENTS.md`
 - `.codex/skills/telengard-next-slice/SKILL.md`
 - `docs/tasks/README.md`
-- individual TEL-110–TEL-127 ticket files
+- individual TEL-110–TEL-128 ticket files
 - `docs/presentation/GODOT_CLIENT_BLUEPRINT.md`
 - `docs/presentation/UX_INTERACTION_BLUEPRINT.md`
 - `docs/presentation/ART_DIRECTION_BLUEPRINT.md`
@@ -134,12 +134,19 @@ After explicit content dependencies are satisfied:
 ### Milestone C — Playable integration
 
 7. TEL-126 — save/suspend/resume and application lifecycle integration.
-8. TEL-127 — full fixed-seed playable vertical-slice acceptance plus
-   Art Production Ready evidence.
+8. TEL-127 — full fixed-seed Playable Godot Vertical Slice gate acceptance.
 
-### Milestone D — Production-art handoff
+A passed TEL-127 means the client is genuinely playable with production-shaped
+placeholder/graybox presentation. It does not by itself authorize final asset
+batches.
 
-Only after `ART-PRODUCTION-READY` passes:
+### Milestone D — Art-production handoff
+
+9. TEL-128 — complete the separate Art Production Ready gate, including stable
+   art-direction constraints, asset registry/pipeline/inventory evidence, UX
+   stability, and binary policy.
+
+Only after TEL-128 passes:
 
 - author focused production-asset TEL tickets;
 - keep them scoped to the representative first-slice inventory;
@@ -155,17 +162,20 @@ Every code ticket uses focused checks plus the canonical repository gate:
 `./eng/verify.ps1 -Mode Full`
 
 Presentation-visible tickets must also exercise the required Godot surface.
-The final playable gate additionally requires a real Godot acceptance run;
-headless tests alone cannot pass it.
+TEL-127 requires a real Godot acceptance run; headless tests alone cannot pass
+the playable gate. TEL-128 is separately blocked if required art-direction or
+repository policy decisions remain unresolved.
 
 The final plan validation includes:
 
-- `docs/gates/GODOT-PLAYABLE-SLICE.md` completed with evidence;
-- `docs/gates/ART-PRODUCTION-READY.md` completed with evidence;
+- `docs/gates/GODOT-PLAYABLE-SLICE.md` completed with evidence via TEL-127;
+- `docs/gates/ART-PRODUCTION-READY.md` completed with evidence via TEL-128;
 - first-slice content from TEL-110–TEL-116 loaded through the production content
   pack rather than test-only fixtures;
 - fixed-seed authoritative equivalence through save/resume;
-- keyboard and controller client acceptance.
+- keyboard and controller client acceptance;
+- validated first-slice production asset inventory and pipeline/readiness
+  evidence.
 
 ## Progress
 
@@ -173,7 +183,7 @@ The final plan validation includes:
   prototype rather than a playable client and established the two-track
   development methodology.
 - [x] 2026-08-23 — durable Godot/UX/art/asset blueprints and acceptance gates
-  authored; TEL-120–TEL-127 client slices added to the task system.
+  authored; TEL-120–TEL-128 client/readiness slices added to the task system.
 - [ ] TEL-120 — application host/bootstrap.
 - [ ] TEL-121 — input/clock bridge.
 - [ ] TEL-122 — session/scene flow.
@@ -181,7 +191,8 @@ The final plan validation includes:
 - [ ] TEL-124 — content-aware dungeon graybox.
 - [ ] TEL-125 — HUD and interaction flows.
 - [ ] TEL-126 — persistence/application lifecycle.
-- [ ] TEL-127 — playable slice + art-readiness acceptance.
+- [ ] TEL-127 — playable Godot vertical-slice acceptance.
+- [ ] TEL-128 — Art Production Ready acceptance.
 
 TEL-110–TEL-116 progress is tracked by the canonical task ledger and should not
 be duplicated as authoritative status here.
@@ -200,6 +211,9 @@ be duplicated as authoritative status here.
   definitions do not share one standardized presentation-key contract; the
   presentation-side registry avoids prematurely coupling engine resources to
   authoritative content schemas.
+- Playable-client acceptance and production-art readiness are intentionally
+  separate so unresolved visual direction cannot make TEL-127 ambiguously
+  complete.
 
 ## Decision log
 
@@ -207,6 +221,8 @@ be duplicated as authoritative status here.
   parallel; dependency graph controls convergence.
 - **Placeholder first:** the playable client gate explicitly does not require
   final art.
+- **Separate readiness ticket:** TEL-127 proves playability; TEL-128 alone
+  authorizes production-art ticket creation.
 - **Production-art hard gate:** systematic final asset batches wait for
   Art Production Ready evidence.
 - **Presentation-side registry:** stable IDs map to Godot resources outside
@@ -216,7 +232,7 @@ be duplicated as authoritative status here.
 
 ## Results / remaining work
 
-The plan remains active until TEL-120–TEL-127 are complete and both presentation
+The plan remains active until TEL-120–TEL-128 are complete and both presentation
 gates have recorded passing evidence. At that point move this plan to
 `docs/exec-plans/completed/` and author the first production-art batch tickets
 from the validated first-slice asset inventory.
