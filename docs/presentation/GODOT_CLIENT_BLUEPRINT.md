@@ -71,7 +71,12 @@ launch
 ```
 
 Passing this milestone is governed by
-`docs/gates/GODOT-PLAYABLE-SLICE.md`.
+`docs/gates/GODOT-PLAYABLE-SLICE.md` and owned by TEL-127.
+
+A separate **Art Production Ready** transition follows the playable milestone.
+TEL-128 owns that gate so the project can be fully playable while still
+explicitly blocked from final asset production by unresolved art-direction or
+pipeline decisions.
 
 ## Development tracks
 
@@ -90,12 +95,16 @@ TEL-110 through TEL-116 author the §48 floors 1-5 content pack:
 - spell roster;
 - fountain/altar/pit/teleporter definitions.
 
-### Track B — Playable Godot client
+### Track B — Playable Godot client and handoff
 
 TEL-120 onward owns the production-client transition. Foundation slices that do
 not depend on final content identities may proceed while TEL-110 through
 TEL-116 are still being authored. Content-dependent graybox/integration slices
 must declare and respect their explicit TEL-110–TEL-116 dependencies.
+
+TEL-127 proves the playable client. TEL-128 separately proves that the
+presentation/content/UX/art pipeline is stable enough to start systematic final
+asset batches.
 
 The autonomous next-slice workflow must compare eligible work across both
 tracks. It must not rigidly choose the lowest TEL number, and it must not starve
@@ -114,17 +123,17 @@ Godot host/input/session foundation ---+--> graybox playable client
 presentation + asset contracts --------+
                                               |
                                               v
-                                  GODOT-PLAYABLE-SLICE gate
+                               TEL-127 / GODOT-PLAYABLE-SLICE
                                               |
                                               v
-                                  ART-PRODUCTION-READY gate
+                               TEL-128 / ART-PRODUCTION-READY
                                               |
                                               v
                                   production asset batches
 ```
 
-No final/expensive production-art batch should be introduced before
-`ART-PRODUCTION-READY` passes. Concept exploration, style studies, UI
+No final/expensive production-art batch should be introduced before TEL-128
+passes `ART-PRODUCTION-READY`. Concept exploration, style studies, UI
 wireframes, placeholder assets, debug graphics, and graybox presentation are
 allowed before that gate because they exist to validate the client and visual
 language rather than lock production inventory.
@@ -283,8 +292,9 @@ placeholders. A placeholder should prove:
 - asset-state requirements;
 - deterministic replay compatibility.
 
-Only after the placeholder path works should an implementation slice replace it
-with final production assets.
+After the placeholder path works, TEL-127 proves the complete playable client.
+Final production assets still wait for TEL-128 to pass the separate readiness
+gate.
 
 ## UX contract
 
@@ -305,7 +315,8 @@ Use:
 - `docs/presentation/ART_DIRECTION_BLUEPRINT.md` for visual-language decisions;
 - `docs/presentation/ASSET_PIPELINE_BLUEPRINT.md` for resource organization,
   import, validation, and content-ID mapping;
-- `docs/gates/ART-PRODUCTION-READY.md` before production asset batches.
+- `docs/gates/ART-PRODUCTION-READY.md` for TEL-128 acceptance before production
+  asset batches.
 
 Art direction can be explored early. Production inventory should not be frozen
 until the corresponding authored content identity and placeholder states are
@@ -313,9 +324,9 @@ stable.
 
 ## Ticket sequence
 
-The canonical Godot client tickets live in `docs/tasks/README.md` and individual
-`docs/tasks/TEL-120.md` onward files. Their dependency graph, not numeric order,
-controls eligibility.
+The canonical Godot client/readiness tickets live in `docs/tasks/README.md` and
+individual `docs/tasks/TEL-120.md` onward files. Their dependency graph, not
+numeric order across the content/client tracks, controls eligibility.
 
 At a high level the sequence is:
 
@@ -326,24 +337,28 @@ host/bootstrap
   -> production presentation + asset contract
   -> content-aware dungeon graybox
   -> HUD/interaction graybox
-  -> persistence + full playable integration
-  -> art-production readiness review
+  -> persistence
+  -> TEL-127 playable-client acceptance
+  -> TEL-128 art-production readiness
+  -> production asset batches
 ```
 
 ## Autonomous selection policy
 
 `$telengard-next-slice` must:
 
-1. read this blueprint when any TEL-110–TEL-127 work is a serious candidate;
+1. read this blueprint when any TEL-110–TEL-128 work is a serious candidate;
 2. inspect both content and Godot tracks;
 3. use explicit ticket dependencies to determine eligibility;
 4. prefer dependency-unblocking work and convergence toward the playable slice;
-5. avoid production-art work before the readiness gate;
+5. keep production-art work blocked until TEL-128 passes;
 6. require presentation observation for Godot-visible changes when the ticket
    acceptance criteria call for it;
 7. if the current environment cannot perform required Godot observation,
    select another eligible non-Godot slice when one exists; otherwise stop with
-   a concrete environment blocker rather than weakening acceptance criteria.
+   a concrete environment blocker rather than weakening acceptance criteria;
+8. if TEL-128 depends on unresolved human/product visual direction, report the
+   smallest explicit decision needed rather than inventing an art policy.
 
 ## Art-production transition
 
@@ -359,7 +374,7 @@ The project has three distinct presentation stages:
 - atmosphere studies;
 - placeholder/icon language experiments.
 
-### 2. Graybox playable production — begins with TEL-120+
+### 2. Graybox playable production — TEL-120 through TEL-127
 
 - actual Godot host and input path;
 - placeholder dungeon rendering;
@@ -367,11 +382,11 @@ The project has three distinct presentation stages:
 - complete interactive UX;
 - deterministic full-loop acceptance.
 
-### 3. Production art — gated
+### 3. Production art — TEL-128 gated
 
 Final tiles, sprites, animation sets, VFX, UI art, icons, and production audio
-begin as systematic content batches only after
-`docs/gates/ART-PRODUCTION-READY.md` passes.
+begin as systematic content batches only after TEL-128 records passing evidence
+for `docs/gates/ART-PRODUCTION-READY.md`.
 
 ## Non-goals
 
