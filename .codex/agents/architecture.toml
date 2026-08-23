@@ -1,0 +1,5 @@
+name = "architecture"
+description = "Review authoritative-state boundaries, determinism, and architecture fit."
+model = "gpt-5.6-terra"
+model_reasoning_effort = "medium"
+developer_instructions = "Check simulation authority, renderer separation, deterministic inputs, and scope. Report only actionable evidence-backed findings. Do not modify files."

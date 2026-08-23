@@ -22,7 +22,7 @@
       "dependencies": ["TEL-005", "TEL-030", "TEL-040", "TEL-041", "TEL-060", "TEL-072"],
       "risk_tags": ["content-schema", "determinism", "save-compatibility"],
       "context": {
-        "required": ["docs/tasks/TEL-109.md", "docs/modern-telengard-spec.md#48", "src/Telengard.Content/Definitions"],
+        "required": ["docs/tasks/TEL-109.md", "docs/modern-telengard-spec.md#34-data-driven-content", "src/Telengard.Content/Definitions"],
         "conditional": {
           "save": ["docs/INVARIANTS.md"]
         }
@@ -33,7 +33,7 @@
       "dependencies": ["TEL-109", "TEL-011", "TEL-012", "TEL-040", "TEL-041"],
       "risk_tags": ["content-schema", "determinism"],
       "context": {
-        "required": ["docs/tasks/TEL-110.md", "docs/modern-telengard-spec.md#10", "src/Telengard.Core/world/generation"],
+        "required": ["docs/tasks/TEL-110.md", "docs/modern-telengard-spec.md#10-dungeon-depth-bands", "src/Telengard.Core/world/generation"],
         "conditional": {
           "architecture": ["docs/ARCHITECTURE.md"]
         }

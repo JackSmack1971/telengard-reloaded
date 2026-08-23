@@ -33,9 +33,21 @@ jobs:
         shell: pwsh
         run: New-Item -ItemType Directory -Force -Path .codex | Out-Null
 
+      - name: Check agent control plane
+        shell: pwsh
+        run: ./eng/control-plane.ps1 -Mode Check
+
       - name: Check generated audit status
         shell: pwsh
         run: ./eng/audit-status.ps1 -Mode Check
+
+      - name: Run focused structural checks
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          ./eng/control-plane.tests.ps1
+          ./eng/audit-status.tests.ps1
+          ./eng/task-index.tests.ps1
 
       - name: Run the canonical verification gate
         shell: pwsh
