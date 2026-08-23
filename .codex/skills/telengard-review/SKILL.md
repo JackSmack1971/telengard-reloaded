@@ -46,9 +46,49 @@ Add a lane only when it has a distinct falsification target. If multiple rows
 apply, take their union and deduplicate equivalent targets. If the diff is
 ambiguous, use the smallest safe escalation and state the reason.
 
-Use independent subagents when available. Give each reviewer the base/head refs
-or complete diff target, selected ticket, and its lane target. Reviewers should
-not share conclusions before producing their own findings.
+Use independent subagents when available. Give each reviewer a compact,
+lane-specific context contract containing only:
+
+```text
+base ref
+head ref
+selected TEL id
+lane objective
+lane-specific required docs
+finding schema
+```
+
+The reviewer must inspect the actual diff and required repository evidence
+itself. Do not pass the parent planning transcript, implementation narrative,
+unrelated blueprint documents or invariants, prior test output, or other
+reviewers' conclusions unless the selected lane explicitly requires them.
+Reviewers must not share conclusions before producing their own findings.
+
+The lane-specific required-docs minimum is:
+
+| Lane | Required context |
+| --- | --- |
+| correctness | selected ticket and changed production paths |
+| architecture/determinism | selected ticket, changed paths, and relevant invariants/architecture |
+| tests | selected ticket acceptance, production diff, test diff, and verification policy |
+| documentation/provenance | selected ticket, changed docs/status files, and task-status/ExecPlan rules when applicable |
+| presentation | selected ticket, Godot/projection diff, presentation invariants, and named blueprint sections |
+| save/architecture | selected ticket, save DTO/migration diff, save invariants/version rules, and relevant tests |
+
+Each reviewer returns at most five actionable findings followed by its lane
+verdict. It must not return file summaries, ticket restatement, or
+investigation narration. Use this schema:
+
+```text
+FINDINGS
+- P1 path:line — failure — violated contract — minimum correction
+- P2 path:line — failure — violated contract — missing test
+
+LANE_RESULT: pass | fail
+```
+
+Use only the severities and evidence standard defined below; omit the example
+lines when there are no findings.
 
 ## Review lanes
 

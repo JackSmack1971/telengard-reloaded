@@ -205,9 +205,14 @@ Fix issues before independent review.
 Invoke `$telengard-review` on the final candidate diff. Reviewers must inspect the repository/diff independently.
 
 Pass the selected ticket's risk tags and the actual changed paths so the review
-skill can route only lanes with distinct falsification targets. The parent still
-self-reviews the complete diff. Do not instantiate every generic lane by
-default.
+skill can route only lanes with distinct falsification targets. For each lane,
+construct the compact reviewer contract required by `$telengard-review`:
+`base ref`, `head ref`, selected TEL id, lane objective, lane-specific required
+docs, and the finding schema. Do not forward the parent planning transcript,
+implementation narrative, unrelated blueprint/invariant material, prior test
+output, or other reviewers' conclusions unless that lane explicitly requires
+the material. The parent still self-reviews the complete diff. Do not
+instantiate every generic lane by default.
 
 Resolve every actionable finding. If fixes materially change behavior, re-run focused tests, full verification, and the affected review lanes.
 
