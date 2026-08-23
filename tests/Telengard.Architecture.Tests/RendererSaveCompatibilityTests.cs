@@ -16,17 +16,25 @@ public sealed class RendererSaveCompatibilityTests
     public void Save_reload_preserves_modern_and_terminal_projections_without_exposing_hidden_state()
     {
         var layout = new FloorLayoutGenerator().Generate(1234, "generator-1", 1);
-        var entered = DungeonWalkingResolver.Enter(
-            GameState.Create(1234, mode: GameMode.Legacy),
-            new EnterDungeonCommand(),
-            layout);
-        var position = entered.State.Player.Position;
+        var enterDispatcher = new CommandDispatcher(GameState.Create(1234, mode: GameMode.Legacy));
+        enterDispatcher.Register<EnterDungeonCommand>((current, command) =>
+            DungeonWalkingResolver.Enter(current, command, layout));
+        var entered = enterDispatcher.Dispatch(new EnterDungeonCommand());
+        var encounterConfiguration = new EncounterTriggerConfiguration(
+            1,
+            [new EncounterSpawnOption("deep-watcher", level: 4, currentHitPoints: 7)]);
+        var destination = FindWalkableNeighbor(layout, entered.State.Player.Position);
+        var moveDispatcher = new CommandDispatcher(entered.State);
+        moveDispatcher.Register<MoveCommand>((current, command) =>
+            DungeonWalkingResolver.Move(current, command, layout, encounterConfiguration));
+        var encounter = moveDispatcher.Dispatch(new MoveCommand(
+            DirectionBetween(entered.State.Player.Position, destination)));
+        var position = encounter.State.Player.Position;
         var observed = new DungeonPosition(1, 0, 0);
         var visited = new DungeonPosition(1, 0, 0);
         var discoveredFeatureId = Guid.Parse("00000000-0000-0000-0000-000000000010");
         var hiddenFeatureId = Guid.Parse("00000000-0000-0000-0000-000000000011");
-        var monsterId = Guid.Parse("00000000-0000-0000-0000-000000000020");
-        var state = entered.State with
+        var state = encounter.State with
         {
             SimulationTick = 42,
             Inn = new InnState { IsAtInn = false },
@@ -68,23 +76,23 @@ public sealed class RendererSaveCompatibilityTests
                     observations: ["restores something"],
                     sampleCount: 1,
                     confidence: 50)]),
-            Combat = new CombatState(
-                new MonsterInstance(
-                    monsterId,
-                    "deep-watcher",
-                    level: 4,
-                    currentHitPoints: 7,
-                    position,
+            Combat = encounter.State.Combat! with
+            {
+                Monster = new MonsterInstance(
+                    encounter.State.Combat.Monster.InstanceId,
+                    encounter.State.Combat.Monster.DefinitionId,
+                    encounter.State.Combat.Monster.Level,
+                    encounter.State.Combat.Monster.CurrentHitPoints,
+                    encounter.State.Combat.Monster.Position,
                     temporaryEffects: ["hidden-effect"],
                     currentBehaviorState: "ambush"),
-                CombatPhase.EnemyAction,
-                round: 2,
-                selectedAction: CombatAction.Defend,
-                threatLevel: ThreatLevel.Deadly)
+                Phase = CombatPhase.EnemyAction,
+                Round = 2,
+                SelectedAction = CombatAction.Defend,
+                ThreatLevel = ThreatLevel.Deadly
+            }
         };
-        var events = entered.Events
-            .Append<IDomainEvent>(new EncounterStartedEvent(state.Combat!.Monster))
-            .ToArray();
+        var events = entered.Events.Concat(encounter.Events).ToArray();
         var originalSave = SaveGameSerializer.Serialize(state);
 
         var expectedPresentation = PresentationStateAdapter.Create(state);
@@ -94,14 +102,22 @@ public sealed class RendererSaveCompatibilityTests
         var actualPresentation = PresentationStateAdapter.Create(reloaded);
         var actualModern = ModernRenderer.Create(actualPresentation, events);
         var actualTerminal = TerminalRenderer.Render(actualPresentation, events);
-        var originalContinuation = CombatStateResolver.Advance(state, new AdvanceCombatCommand());
-        var reloadedContinuation = CombatStateResolver.Advance(reloaded, new AdvanceCombatCommand());
+        var originalContinuation = CreateCombatDispatcher(state)
+            .Dispatch(new AdvanceCombatCommand());
+        var reloadedContinuation = CreateCombatDispatcher(reloaded)
+            .Dispatch(new AdvanceCombatCommand());
 
         Assert.Collection(
             events,
             domainEvent => Assert.IsType<DungeonEnteredEvent>(domainEvent),
             domainEvent => Assert.IsType<ExpeditionStartedEvent>(domainEvent),
+            domainEvent => Assert.IsType<PlayerMovedEvent>(domainEvent),
             domainEvent => Assert.IsType<EncounterStartedEvent>(domainEvent));
+        var movedEvent = Assert.IsType<PlayerMovedEvent>(events[2]);
+        Assert.Equal(entered.State.Player.Position, movedEvent.From);
+        Assert.Equal(state.Player.Position, movedEvent.To);
+        var encounterEvent = Assert.IsType<EncounterStartedEvent>(events[3]);
+        Assert.Equal(state.Combat!.EncounterId, encounterEvent.Monster.InstanceId);
         Assert.Equal(originalSave, SaveGameSerializer.Serialize(reloaded));
         Assert.Equal(
             SaveGameSerializer.Serialize(originalContinuation.State),
@@ -117,11 +133,18 @@ public sealed class RendererSaveCompatibilityTests
         Assert.Equal(expectedModern.Combat, actualModern.Combat);
         Assert.Equal(expectedModern.Cues, actualModern.Cues);
         Assert.Equal(
-            [ModernCueKind.DungeonEntered, ModernCueKind.CombatStarted],
+            [ModernCueKind.DungeonEntered, ModernCueKind.PlayerMoved, ModernCueKind.CombatStarted],
             actualModern.Cues.Select(cue => cue.Kind));
+        Assert.DoesNotContain(typeof(ModernMonsterMarker).GetProperties(), property =>
+            property.Name is nameof(MonsterInstance.Level) or
+                nameof(MonsterInstance.TemporaryEffects) or
+                nameof(MonsterInstance.CurrentBehaviorState));
         Assert.Contains("EVENT dungeon_entered", actualTerminal);
+        Assert.Contains("EVENT player_moved", actualTerminal);
         Assert.Contains("EVENT encounter_started", actualTerminal);
         Assert.True(actualTerminal.IndexOf("EVENT dungeon_entered", StringComparison.Ordinal) <
+            actualTerminal.IndexOf("EVENT player_moved", StringComparison.Ordinal));
+        Assert.True(actualTerminal.IndexOf("EVENT player_moved", StringComparison.Ordinal) <
             actualTerminal.IndexOf("EVENT encounter_started", StringComparison.Ordinal));
         Assert.DoesNotContain(actualPresentation.DiscoveredFeatures, feature => feature.InstanceId == hiddenFeatureId);
         Assert.DoesNotContain(hiddenFeatureId.ToString("N"), actualTerminal, StringComparison.Ordinal);
@@ -129,4 +152,45 @@ public sealed class RendererSaveCompatibilityTests
         Assert.DoesNotContain("ambush", actualTerminal, StringComparison.Ordinal);
         Assert.Equal(originalSave, SaveGameSerializer.Serialize(state));
     }
+
+    private static CommandDispatcher CreateCombatDispatcher(GameState state)
+    {
+        var dispatcher = new CommandDispatcher(state);
+        dispatcher.Register<AdvanceCombatCommand>(CombatStateResolver.Advance);
+        return dispatcher;
+    }
+
+    private static DungeonPosition FindWalkableNeighbor(FloorLayout layout, DungeonPosition origin)
+    {
+        foreach (var direction in Enum.GetValues<MovementDirection>())
+        {
+            var candidate = Offset(origin, direction);
+            if (candidate.X >= 0 && candidate.X < layout.Width &&
+                candidate.Y >= 0 && candidate.Y < layout.Height && layout.IsWalkable(candidate))
+            {
+                return candidate;
+            }
+        }
+
+        throw new InvalidOperationException("The generated layout has no walkable neighbor.");
+    }
+
+    private static DungeonPosition Offset(DungeonPosition position, MovementDirection direction) => direction switch
+    {
+        MovementDirection.North => new(position.Floor, position.X, position.Y - 1),
+        MovementDirection.South => new(position.Floor, position.X, position.Y + 1),
+        MovementDirection.East => new(position.Floor, position.X + 1, position.Y),
+        MovementDirection.West => new(position.Floor, position.X - 1, position.Y),
+        _ => throw new ArgumentOutOfRangeException(nameof(direction))
+    };
+
+    private static MovementDirection DirectionBetween(DungeonPosition from, DungeonPosition to) =>
+        (to.X - from.X, to.Y - from.Y) switch
+        {
+            (0, -1) => MovementDirection.North,
+            (0, 1) => MovementDirection.South,
+            (1, 0) => MovementDirection.East,
+            (-1, 0) => MovementDirection.West,
+            _ => throw new ArgumentException("Positions must be adjacent.", nameof(to))
+        };
 }
