@@ -10,7 +10,7 @@ A multi-ticket/umbrella ExecPlan may coordinate a milestone across many TEL tick
 
 When a selected ticket belongs to an active umbrella plan, update only the durable progress/decision/discovery state affected by that ticket. The canonical task ledger remains `docs/tasks/README.md`; an ExecPlan is coordination state, not an alternate status ledger.
 
-The current example is `docs/exec-plans/active/GODOT-PLAYABLE-VERTICAL-SLICE.md`, which coordinates the TEL-110–TEL-116 content track with TEL-120–TEL-127 Godot-client work and the playable/art-readiness gates.
+The current example is `docs/exec-plans/active/GODOT-PLAYABLE-VERTICAL-SLICE.md`, which coordinates the TEL-110–TEL-116 content track with TEL-120–TEL-127 playable-Godot work and TEL-128 Art Production Ready handoff. TEL-127 and TEL-128 are intentionally separate acceptance slices so a playable client can be complete while unresolved art-direction or production-pipeline policy still blocks final assets.
 
 ## Required properties
 
@@ -37,7 +37,7 @@ For each applicable contract, state how it is preserved: simulation authority, c
 State `none` when truly none. Otherwise describe DTO, migration, save/simulation/generator/content version implications and backward-compatibility tests.
 
 ### Implementation plan
-Ordered milestones expressed as observable repository changes. Each milestone should be independently understandable and testable. For multi-track plans, record explicit convergence dependencies rather than implying numerical ticket order.
+Ordered milestones expressed as observable repository changes. Each milestone should be independently understandable and testable. For multi-track plans, record explicit convergence dependencies rather than implying numerical ticket order. Separate acceptance gates into separate TEL slices when one can pass while the next remains legitimately blocked by a distinct readiness decision.
 
 ### Validation
 Exact focused checks and the final gate. For code changes the final headless gate is normally:
