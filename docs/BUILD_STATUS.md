@@ -2685,3 +2685,27 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
   passed (408), formatter verification passed, and the focused Release build
   passed with zero warnings and zero errors. The canonical
   `./eng/verify.ps1 -Mode Full` gate passed on the completed diff.
+
+## TEL-093 verification
+
+- Status: implemented and verified; the existing explicit save DTO/migration
+  boundary now has a focused cross-boundary proof that a loaded authoritative
+  state produces equivalent Modern and Terminal presentation output.
+- Tests added: `RendererSaveCompatibilityTests` covers canonical save equality,
+  Modern projection equality, deterministic Terminal output, committed event
+  cues, hidden feature and internal monster-detail redaction, and source-state
+  immutability across rendering.
+- Files/modules affected: `tests/Telengard.Architecture.Tests/RendererSaveCompatibilityTests.cs`,
+  `docs/tasks/TEL-093.md`, `docs/tasks/README.md`, `CHANGELOG.md`,
+  `docs/BUILD_STATUS.md`, and the active ExecPlan.
+- Save-schema impact: none; save version 14, DTOs, migrations, simulation,
+  generator, and content versions remain unchanged.
+- Invariants: both renderers consume fresh presentation projections after
+  reload; no renderer mutates authoritative state or receives undiscovered
+  features or internal monster effects/behavior.
+- Acceptance: `./eng/dotnet.ps1 test Telengard.sln --configuration Release
+  --no-restore --filter FullyQualifiedName~RendererSaveCompatibilityTests`
+  passed (1); `./eng/dotnet.ps1 format Telengard.sln --verify-no-changes`
+  passed; and `./eng/verify.ps1 -Mode Full` passed with a Release build of
+  0 warnings and 0 errors and 397 Release tests. Independent review and PR
+  gates remain pending.
