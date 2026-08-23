@@ -38,8 +38,12 @@ public static class ContentPackLoader
             contentRoot,
             "loot_tables",
             ParseLootTable);
+        var bands = LoadDefinitions(
+            contentRoot,
+            "bands",
+            ParseDungeonBand);
 
-        var pack = new ContentPack(contentVersion, monsters, items, spells, features, talents, lootTables);
+        var pack = new ContentPack(contentVersion, monsters, items, spells, features, talents, lootTables, bands);
         ValidateReferences(pack);
         return pack;
     }
@@ -209,6 +213,25 @@ public static class ContentPackLoader
                 RequiredLong(entry, "weight")))
             .ToArray();
         return new LootTable(RequiredString(root, "id"), entries);
+    }
+
+    private static DungeonBandDefinition ParseDungeonBand(string json)
+    {
+        var root = ParseRoot(json);
+        return new DungeonBandDefinition(
+            RequiredString(root, "id"),
+            RequiredString(root, "displayName"),
+            RequiredInt(root, "floorMin"),
+            RequiredInt(root, "floorMax"),
+            RequiredString(root, "generationProfile"),
+            StringArray(root, "monsterFamilies"),
+            IntMap(root, "featureWeights"),
+            StringArray(root, "hazards"),
+            StringArray(root, "ambientRules"),
+            OptionalString(root, "encounterEcologyId"),
+            OptionalString(root, "lootProfile"),
+            RequiredString(root, "visualTheme"),
+            RequiredString(root, "audioTheme"));
     }
 
     private static IReadOnlyList<FeatureOutcome> FeatureOutcomes(JsonElement root, string propertyName)
@@ -424,6 +447,8 @@ public static class ContentPackLoader
 
     private static void ValidateReferences(ContentPack pack)
     {
+        ValidateBandRanges(pack);
+
         foreach (var table in pack.LootTables.Definitions.Values)
         {
             foreach (var entry in table.Entries)
@@ -442,6 +467,24 @@ public static class ContentPackLoader
             {
                 throw new InvalidDataException(
                     $"Monster '{monster.Id}' references missing loot table '{monster.LootTable}'.");
+            }
+        }
+    }
+
+    private static void ValidateBandRanges(ContentPack pack)
+    {
+        var bands = pack.Bands.Definitions.Values
+            .OrderBy(band => band.FloorMin)
+            .ThenBy(band => band.FloorMax)
+            .ThenBy(band => band.Id, StringComparer.Ordinal)
+            .ToArray();
+
+        for (var index = 1; index < bands.Length; index++)
+        {
+            if (bands[index - 1].FloorMax >= bands[index].FloorMin)
+            {
+                throw new InvalidDataException(
+                    $"Dungeon bands '{bands[index - 1].Id}' and '{bands[index].Id}' have overlapping floor ranges.");
             }
         }
     }

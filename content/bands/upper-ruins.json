@@ -1,0 +1,15 @@
+{
+  "id": "upper-ruins",
+  "display_name": "Upper Ruins",
+  "floor_min": 1,
+  "floor_max": 5,
+  "generation_profile": "upper-ruins",
+  "monster_families": ["ruin-dweller"],
+  "feature_weights": {},
+  "hazards": ["darkness"],
+  "ambient_rules": ["distant-drips"],
+  "encounter_ecology_id": "upper-ruins-encounters",
+  "loot_profile": "upper-ruins-loot",
+  "visual_theme": "upper-ruins",
+  "audio_theme": "upper-ruins"
+}
