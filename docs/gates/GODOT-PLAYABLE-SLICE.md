@@ -1,5 +1,12 @@
 # Playable Godot Vertical Slice gate
 
+## Owner
+
+TEL-127 — Verify playable Godot vertical slice.
+
+This gate is intentionally separate from `ART-PRODUCTION-READY.md`, which is
+owned by TEL-128.
+
 ## Purpose
 
 This gate determines whether the project has moved beyond the TEL-091 renderer
@@ -12,6 +19,7 @@ stable.
 
 ## Sources of truth
 
+- `docs/tasks/TEL-127.md`
 - `docs/presentation/GODOT_CLIENT_BLUEPRINT.md`
 - `docs/presentation/UX_INTERACTION_BLUEPRINT.md`
 - `docs/modern-telengard-spec.md` §3, §12, §36–§39, §47–§48, §51–§52
@@ -23,8 +31,7 @@ stable.
 The gate is not eligible to pass until:
 
 - TEL-110 through TEL-116 are implemented and verified;
-- all Godot client tickets required by the ledger through the playable-slice
-  integration ticket are implemented and verified;
+- TEL-120 through TEL-126 are implemented and verified;
 - the current first-slice content pack loads through the production content
   boundary rather than test-only fixtures.
 
@@ -158,7 +165,8 @@ The gate fails if:
 
 ## Result
 
-When all acceptance criteria pass, record the date, commit/PR, verification
-commands, Godot acceptance environment, and remaining presentation-only defects.
-Then proceed to `ART-PRODUCTION-READY.md`; do not treat this gate alone as
-permission for broad final asset production.
+When all acceptance criteria pass, TEL-127 records the date, commit/PR,
+verification commands, Godot acceptance environment, and remaining
+presentation-only defects. Then TEL-128 may evaluate
+`ART-PRODUCTION-READY.md`; do not treat this gate alone as permission for broad
+final asset production.
