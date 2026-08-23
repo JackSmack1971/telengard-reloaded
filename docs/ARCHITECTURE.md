@@ -6,7 +6,7 @@ The repository contains a C#/.NET 8 renderer-independent solution, engineering-c
 
 Core Alpha system composition is proven headlessly. TEL-090–TEL-093 prove presentation separation and renderer-independent save compatibility. `src/Telengard.Godot/ModernRenderer.tscn` remains a visual renderer prototype rather than a complete playable application host.
 
-The current convergence milestone is a **Playable Godot Vertical Slice**. TEL-110–TEL-116 author the representative floors 1-5 content while TEL-120–TEL-127 build the production-shaped Godot client using placeholder/graybox presentation. See `docs/presentation/GODOT_CLIENT_BLUEPRINT.md` and the active Godot umbrella ExecPlan.
+The current convergence is a **Playable Godot Vertical Slice** followed by the separate **Art Production Ready** handoff. TEL-110–TEL-116 author the representative floors 1-5 content, TEL-120–TEL-127 build and prove the production-shaped Godot client using placeholder/graybox presentation, and TEL-128 determines when systematic final asset production is allowed. See `docs/presentation/GODOT_CLIENT_BLUEPRINT.md` and the active Godot umbrella ExecPlan.
 
 The structure below separates implemented boundaries from incomplete client/presentation work. Future agents must still verify the actual tree and current task ledger before extending any path.
 
@@ -60,6 +60,7 @@ meta/          [implemented slices]  setup/suspension/save/profile-related bound
 content/       [implemented boundary] external versioned pack; TEL-110–116 author slice data
 presentation/  [implemented prototype] safe projections + Modern/Terminal renderer proofs
 Godot host/UI  [planned]             TEL-120–127 playable application/client work
+art readiness  [planned]             TEL-128 production-asset handoff gate
 ```
 
 Explicit save DTOs and migrations live in `Telengard.Save`; they are part of the meta boundary but are intentionally separate from Core domain folders.
@@ -119,16 +120,20 @@ Stable content/presentation IDs map to Godot assets through a presentation-side 
 
 This allows final art to be replaced or reorganized without changing simulation identity or save meaning.
 
-## Production-art transition
+## Playable-client and production-art transition
 
 The architecture intentionally uses placeholders/graybox assets while client and projection contracts are being proven.
 
-Systematic final asset batches are not architecture prerequisites. They become eligible only after:
+TEL-127 passes `docs/gates/GODOT-PLAYABLE-SLICE.md` and proves that the real first-slice game is playable in Godot through the authoritative boundaries. Passing TEL-127 does not itself authorize systematic final asset production.
+
+TEL-128 separately passes `docs/gates/ART-PRODUCTION-READY.md`. It may remain blocked if art direction, asset-pipeline, UX-stability, binary/LFS, or other required production policy is not yet explicit. Codex must not invent those decisions merely to make the gate pass.
+
+Systematic final asset batches become eligible only after:
 
 1. the real first-slice content exists;
 2. the full Godot loop works through the authoritative boundaries;
 3. the presentation/resource mapping is stable;
-4. `docs/gates/GODOT-PLAYABLE-SLICE.md` passes;
-5. `docs/gates/ART-PRODUCTION-READY.md` passes.
+4. TEL-127 / `GODOT-PLAYABLE-SLICE` passes;
+5. TEL-128 / `ART-PRODUCTION-READY` passes.
 
 Concept/style exploration before those gates is presentation design work, not authorization to hard-code production asset contracts.
