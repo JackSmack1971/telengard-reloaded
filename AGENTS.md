@@ -6,7 +6,7 @@ This file is the durable repository contract for coding agents. Apply it to all 
 
 Advance Telengard Reloaded toward the nearest verified product milestone by completing **one minimal coherent slice per implementation run** while preserving the project's architecture, determinism, save compatibility, documentation provenance, and verification gates.
 
-The current convergence milestone is the **Playable Godot Vertical Slice**: complete the representative floors 1–5 content while building a production-shaped Godot client with placeholders/graybox visuals, then pass the playable-client and Art Production Ready gates before systematic final asset production.
+The current convergence milestone is the **Playable Godot Vertical Slice**: complete the representative floors 1–5 content while building a production-shaped Godot client with placeholders/graybox visuals, pass the playable-client gate, then separately pass the Art Production Ready gate before systematic final asset production.
 
 Autonomy does not authorize invention. When the specification or ticket leaves gameplay policy, balancing, formulas, tuning, visual direction, or production-asset policy unresolved, preserve that configurability and stop rather than silently choosing a permanent rule.
 
@@ -21,7 +21,7 @@ For product and engineering decisions, use this precedence:
 5. `docs/modern-telengard-spec.md` for product intent and requirements.
 6. `docs/INVARIANTS.md` for contracts that must remain true.
 7. `docs/ARCHITECTURE.md`, ADRs, and `docs/DEVELOPMENT.md` for architectural and implementation conventions.
-8. For TEL-110–TEL-127 or related presentation/content work: `docs/presentation/GODOT_CLIENT_BLUEPRINT.md`, its referenced presentation blueprints/gates, and `docs/exec-plans/active/GODOT-PLAYABLE-VERTICAL-SLICE.md`.
+8. For TEL-110–TEL-128 or related presentation/content work: `docs/presentation/GODOT_CLIENT_BLUEPRINT.md`, its referenced presentation blueprints/gates, and `docs/exec-plans/active/GODOT-PLAYABLE-VERTICAL-SLICE.md`.
 9. Existing code and tests as evidence of current behavior.
 10. `docs/BUILD_STATUS.md` as append-only verification history, never as a replacement for the task ledger.
 
@@ -50,7 +50,7 @@ Read at minimum:
 - the candidate ticket(s);
 - relevant architecture/spec/ADR material discovered from those files.
 
-When TEL-110–TEL-127 are plausible candidates, also read:
+When TEL-110–TEL-128 are plausible candidates, also read:
 
 - `docs/presentation/GODOT_CLIENT_BLUEPRINT.md`;
 - `docs/exec-plans/active/GODOT-PLAYABLE-VERTICAL-SLICE.md`;
@@ -71,12 +71,12 @@ A candidate is eligible only when:
 - it advances the nearest repository milestone or removes a blocker to that milestone;
 - any required observation/tooling is available or the ticket defines a repository-approved substitute.
 
-For the current Playable Godot Vertical Slice milestone, evaluate both coordinated tracks:
+For the current Playable Godot Vertical Slice and production-readiness handoff, evaluate both coordinated tracks:
 
 - TEL-110–TEL-116: representative authored content;
-- TEL-120–TEL-127: playable Godot client.
+- TEL-120–TEL-128: playable Godot client and Art Production Ready handoff.
 
-TEL-120–TEL-123 may progress while TEL-110–TEL-116 are still being authored when their explicit dependencies are satisfied. TEL-124 onward declares the content dependencies needed for convergence. Do not force strict numeric sequencing across the two tracks.
+TEL-120–TEL-123 may progress while TEL-110–TEL-116 are still being authored when their explicit dependencies are satisfied. TEL-124 onward declares the content dependencies needed for convergence. TEL-127 proves playability; TEL-128 separately proves production-art readiness. Do not force strict numeric sequencing across the two tracks.
 
 Prefer candidates using this order of evidence:
 
@@ -87,7 +87,7 @@ Prefer candidates using this order of evidence:
 5. smallest independently verifiable vertical behavior;
 6. repository engineering work only when it blocks safe product progress.
 
-Production-art/final-asset batches are ineligible until `docs/gates/ART-PRODUCTION-READY.md` has recorded passing evidence. Concept studies, UI wireframes, placeholders, graybox assets, and technical presentation experiments remain allowed before that gate when owned by the selected ticket.
+Production-art/final-asset batches are ineligible until TEL-128 has recorded passing evidence for `docs/gates/ART-PRODUCTION-READY.md`. Concept studies, UI wireframes, placeholders, graybox assets, and technical presentation experiments remain allowed before that gate when owned by the selected ticket.
 
 When multiple candidates remain plausible, compare dependency readiness, milestone value, scope size, architectural risk, verification/observation clarity, and continuity with recent work. Record the selected ticket and a short evidence-based rationale in the plan/PR; do not record hidden chain-of-thought.
 
@@ -103,7 +103,7 @@ Before editing code:
 - state the full verification path;
 - create/update an ExecPlan when `docs/PLANS.md` requires one.
 
-For TEL-120–TEL-127, update the umbrella ExecPlan when the selected slice changes durable progress, dependencies, discoveries, or decisions.
+For TEL-120–TEL-128, update the umbrella ExecPlan when the selected slice changes durable progress, dependencies, discoveries, or decisions.
 
 Keep plans factual and self-contained. Update them when repository discoveries invalidate assumptions.
 
@@ -139,7 +139,7 @@ Additional Godot/presentation contracts:
 - Godot resource paths, scene UIDs, texture/audio paths, and transient scene objects do not become authoritative save data;
 - stable content/presentation IDs resolve through a presentation-side asset registry rather than scattered renderer conditionals;
 - use conspicuous placeholders/graybox presentation before final production assets;
-- do not opportunistically add systematic final art before Art Production Ready passes.
+- do not opportunistically add systematic final art before TEL-128 passes Art Production Ready.
 
 ### 6. TEST
 
@@ -214,7 +214,7 @@ Update durable repository knowledge in the same slice when required:
 - generated audit/status projections using the repository tooling rather than hand-editing generated files;
 - README/DEVELOPMENT/INVARIANTS only when their durable contracts actually change.
 
-For TEL-127, record `GODOT-PLAYABLE-SLICE` and `ART-PRODUCTION-READY` results independently. Do not create final production-art TEL batches unless the latter gate passes.
+TEL-127 records only `docs/gates/GODOT-PLAYABLE-SLICE.md`. TEL-128 separately records `docs/gates/ART-PRODUCTION-READY.md`; if required visual direction or repository policy is unresolved, TEL-128 remains blocked rather than inventing the missing decision. Do not create final production-art TEL batches unless TEL-128 passes.
 
 Documentation must describe what exists after the change, what was verified, save/version impact, presentation observation when required, and intentionally deferred work. Never mark work implemented merely because a plan or task file was written.
 
@@ -252,7 +252,7 @@ Use squash merge because this repository allows squash merging and does not allo
 
 After merge, synchronize/read the new `main`, identify likely next candidates only as a handoff, and **end the run**. Do not implement the next ticket in the same thread/run.
 
-While TEL-110–TEL-127 remain, handoffs should consider candidates from both tracks when dependencies permit rather than assuming strict numeric order.
+While TEL-110–TEL-128 remain, handoffs should consider candidates from both tracks when dependencies permit rather than assuming strict numeric order.
 
 Finish with a compact machine-readable handoff:
 
@@ -280,7 +280,7 @@ Stop without implementing or merging when any of these applies:
 - required tests/verification/observation cannot run and there is no repository-approved substitute;
 - a save migration/version decision cannot be made from existing contracts;
 - the requested change would move authoritative gameplay behavior into presentation/tooling;
-- a final production-art batch is proposed before `ART-PRODUCTION-READY` passes;
+- a final production-art batch is proposed before TEL-128 / `ART-PRODUCTION-READY` passes;
 - credentials, secrets, destructive external actions, or unrelated user work would be endangered;
 - the coherent slice expands beyond what can be reviewed as one transaction.
 
