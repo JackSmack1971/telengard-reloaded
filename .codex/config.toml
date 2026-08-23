@@ -1,0 +1,13 @@
+# Project-scoped Codex defaults. Loaded only when this repository is trusted.
+# Keep model selection user-controlled; raise reasoning for this architecture/spec-heavy repo.
+# Medium is the balanced project default; high is an explicit escalation.
+model_reasoning_effort = "medium"
+project_doc_max_bytes = 65536
+
+[control_plane]
+root_agents_max_bytes = 16384
+workflow_skill_soft_max_bytes = 16384
+
+[features]
+hooks = true
+multi_agent = true
