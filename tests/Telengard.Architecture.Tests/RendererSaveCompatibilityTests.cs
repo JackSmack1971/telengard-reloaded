@@ -152,6 +152,12 @@ public sealed class RendererSaveCompatibilityTests
         Assert.Contains("EVENT dungeon_entered", actualTerminal);
         Assert.Contains("EVENT player_moved", actualTerminal);
         Assert.Contains("EVENT encounter_started", actualTerminal);
+        Assert.Contains(
+            $"EVENT dungeon_entered {entered.State.Player.Position.Floor}/{entered.State.Player.Position.X}/{entered.State.Player.Position.Y}",
+            actualTerminal);
+        Assert.Contains(
+            $"EVENT player_moved {state.Player.Position.Floor}/{state.Player.Position.X}/{state.Player.Position.Y}",
+            actualTerminal);
         Assert.True(actualTerminal.IndexOf("EVENT dungeon_entered", StringComparison.Ordinal) <
             actualTerminal.IndexOf("EVENT player_moved", StringComparison.Ordinal));
         Assert.True(actualTerminal.IndexOf("EVENT player_moved", StringComparison.Ordinal) <
