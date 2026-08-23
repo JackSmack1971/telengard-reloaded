@@ -13,7 +13,7 @@ Advance the nearest project milestone by selecting the best **eligible** next sl
 
 Never continue into a second implementation slice in the same run.
 
-The current product-development convergence milestone is the **Playable Godot Vertical Slice**: complete the representative floors 1-5 content while building the production-shaped Godot client with placeholders, then pass the playable-client and Art Production Ready gates. Do not treat TEL-091 as a complete Godot client.
+The current product-development convergence is: complete the representative floors 1-5 content, build the production-shaped Godot client with placeholders, pass TEL-127 / the Playable Godot Vertical Slice gate, then separately pass TEL-128 / the Art Production Ready gate before systematic final asset batches. Do not treat TEL-091 as a complete Godot client.
 
 ## 1. Establish current state
 
@@ -24,7 +24,7 @@ From repository root:
 3. Inspect current branch/worktree, remote `main`, recent commits, open PRs, and CI state.
 4. Detect overlapping/stale work before choosing a ticket.
 5. Read status/milestone material needed to understand the nearest milestone.
-6. If any serious candidate is TEL-110 through TEL-127, read `docs/presentation/GODOT_CLIENT_BLUEPRINT.md` and `docs/exec-plans/active/GODOT-PLAYABLE-VERTICAL-SLICE.md` before ranking candidates.
+6. If any serious candidate is TEL-110 through TEL-128, read `docs/presentation/GODOT_CLIENT_BLUEPRINT.md` and `docs/exec-plans/active/GODOT-PLAYABLE-VERTICAL-SLICE.md` before ranking candidates.
 
 If unrelated user changes are present, do not overwrite, reset, stash, or absorb them without explicit authorization. Prefer an isolated worktree/branch when available.
 
@@ -32,31 +32,33 @@ If unrelated user changes are present, do not overwrite, reset, stash, or absorb
 
 Extract plausible `Not started` work from `docs/tasks/README.md` plus any explicit active remediation work. For each serious candidate, inspect its ticket and dependencies.
 
-For the current playable-slice milestone, build the candidate set across **both** coordinated tracks:
+For the current convergence, build the candidate set across **both** coordinated tracks:
 
 - TEL-110–TEL-116 — representative authored content;
-- TEL-120–TEL-127 — playable Godot client.
+- TEL-120–TEL-128 — playable Godot client and production-readiness handoff.
 
-Do not rigidly select the lowest TEL number. TEL-120–TEL-123 are intentionally able to progress while TEL-110–TEL-116 are still being authored when their explicit dependencies are satisfied. TEL-124 onward has content dependencies that enforce convergence.
+Do not rigidly select the lowest TEL number. TEL-120–TEL-123 are intentionally able to progress while TEL-110–TEL-116 are still being authored when their explicit dependencies are satisfied. TEL-124 onward has content dependencies that enforce convergence. TEL-127 proves the real playable client; TEL-128 separately decides whether final production-art batches are eligible.
 
 Reject a candidate when:
 
 - dependencies are incomplete;
 - an active PR already owns it;
-- acceptance criteria require an undefined product/tuning decision;
+- acceptance criteria require an undefined product/tuning/design decision;
 - the slice is too broad to review coherently;
 - another prerequisite is visibly more fundamental;
 - current repository health prevents trustworthy validation;
 - required Godot/manual observation cannot be performed and the ticket provides no repository-approved substitute;
-- it is a production-art/final-asset batch while `docs/gates/ART-PRODUCTION-READY.md` lacks passing evidence.
+- it is a production-art/final-asset batch while TEL-128 / `docs/gates/ART-PRODUCTION-READY.md` lacks passing evidence.
 
 When a Godot-visible ticket is blocked only because the current environment lacks required Godot tooling, prefer another eligible content/headless/client-contract slice if one exists. If none exists, stop with a concrete environment blocker; never weaken the ticket's observation criteria.
+
+When TEL-128 is the candidate, do not invent unresolved visual direction, repository binary policy, or other human/product decisions needed by the Art Production Ready gate. If the repository does not already contain enough authority to decide them, stop with the smallest explicit decision request.
 
 Rank remaining candidates by:
 
 1. direct dependency leverage toward the Playable Godot Vertical Slice convergence;
 2. continuity with the most recently completed coherent feature/client chain;
-3. milestone blocker value;
+3. blocker value for the nearest acceptance gate;
 4. ability to unlock work on the other coordinated track;
 5. ability to prove behavior with focused tests/observation;
 6. small/reviewable scope;
@@ -74,7 +76,7 @@ Read:
 - existing implementation and tests for adjacent behavior;
 - recent commits/PRs in the same subsystem when useful.
 
-For TEL-110–TEL-127, also read the blueprint documents referenced by the ticket. For TEL-120–TEL-127, read/update the active umbrella ExecPlan as durable coordination state.
+For TEL-110–TEL-128, also read the blueprint documents referenced by the ticket. For TEL-120–TEL-128, read/update the active umbrella ExecPlan as durable coordination state.
 
 Determine whether `docs/PLANS.md` requires a ticket-specific ExecPlan in addition to the umbrella plan. Create/resume one before implementation if required.
 
@@ -99,11 +101,12 @@ For presentation work, explicitly state whether the slice is:
 - client foundation;
 - placeholder/graybox presentation;
 - playable integration;
+- art-production readiness;
 - production art.
 
-Production art is invalid before Art Production Ready passes.
+Production art is invalid before TEL-128 passes Art Production Ready.
 
-If evidence reveals that the ticket is not actually implementable without a new product decision, stop with `RUN_RESULT status: blocked`.
+If evidence reveals that the ticket is not actually implementable without a new product/design decision, stop with `RUN_RESULT status: blocked`.
 
 ## 5. Prove the gap
 
@@ -137,8 +140,8 @@ For Godot/client work additionally enforce:
 - missing drawing information must be added through renderer-safe presentation projections, not direct hidden `GameState` access;
 - Godot resource paths/UIDs do not become authoritative save state;
 - stable content/presentation IDs resolve through the presentation asset registry rather than scattered scene conditionals;
-- placeholder-first implementation is preferred until the Art Production Ready gate passes;
-- no opportunistic final asset production while implementing client infrastructure.
+- placeholder-first implementation is preferred through TEL-127;
+- no opportunistic final asset production before TEL-128 passes.
 
 Do not bundle adjacent TEL tickets because they are convenient.
 
@@ -182,7 +185,7 @@ For presentation work also check:
 - duplicated content/game rules in scenes;
 - resource paths embedded in authoritative data;
 - placeholder bypasses that would need architectural replacement later;
-- production-art work introduced before the readiness gate.
+- production-art work introduced before TEL-128 / the readiness gate.
 
 Fix issues before independent review.
 
@@ -198,14 +201,9 @@ Use the presentation review lane for Godot/client work and explicitly review sim
 
 Update the selected ticket and task ledger only after implementation evidence exists. Update BUILD_STATUS/ExecPlan/ADRs/README/DEVELOPMENT/INVARIANTS/generated status only when their documented role requires it.
 
-For TEL-120–TEL-127, update `docs/exec-plans/active/GODOT-PLAYABLE-VERTICAL-SLICE.md` progress/decisions when the slice changes plan state.
+For TEL-120–TEL-128, update `docs/exec-plans/active/GODOT-PLAYABLE-VERTICAL-SLICE.md` progress/decisions when the slice changes plan state.
 
-For TEL-127, record the two gate results independently:
-
-- `docs/gates/GODOT-PLAYABLE-SLICE.md`;
-- `docs/gates/ART-PRODUCTION-READY.md`.
-
-Do not create production-art TEL batches unless Art Production Ready has passing evidence.
+TEL-127 records only the result of `docs/gates/GODOT-PLAYABLE-SLICE.md`. TEL-128 separately records `docs/gates/ART-PRODUCTION-READY.md`. If TEL-128 cannot pass because human/product art-direction or repository policy is unresolved, leave it blocked and do not create production-art tickets.
 
 Status must match reality. Never mark a ticket implemented because only its plan or docs exist.
 
@@ -251,7 +249,7 @@ Confirm the PR head still matches the reviewed/verified commit and require:
 - PR is mergeable;
 - independent review has no unresolved actionable findings;
 - docs/generated state are consistent;
-- no unresolved product/tuning decision was invented;
+- no unresolved product/tuning/design decision was invented;
 - no production-art gate was bypassed.
 
 If all gates are true, squash merge and delete the branch when supported.
@@ -262,7 +260,7 @@ If repository settings, CI visibility, permissions, Godot observation, or protec
 
 After merge, inspect the new `main` only enough to identify likely next candidates and repository health. Do not implement another ticket.
 
-When TEL-110–TEL-127 work remains, candidate handoff should mention both tracks when relevant rather than assuming strict numeric order.
+When TEL-110–TEL-128 work remains, candidate handoff should mention both tracks when relevant rather than assuming strict numeric order.
 
 End with exactly one handoff block:
 
