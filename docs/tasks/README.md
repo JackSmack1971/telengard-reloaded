@@ -128,7 +128,7 @@ features. They author data against the existing `Telengard.Content` schemas;
 they do not add fifty-floor content, move rules into renderers, or reimplement
 the already-owned feature, journal, wealth, inn, or death mechanics.
 
-- TEL-109 — Establish the data-driven vertical-slice content pack — Not started
+- TEL-109 — Establish the data-driven vertical-slice content pack — Implemented and verified
   - Define the external content files, catalog/loader boundary, validation, and content-version handling for the slice.
   - Keep authored definitions separate from simulation logic and presentation; do not add renderer-owned content rules.
 - TEL-110 — Author the floors 1–5 dungeon biome and band data — Not started

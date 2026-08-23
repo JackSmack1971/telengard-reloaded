@@ -2710,3 +2710,28 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
   passed; and `./eng/verify.ps1 -Mode Full` passed with a Release build of
   0 warnings and 0 errors and 397 Release tests. Independent review and PR
   gates are satisfied; the PR is ready for squash merge.
+
+## TEL-109 verification
+
+- Status: implemented and verified; the content boundary now loads external
+  JSON definitions into a deterministic, versioned, immutable content pack.
+- Files/modules affected: `content/manifest.json`,
+  `src/Telengard.Content/Definitions/ContentPack.cs`,
+  `src/Telengard.Content/Definitions/ContentPackLoader.cs`,
+  `src/Telengard.Content/Definitions/README.md`,
+  `tests/Telengard.Architecture.Tests/ContentPackLoaderTests.cs`, and the
+  TEL-109 ExecPlan.
+- New public APIs: `ContentPackLoader.Load`, `ContentPack`, and typed read-only
+  content catalogs. Existing in-memory schema types remain the construction
+  boundary; the loader parses external JSON into those types explicitly.
+- Save-schema impact: none; save version 14 and existing simulation, generator,
+  and content version fields remain unchanged. The pack's manifest version is a
+  content input and is not persisted runtime state.
+- Invariants: definitions remain separate from simulation and presentation;
+  files are loaded in ordinal order; duplicate ids and loot/monster references
+  are validated before the pack is returned; no randomness or state mutation is
+  introduced.
+- Acceptance: focused `ContentPackLoaderTests` passed (4); formatter
+  verification passed; `./eng/verify.ps1 -Mode Full` passed with a Release build
+  of 0 warnings and 0 errors and 401 Release tests. TEL-110–TEL-116 authored
+  content remains intentionally deferred.
