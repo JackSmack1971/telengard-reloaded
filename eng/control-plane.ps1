@@ -176,9 +176,11 @@ function Test-PlansAndGates {
         foreach ($plan in Get-ChildItem $active -File) {
             if ($plan.Name -eq '.gitkeep') { continue }
             $matches = @([regex]::Matches((Read-Utf8 $plan.FullName), 'TEL-[0-9]{3}') | ForEach-Object { $_.Value } | Select-Object -Unique)
-            if ($matches.Count -ne 1) { throw "Active plan '$($plan.Name)' must have exactly one TEL owner." }
-            if ($owners.ContainsKey($matches[0])) { throw "TEL owner '$($matches[0])' has multiple active plans." }
-            $owners[$matches[0]] = $plan.Name
+            if ($matches.Count -eq 0) { throw "Active plan '$($plan.Name)' must reference at least one TEL ticket." }
+            foreach ($ticket in $matches) {
+                if ($owners.ContainsKey($ticket)) { throw "TEL owner '$ticket' has multiple active plans." }
+                $owners[$ticket] = $plan.Name
+            }
             foreach ($reference in Get-LocalReferences $plan.FullName) { Assert-Reference $reference $plan.Name }
         }
     }
