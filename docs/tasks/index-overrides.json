@@ -1,0 +1,211 @@
+{
+  "schema_version": 1,
+  "milestone": "core-alpha",
+  "tickets": {
+    "TEL-093": {
+      "track": "persistence",
+      "dependencies": ["TEL-091", "TEL-092"],
+      "risk_tags": ["save-compatibility", "renderer-boundary"],
+      "context": {
+        "required": ["docs/tasks/TEL-093.md", "docs/INVARIANTS.md"],
+        "conditional": {
+          "architecture": ["docs/ARCHITECTURE.md"]
+        }
+      },
+      "verification": {
+        "headless": true,
+        "godot_manual": false
+      }
+    },
+    "TEL-109": {
+      "track": "content",
+      "dependencies": ["TEL-005", "TEL-030", "TEL-040", "TEL-041", "TEL-060", "TEL-072"],
+      "risk_tags": ["content-schema", "determinism", "save-compatibility"],
+      "context": {
+        "required": ["docs/tasks/TEL-109.md", "docs/modern-telengard-spec.md#48", "src/Telengard.Content/Definitions"],
+        "conditional": {
+          "save": ["docs/INVARIANTS.md"]
+        }
+      }
+    },
+    "TEL-110": {
+      "track": "content",
+      "dependencies": ["TEL-109", "TEL-011", "TEL-012", "TEL-040", "TEL-041"],
+      "risk_tags": ["content-schema", "determinism"],
+      "context": {
+        "required": ["docs/tasks/TEL-110.md", "docs/modern-telengard-spec.md#10", "src/Telengard.Core/world/generation"],
+        "conditional": {
+          "architecture": ["docs/ARCHITECTURE.md"]
+        }
+      }
+    },
+    "TEL-111": {
+      "track": "content",
+      "dependencies": ["TEL-109", "TEL-030", "TEL-031"],
+      "risk_tags": ["content-schema", "determinism", "hidden-information"]
+    },
+    "TEL-112": {
+      "track": "content",
+      "dependencies": ["TEL-109", "TEL-110", "TEL-111", "TEL-031"],
+      "risk_tags": ["content-schema", "determinism"]
+    },
+    "TEL-113": {
+      "track": "content",
+      "dependencies": ["TEL-109", "TEL-060", "TEL-061", "TEL-062", "TEL-063", "TEL-064", "TEL-065"],
+      "risk_tags": ["content-schema", "hidden-information"]
+    },
+    "TEL-114": {
+      "track": "content",
+      "dependencies": ["TEL-109", "TEL-113", "TEL-105"],
+      "risk_tags": ["content-schema", "determinism", "wealth"]
+    },
+    "TEL-115": {
+      "track": "content",
+      "dependencies": ["TEL-109", "TEL-072", "TEL-073"],
+      "risk_tags": ["content-schema", "hidden-information"]
+    },
+    "TEL-116": {
+      "track": "content",
+      "dependencies": ["TEL-109", "TEL-040", "TEL-041", "TEL-042", "TEL-043", "TEL-044", "TEL-045", "TEL-050", "TEL-051", "TEL-055", "TEL-056"],
+      "risk_tags": ["content-schema", "determinism", "hidden-information"]
+    },
+    "TEL-120": {
+      "track": "presentation",
+      "dependencies": ["TEL-090", "TEL-091", "TEL-092", "TEL-093", "TEL-104", "TEL-109"],
+      "risk_tags": ["renderer-boundary", "simulation-contract", "content-schema"],
+      "context": {
+        "required": ["docs/tasks/TEL-120.md", "docs/presentation/GODOT_CLIENT_BLUEPRINT.md", "docs/exec-plans/active/GODOT-PLAYABLE-VERTICAL-SLICE.md"],
+        "conditional": {
+          "architecture": ["docs/ARCHITECTURE.md"]
+        }
+      },
+      "verification": {
+        "headless": true,
+        "godot_manual": true
+      }
+    },
+    "TEL-121": {
+      "track": "presentation",
+      "dependencies": ["TEL-120"],
+      "risk_tags": ["renderer-boundary", "determinism", "simulation-contract"],
+      "context": {
+        "required": ["docs/tasks/TEL-121.md", "docs/presentation/GODOT_CLIENT_BLUEPRINT.md", "docs/presentation/UX_INTERACTION_BLUEPRINT.md", "docs/exec-plans/active/GODOT-PLAYABLE-VERTICAL-SLICE.md"],
+        "conditional": {
+          "architecture": ["docs/ARCHITECTURE.md"]
+        }
+      },
+      "verification": {
+        "headless": true,
+        "godot_manual": true
+      }
+    },
+    "TEL-122": {
+      "track": "presentation",
+      "dependencies": ["TEL-120", "TEL-121"],
+      "risk_tags": ["renderer-boundary", "hidden-information", "simulation-contract"],
+      "context": {
+        "required": ["docs/tasks/TEL-122.md", "docs/presentation/GODOT_CLIENT_BLUEPRINT.md", "docs/presentation/UX_INTERACTION_BLUEPRINT.md", "docs/exec-plans/active/GODOT-PLAYABLE-VERTICAL-SLICE.md"],
+        "conditional": {
+          "architecture": ["docs/ARCHITECTURE.md"]
+        }
+      },
+      "verification": {
+        "headless": true,
+        "godot_manual": true
+      }
+    },
+    "TEL-123": {
+      "track": "presentation",
+      "dependencies": ["TEL-090", "TEL-091", "TEL-109", "TEL-120"],
+      "risk_tags": ["renderer-boundary", "hidden-information", "content-schema"],
+      "context": {
+        "required": ["docs/tasks/TEL-123.md", "docs/presentation/GODOT_CLIENT_BLUEPRINT.md", "docs/presentation/ASSET_PIPELINE_BLUEPRINT.md", "docs/exec-plans/active/GODOT-PLAYABLE-VERTICAL-SLICE.md"],
+        "conditional": {
+          "architecture": ["docs/ARCHITECTURE.md"]
+        }
+      },
+      "verification": {
+        "headless": true,
+        "godot_manual": true
+      }
+    },
+    "TEL-124": {
+      "track": "presentation",
+      "dependencies": ["TEL-110", "TEL-111", "TEL-112", "TEL-116", "TEL-121", "TEL-122", "TEL-123"],
+      "risk_tags": ["renderer-boundary", "hidden-information", "content-schema"],
+      "context": {
+        "required": ["docs/tasks/TEL-124.md", "docs/presentation/GODOT_CLIENT_BLUEPRINT.md", "docs/presentation/ART_DIRECTION_BLUEPRINT.md", "docs/presentation/ASSET_PIPELINE_BLUEPRINT.md", "docs/gates/GODOT-PLAYABLE-SLICE.md"],
+        "conditional": {
+          "architecture": ["docs/ARCHITECTURE.md"]
+        }
+      },
+      "verification": {
+        "headless": true,
+        "godot_manual": true
+      }
+    },
+    "TEL-125": {
+      "track": "presentation",
+      "dependencies": ["TEL-113", "TEL-115", "TEL-121", "TEL-122", "TEL-123", "TEL-124"],
+      "risk_tags": ["renderer-boundary", "hidden-information", "wealth"],
+      "context": {
+        "required": ["docs/tasks/TEL-125.md", "docs/presentation/GODOT_CLIENT_BLUEPRINT.md", "docs/presentation/UX_INTERACTION_BLUEPRINT.md", "docs/presentation/ART_DIRECTION_BLUEPRINT.md", "docs/gates/GODOT-PLAYABLE-SLICE.md"],
+        "conditional": {
+          "architecture": ["docs/ARCHITECTURE.md"],
+          "save": ["docs/INVARIANTS.md"]
+        }
+      },
+      "verification": {
+        "headless": true,
+        "godot_manual": true
+      }
+    },
+    "TEL-126": {
+      "track": "presentation",
+      "dependencies": ["TEL-122", "TEL-125"],
+      "risk_tags": ["renderer-boundary", "save-compatibility", "determinism"],
+      "context": {
+        "required": ["docs/tasks/TEL-126.md", "docs/presentation/GODOT_CLIENT_BLUEPRINT.md", "docs/presentation/UX_INTERACTION_BLUEPRINT.md", "docs/gates/GODOT-PLAYABLE-SLICE.md"],
+        "conditional": {
+          "architecture": ["docs/ARCHITECTURE.md"],
+          "save": ["docs/INVARIANTS.md"]
+        }
+      },
+      "verification": {
+        "headless": true,
+        "godot_manual": true
+      }
+    },
+    "TEL-127": {
+      "track": "presentation",
+      "dependencies": ["TEL-110", "TEL-111", "TEL-112", "TEL-113", "TEL-114", "TEL-115", "TEL-116", "TEL-120", "TEL-121", "TEL-122", "TEL-123", "TEL-124", "TEL-125", "TEL-126"],
+      "risk_tags": ["verification", "renderer-boundary", "hidden-information", "save-compatibility"],
+      "context": {
+        "required": ["docs/tasks/TEL-127.md", "docs/presentation/GODOT_CLIENT_BLUEPRINT.md", "docs/presentation/UX_INTERACTION_BLUEPRINT.md", "docs/gates/GODOT-PLAYABLE-SLICE.md", "docs/exec-plans/active/GODOT-PLAYABLE-VERTICAL-SLICE.md"],
+        "conditional": {
+          "architecture": ["docs/ARCHITECTURE.md"],
+          "save": ["docs/INVARIANTS.md"]
+        }
+      },
+      "verification": {
+        "headless": true,
+        "godot_manual": true
+      }
+    },
+    "TEL-128": {
+      "track": "presentation",
+      "dependencies": ["TEL-110", "TEL-111", "TEL-112", "TEL-113", "TEL-114", "TEL-115", "TEL-116", "TEL-123", "TEL-127"],
+      "risk_tags": ["verification", "renderer-boundary", "content-schema"],
+      "context": {
+        "required": ["docs/tasks/TEL-128.md", "docs/presentation/GODOT_CLIENT_BLUEPRINT.md", "docs/presentation/UX_INTERACTION_BLUEPRINT.md", "docs/presentation/ART_DIRECTION_BLUEPRINT.md", "docs/presentation/ASSET_PIPELINE_BLUEPRINT.md", "docs/gates/ART-PRODUCTION-READY.md", "docs/exec-plans/active/GODOT-PLAYABLE-VERTICAL-SLICE.md"],
+        "conditional": {
+          "architecture": ["docs/ARCHITECTURE.md"]
+        }
+      },
+      "verification": {
+        "headless": true,
+        "godot_manual": true
+      }
+    }
+  }
+}
