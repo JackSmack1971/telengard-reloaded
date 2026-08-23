@@ -136,7 +136,7 @@ the already-owned feature, journal, wealth, inn, or death mechanics.
 - [TEL-110.md](TEL-110.md) — Author the floors 1–5 dungeon biome and band data — Implemented and verified
   - Provide one biome covering only floors 1–5, with data references for its encounter, feature, and loot ecology.
   - Keep unresolved pacing, weights, and balance as `CONFIGURATION/TUNING DECISION REQUIRED`.
-- TEL-111 — Author the first-slice monster roster — Not started
+- TEL-111 — Author the first-slice monster roster — Implemented and verified
   - Provide 8–12 distinct monster definitions using families, traits, behaviors, actions, resistances, vulnerabilities, spawn rules, and loot references.
   - Require ecological differences; do not fill the roster with stat-scaled variations of one monster.
 - TEL-112 — Author first-slice encounter ecology tables — Not started

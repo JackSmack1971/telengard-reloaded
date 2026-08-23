@@ -1,0 +1,13 @@
+{
+  "id": "crypt-wight",
+  "display_name": "Crypt Wight",
+  "family": "Undead",
+  "base_stats": { "hit_points": 16, "attack": 5, "defense": 5 },
+  "traits": ["life-drain", "undead"],
+  "resistances": ["cold", "fear"],
+  "vulnerabilities": ["holy"],
+  "actions": ["grave-touch", "wail"],
+  "behaviors": ["stalk", "raise-the-fallen"],
+  "spawn_rules": { "depth": "4-5", "terrain": "crypt" },
+  "loot_table": null
+}

@@ -1,0 +1,13 @@
+{
+  "id": "rust-beetle",
+  "display_name": "Rust Beetle",
+  "family": "Beasts",
+  "base_stats": { "hit_points": 8, "attack": 2, "defense": 5 },
+  "traits": ["armored-shell", "metal-eater"],
+  "resistances": ["physical"],
+  "vulnerabilities": ["lightning"],
+  "actions": ["mandibles", "rust-spray"],
+  "behaviors": ["territorial", "charge"],
+  "spawn_rules": { "depth": "2-5", "terrain": "ruins" },
+  "loot_table": null
+}

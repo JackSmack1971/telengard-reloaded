@@ -1,0 +1,13 @@
+{
+  "id": "skeleton-guard",
+  "display_name": "Skeleton Guard",
+  "family": "Undead",
+  "base_stats": { "hit_points": 9, "attack": 3, "defense": 4 },
+  "traits": ["undead", "unyielding"],
+  "resistances": ["poison", "fear"],
+  "vulnerabilities": ["holy"],
+  "actions": ["rusted-sword"],
+  "behaviors": ["hold-position", "pursue"],
+  "spawn_rules": { "depth": "1-4", "terrain": "crypt" },
+  "loot_table": null
+}

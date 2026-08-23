@@ -1,0 +1,13 @@
+{
+  "id": "goblin-skirmisher",
+  "display_name": "Goblin Skirmisher",
+  "family": "Humanoids",
+  "base_stats": { "hit_points": 7, "attack": 3, "defense": 2 },
+  "traits": ["opportunist", "light-footed"],
+  "resistances": [],
+  "vulnerabilities": ["fear"],
+  "actions": ["short-blade", "throwing-stone"],
+  "behaviors": ["harry", "retreat-and-return"],
+  "spawn_rules": { "depth": "1-3", "terrain": "ruins" },
+  "loot_table": null
+}

@@ -1,0 +1,13 @@
+{
+  "id": "cave-rat",
+  "display_name": "Cave Rat",
+  "family": "Beasts",
+  "base_stats": { "hit_points": 3, "attack": 1, "defense": 1 },
+  "traits": ["pack-hunter", "scavenger"],
+  "resistances": [],
+  "vulnerabilities": ["fire"],
+  "actions": ["bite"],
+  "behaviors": ["swarm", "flee-at-low-health"],
+  "spawn_rules": { "depth": "1-2", "terrain": "ruins" },
+  "loot_table": null
+}

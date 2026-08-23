@@ -55,13 +55,15 @@ try {
     Assert-Condition ($index.tickets.Count -ge 12 -and $index.completed.Count -ge 70) 'Generated index omitted ledger scheduling data.'
     $tel001 = @($index.tickets | Where-Object { $_.id -eq 'TEL-001' })
     $tel111 = @($index.tickets | Where-Object { $_.id -eq 'TEL-111' })
+    $tel112 = @($index.tickets | Where-Object { $_.id -eq 'TEL-112' })
     $tel120 = @($index.tickets | Where-Object { $_.id -eq 'TEL-120' })
     $tel127 = @($index.tickets | Where-Object { $_.id -eq 'TEL-127' })
     Assert-Condition ($tel001.Count -eq 0 -and @($index.completed | Where-Object { $_ -eq 'TEL-001' }).Count -eq 1) 'Completed ledger entry was not compacted.'
-    Assert-Condition ($tel111.Count -eq 1 -and $tel111[0].track -eq 'content') 'Vertical-slice track was not parsed.'
+    Assert-Condition ($tel111.Count -eq 0 -and @($index.completed | Where-Object { $_ -eq 'TEL-111' }).Count -eq 1) 'Completed monster-roster entry was not compacted.'
+    Assert-Condition ($tel112.Count -eq 1 -and $tel112[0].track -eq 'content') 'Vertical-slice track was not parsed.'
     Assert-Condition ($tel120.Count -eq 1 -and $tel120[0].track -eq 'presentation' -and $tel120[0].decision_state -eq 'ready') 'Playable-client scheduling metadata was not projected.'
-    Assert-Condition (@($tel111[0].risk_tags).Count -gt 0 -and @($tel120[0].review.conditional) -contains 'presentation' -and $tel120[0].verification.godot_manual) 'Effective risk, review, and verification policy was not serialized.'
-    Assert-Condition ($tel127.Count -eq 1 -and $tel127[0].decision_state -eq 'blocked' -and $tel127[0].blocker -match 'TEL-111') 'Dependency-derived blocker metadata was not projected.'
+    Assert-Condition (@($tel112[0].risk_tags).Count -gt 0 -and @($tel120[0].review.conditional) -contains 'presentation' -and $tel120[0].verification.godot_manual) 'Effective risk, review, and verification policy was not serialized.'
+    Assert-Condition ($tel127.Count -eq 1 -and $tel127[0].decision_state -eq 'blocked' -and $tel127[0].blocker -match 'TEL-112') 'Dependency-derived blocker metadata was not projected.'
     Assert-Condition ($index.context_template -eq 'docs/tasks/{id}.md') 'Ticket context template is missing.'
     Assert-Condition ($index.conditional_context_by_risk.'save-compatibility' -eq 'save') 'Risk-to-context routing is missing.'
 
