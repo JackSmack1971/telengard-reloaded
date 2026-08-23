@@ -1,5 +1,12 @@
 # Art Production Ready gate
 
+## Owner
+
+TEL-128 — Verify Art Production Ready gate.
+
+TEL-127 / `GODOT-PLAYABLE-SLICE.md` must pass first. A playable client may be
+complete while this separate production-readiness gate remains blocked.
+
 ## Purpose
 
 This gate determines when Telengard Reloaded may transition from exploratory
@@ -12,13 +19,14 @@ content identities, unresolved presentation contracts, or unproven UX flows.
 
 ## Hard prerequisite
 
-`docs/gates/GODOT-PLAYABLE-SLICE.md` must pass first.
+`docs/gates/GODOT-PLAYABLE-SLICE.md` must pass first through TEL-127.
 
 Concept art, style studies, UI wireframes, placeholder assets, and technical
 visual experiments do not require this gate. Final production inventory does.
 
 ## Sources of truth
 
+- `docs/tasks/TEL-128.md`
 - `docs/presentation/GODOT_CLIENT_BLUEPRINT.md`
 - `docs/presentation/UX_INTERACTION_BLUEPRINT.md`
 - `docs/presentation/ART_DIRECTION_BLUEPRINT.md`
@@ -43,8 +51,8 @@ visual experiments do not require this gate. Final production inventory does.
 
 ### Playable placeholder client exists
 
-- [ ] The Playable Godot Vertical Slice gate passed on current-enough client and
-      content contracts.
+- [ ] TEL-127 / the Playable Godot Vertical Slice gate passed on current-enough
+      client and content contracts.
 - [ ] Every required production asset category has a working placeholder in the
       same lookup/presentation path intended for final assets.
 - [ ] Placeholder playtesting has exposed and resolved major camera/scale/state
@@ -79,8 +87,11 @@ For the first slice, the review packet defines:
 - [ ] VFX readability/intensity rules;
 - [ ] baseline accessibility/readability notes.
 
-The gate does not require a specific artistic style; it requires that the chosen
-style constraints are explicit enough to produce consistent assets.
+The gate does not require a specific artistic style to have been prescribed by
+Codex. It requires that the chosen style constraints are explicit enough to
+produce consistent assets. If those choices require human/product direction
+that the repository does not already supply, TEL-128 remains blocked until that
+input exists.
 
 ### Asset pipeline is defined
 
@@ -93,6 +104,9 @@ style constraints are explicit enough to produce consistent assets.
 - [ ] Binary/Git LFS policy is decided before large asset batches.
 - [ ] Third-party asset license/provenance expectations are documented.
 - [ ] Validation can enumerate missing first-slice mappings.
+
+If binary/LFS or other repository policy is not already authoritative, Codex
+must report the missing decision instead of inventing it to make the gate pass.
 
 ### Production asset matrix exists
 
@@ -119,8 +133,8 @@ The first-slice inventory records, for each relevant ID:
 
 ## What passing this gate authorizes
 
-After this gate passes, the task ledger may introduce focused production-asset
-batches, for example:
+After TEL-128 passes this gate, the task ledger may introduce focused
+production-asset batches, for example:
 
 - Upper Ruins environment tile/prop batch;
 - first-slice monster art/animation batches;
@@ -155,15 +169,17 @@ The gate fails if:
 - asset mappings are scattered through scene code without a reviewable registry;
 - scale/camera/import rules are unresolved;
 - UI art would need to be redone because interaction structure is still moving;
-- large binary batches are planned without a repository policy.
+- large binary batches are planned without a repository policy;
+- required art-direction or repository-policy choices are unresolved and were
+  merely invented by the implementing agent.
 
 ## Result recording
 
-When the gate passes, record:
+When TEL-128 passes, record:
 
 - date;
 - commit/PR;
-- Playable Godot Slice gate evidence used;
+- TEL-127 / Playable Godot Slice gate evidence used;
 - art-direction review references;
 - asset-pipeline/registry validation evidence;
 - first-slice production inventory count;
