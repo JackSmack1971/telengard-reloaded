@@ -14,9 +14,9 @@ Use this page to choose the smallest context set for a task. The repository spec
 | What is implemented now | code + tests | `tasks/README.md`, then `BUILD_STATUS.md` history |
 | Phase/gate acceptance | `gates/*.md` | current test/build/manual evidence |
 | Long-running work | `PLANS.md` | active plan under `exec-plans/active/` |
-| Playable Godot/client work | `presentation/GODOT_CLIENT_BLUEPRINT.md` | TEL-120–TEL-127, active Godot ExecPlan, Godot code/tests |
+| Playable Godot/client work | `presentation/GODOT_CLIENT_BLUEPRINT.md` | TEL-120–TEL-128, active Godot ExecPlan, Godot code/tests |
 | UX/input work | `presentation/UX_INTERACTION_BLUEPRINT.md` | selected TEL ticket + command/application boundaries |
-| Art/readiness work | `presentation/ART_DIRECTION_BLUEPRINT.md` | `gates/ART-PRODUCTION-READY.md`, first-slice content IDs |
+| Art/readiness work | `presentation/ART_DIRECTION_BLUEPRINT.md` | TEL-128, `gates/ART-PRODUCTION-READY.md`, first-slice content IDs |
 | Asset/resource pipeline | `presentation/ASSET_PIPELINE_BLUEPRINT.md` | Godot registry/import implementation + selected TEL ticket |
 | Codex/runtime workflow | `CODEX_WORKFLOW.md` | `AGENTS.md`, `eng/*.ps1`, `.codex/` |
 
@@ -24,18 +24,18 @@ Use this page to choose the smallest context set for a task. The repository spec
 
 `docs/tasks/README.md` is the current TEL-ticket status authority. Working code/tests are the present-state implementation evidence and `modern-telengard-spec.md` remains product intent. `BUILD_STATUS.md` is append-only verification history. Never remove implemented behavior solely because historical prose lags; reconcile stale status records when appropriate.
 
-For TEL-110–TEL-127, the task ledger and explicit ticket dependencies govern eligibility. The active Godot umbrella ExecPlan coordinates the multi-ticket milestone but is not a status ledger.
+For TEL-110–TEL-128, the task ledger and explicit ticket dependencies govern eligibility. The active Godot umbrella ExecPlan coordinates the multi-ticket milestone but is not a status ledger.
 
 ## Current milestone routing
 
-The current convergence milestone is the **Playable Godot Vertical Slice**.
+The current convergence is the **Playable Godot Vertical Slice** followed by the separate **Art Production Ready** handoff.
 
 Two tracks may progress in parallel:
 
 - TEL-110–TEL-116 — representative floors 1-5 authored content;
-- TEL-120–TEL-127 — playable Godot client.
+- TEL-120–TEL-128 — playable Godot client plus production-readiness handoff.
 
-Read `presentation/GODOT_CLIENT_BLUEPRINT.md` before ranking serious candidates across these tracks. Do not infer that TEL-091 is a complete client. Do not start systematic final production-art batches before `gates/ART-PRODUCTION-READY.md` passes.
+Read `presentation/GODOT_CLIENT_BLUEPRINT.md` before ranking serious candidates across these tracks. Do not infer that TEL-091 is a complete client. TEL-127 owns playable-client acceptance; TEL-128 separately owns Art Production Ready. Do not start systematic final production-art batches before TEL-128 passes.
 
 ## Current code map
 
@@ -47,7 +47,7 @@ Read `presentation/GODOT_CLIENT_BLUEPRINT.md` before ranking serious candidates 
 - `src/Telengard.Core/presentation/` — renderer-safe presentation projections and Modern frame prototype contract.
 - `src/Telengard.Save/` — explicit save DTOs, serializer, migrations.
 - `src/Telengard.Terminal/` — terminal presentation boundary.
-- `src/Telengard.Godot/` — Godot presentation boundary/prototype; playable-client work is TEL-120–TEL-127.
+- `src/Telengard.Godot/` — Godot presentation boundary/prototype; playable-client work is TEL-120–TEL-127 and TEL-128 owns the art-readiness handoff.
 - `tests/Telengard.Architecture.Tests/` — architecture + domain behavior tests.
 - `tools/Telengard.TestHarness/` — scripted deterministic simulation harness.
 - `content/` — external data-defined content pack; authored first-slice work is TEL-110–TEL-116.
@@ -58,7 +58,7 @@ Read `presentation/GODOT_CLIENT_BLUEPRINT.md` before ranking serious candidates 
 
 Use `$telengard-next-slice`. Read root `AGENTS.md` → this index → `tasks/README.md` → serious candidate tickets → required blueprint/ExecPlan context → cited spec/invariants/architecture → adjacent code/tests.
 
-For TEL-110–TEL-127, evaluate both current milestone tracks rather than selecting strictly by TEL number.
+For TEL-110–TEL-128, evaluate both current milestone tracks rather than selecting strictly by TEL number.
 
 ### Implement a specific TEL ticket
 
@@ -74,7 +74,7 @@ Read `src/Telengard.Save/AGENTS.md` when present → save/version sections of sp
 
 ### Change Godot presentation
 
-Read `presentation/GODOT_CLIENT_BLUEPRINT.md` → selected TEL-120–TEL-127 ticket → UX/art/asset blueprint(s) referenced by that ticket → `INVARIANTS.md` → Core presentation projection → Godot boundary. Preserve simulation authority and require ticket-specified manual observation.
+Read `presentation/GODOT_CLIENT_BLUEPRINT.md` → selected TEL-120–TEL-128 ticket → UX/art/asset blueprint(s) referenced by that ticket → `INVARIANTS.md` → Core presentation projection → Godot boundary. Preserve simulation authority and require ticket-specified manual observation.
 
 ### Review a diff
 
