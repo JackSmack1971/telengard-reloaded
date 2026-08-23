@@ -5,10 +5,11 @@
 The repository contains the .NET 8 headless solution selected by
 `docs/adr/ADR-001-technology-stack.md`, with the renderer-independent Core Alpha
 composition and presentation-separation proof implemented. The current
-convergence milestone is a **Playable Godot Vertical Slice**: TEL-110–TEL-116
-author the representative floors 1-5 content while TEL-120–TEL-127 build the
-production-shaped Godot client using placeholder/graybox presentation before
-final art production.
+convergence is a **Playable Godot Vertical Slice** followed by the separate
+**Art Production Ready** handoff: TEL-110–TEL-116 author the representative
+floors 1-5 content, TEL-120–TEL-127 build/prove the production-shaped Godot
+client using placeholder/graybox presentation, and TEL-128 separately decides
+when final production asset batches may begin.
 
 Current TEL status is authoritative in [`docs/tasks/README.md`](tasks/README.md).
 Verification history is recorded in [`docs/BUILD_STATUS.md`](BUILD_STATUS.md).
@@ -142,7 +143,7 @@ TEL-110–TEL-116 own the representative floors 1-5 authored content. Their IDs 
 
 ## Godot client development
 
-For TEL-120–TEL-127 read:
+For TEL-120–TEL-128 read:
 
 - `presentation/GODOT_CLIENT_BLUEPRINT.md`;
 - the selected TEL ticket;
@@ -180,9 +181,11 @@ Simulation speed/outcomes must remain independent of Godot rendering FPS. Normal
 
 Stable content/presentation IDs resolve through the presentation-side asset registry described in `presentation/ASSET_PIPELINE_BLUEPRINT.md`. Do not scatter direct ID-to-resource-path conditionals across scenes and do not persist Godot resource paths/UIDs in saves.
 
-### Placeholder first
+### Placeholder first and gate split
 
-Use conspicuous placeholders/graybox visuals until the full client path is proven. Final production assets are systematically ticketed only after `gates/ART-PRODUCTION-READY.md` passes.
+Use conspicuous placeholders/graybox visuals through TEL-127 until the full client path is proven. TEL-127 owns the Playable Godot Vertical Slice gate. Final production assets are systematically ticketed only after TEL-128 separately passes `gates/ART-PRODUCTION-READY.md`.
+
+TEL-128 must not invent unresolved visual-direction, binary/LFS, or other product/repository policy merely to pass readiness. If such a decision is missing, report the explicit blocker.
 
 ### Godot observation
 
@@ -200,4 +203,4 @@ Godot scene/resource state is not authoritative save data. If client work reveal
 
 Use the task template in the specification: design intent, current architecture, requirements, non-goals, invariants, data model, public API, events, determinism, save impact, tests, observation when relevant, and acceptance criteria. Avoid unrelated refactors and never silently redesign a public interface while implementing another TEL ticket.
 
-For the current milestone, numerical TEL order does not override explicit dependencies across the TEL-110–TEL-116 content track and TEL-120–TEL-127 Godot track.
+For the current convergence, numerical TEL order does not override explicit dependencies across the TEL-110–TEL-116 content track and TEL-120–TEL-128 Godot/readiness track.
