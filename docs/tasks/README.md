@@ -101,7 +101,7 @@ This ledger is derived from the ordered TEL tickets in `docs/modern-telengard-sp
 - [TEL-090.md](TEL-090.md) — Create presentation-state adapter — Implemented and verified
 - [TEL-091.md](TEL-091.md) — Build Modern renderer prototype — Implemented and verified
 - [TEL-092.md](TEL-092.md) — Build Terminal renderer prototype — Implemented and verified
-- [TEL-093.md](TEL-093.md) — Verify renderer-independent save compatibility — Not started
+- [TEL-093.md](TEL-093.md) — Verify renderer-independent save compatibility — Implemented and verified
 
 ## Core Alpha extensions (project-local)
 
