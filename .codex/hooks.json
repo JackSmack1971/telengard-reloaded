@@ -1,0 +1,47 @@
+{
+  "description": "Telengard project guardrails and verification loop.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "^(startup|resume)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "true",
+            "commandWindows": "powershell -NoProfile -ExecutionPolicy Bypass -File .codex\\hooks\\session_start.ps1",
+            "timeout": 10,
+            "statusMessage": "Loading Telengard repo context",
+            "additionalContextLimit": 1000
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "^(Bash|exec|exec_command)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "true",
+            "commandWindows": "powershell -NoProfile -ExecutionPolicy Bypass -File .codex\\hooks\\pre_tool_use.ps1",
+            "timeout": 10,
+            "statusMessage": "Checking Telengard shell policy"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "true",
+            "commandWindows": "powershell -NoProfile -ExecutionPolicy Bypass -File .codex\\hooks\\stop_verify.ps1",
+            "timeout": 15,
+            "statusMessage": "Checking Telengard verification state"
+          }
+        ]
+      }
+    ]
+  }
+}

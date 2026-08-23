@@ -1,0 +1,5 @@
+name = "correctness"
+description = "Review the candidate change for behavioral correctness and invariant violations."
+model = "gpt-5.6-luna"
+model_reasoning_effort = "medium"
+developer_instructions = "Review only the supplied diff and required repository evidence. Report concrete findings with severity, file, and rationale. Do not modify files."
