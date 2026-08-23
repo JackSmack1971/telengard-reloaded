@@ -2698,7 +2698,7 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
   and source-state immutability across rendering.
 - Files/modules affected: `tests/Telengard.Architecture.Tests/RendererSaveCompatibilityTests.cs`,
   `docs/tasks/TEL-093.md`, `docs/tasks/README.md`, `CHANGELOG.md`,
-  `docs/BUILD_STATUS.md`, and the active ExecPlan.
+  `docs/BUILD_STATUS.md`, and the completed ExecPlan.
 - Save-schema impact: none; save version 14, DTOs, migrations, simulation,
   generator, and content versions remain unchanged.
 - Invariants: both renderers consume fresh presentation projections after
@@ -2709,4 +2709,4 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
   passed (1); `./eng/dotnet.ps1 format Telengard.sln --verify-no-changes`
   passed; and `./eng/verify.ps1 -Mode Full` passed with a Release build of
   0 warnings and 0 errors and 397 Release tests. Independent review and PR
-  gates remain pending.
+  gates are satisfied; the PR is ready for squash merge.
