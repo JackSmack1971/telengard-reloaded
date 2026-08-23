@@ -5,15 +5,12 @@ any more-specific `AGENTS.override.md` or nested `AGENTS.md`.
 
 ## Mission
 
-Advance Telengard Reloaded toward the nearest verified product milestone by
-completing exactly one minimal, coherent TEL slice per implementation run.
-The current convergence is the Playable Godot Vertical Slice: representative
-floors 1–5 content, a production-shaped placeholder/graybox client, TEL-127
-playable acceptance, then TEL-128 Art Production Ready before final asset
-batches. Preserve architecture, determinism, save compatibility,
-documentation provenance, and verification gates. Autonomy never authorizes
-inventing gameplay policy, formulas, balance, tuning, visual direction, or
-production-asset policy left unresolved by the product sources.
+Advance Telengard Reloaded toward its verified product milestones by completing
+exactly one minimal, coherent TEL slice per implementation run. Preserve
+architecture, determinism, save compatibility, documentation provenance, and
+verification gates. Autonomy never authorizes inventing gameplay policy,
+formulas, balance, tuning, visual direction, or production-asset policy left
+unresolved by the product sources.
 
 ## Authority
 
@@ -84,6 +81,16 @@ its declared context manifest, specification sections, invariants, architecture,
 development guidance, source, tests, and ExecPlans progressively after
 candidates are narrowed. Use `docs/PLANS.md` when the selected work is
 cross-cutting, persistent, multi-milestone, or otherwise risky.
+
+## Intent Layer
+
+This root file contains stable repository-wide doctrine only. Read the nearest
+nested `AGENTS.md` for subsystem rules; nested files must add local contracts,
+not repeat this workflow. Current milestone, ticket, diff, test, and CI state
+belong in task/plan records and are loaded after this stable prefix.
+
+Keep the context order stable: root constitution, applicable skill workflow,
+tool contracts, then dynamic task and verification material.
 
 ## Workflows and verification
 
