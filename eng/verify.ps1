@@ -19,6 +19,16 @@ function Invoke-DotNetStep {
 
 Push-Location $RepoRoot
 try {
+    Write-Host ""
+    Write-Host '== Task index check =='
+    & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $RepoRoot 'eng\task-index.ps1') -Mode Check
+    if ($LASTEXITCODE -ne 0) { throw 'Task index check failed.' }
+
+    Write-Host ''
+    Write-Host '== Task index validation =='
+    & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $RepoRoot 'eng\task-index.tests.ps1')
+    if ($LASTEXITCODE -ne 0) { throw 'Task index validation failed.' }
+
     if ($Mode -eq 'Full') {
         Invoke-DotNetStep -Name 'Restore' -Arguments @('restore','Telengard.sln')
         Invoke-DotNetStep -Name 'Format verification' -Arguments @('format','Telengard.sln','--verify-no-changes','--no-restore')

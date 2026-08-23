@@ -1,19 +1,56 @@
 ---
 name: telengard-review
-description: Independently review a Telengard Reloaded implementation diff before merge. Use after a slice is implemented, when reviewing a PR/branch/commit, or whenever the next-slice workflow reaches its independent-review phase. Coordinate separate reviewer agents for correctness, architecture/determinism/save contracts, tests/regression risk, documentation/status provenance, and presentation boundaries when relevant.
+description: Independently review a Telengard Reloaded implementation diff before merge. Use after a slice is implemented, when reviewing a PR/branch/commit, or whenever the next-slice workflow reaches its independent-review phase. Route only the review lanes justified by ticket and diff risk, with correctness as the default target.
 ---
 
 # Telengard Independent Review
 
 Review the actual final diff against its base branch. Do not rely on the implementer's summary as evidence.
 
-Read root `AGENTS.md`, the selected TEL ticket, relevant invariants, and only the architecture/spec/code needed for each lane. For TEL-110–TEL-128 or Godot/client/readiness work, also read the blueprint/gate documents referenced by the ticket and the active `GODOT-PLAYABLE-VERTICAL-SLICE` ExecPlan.
+## Contents
 
-## Orchestration
+- Route independent lanes from ticket/diff risk
+- Review correctness, architecture, tests, and provenance as selected
+- Escalate only for distinct falsification targets
+- Synthesize actionable findings into `REVIEW_RESULT`
 
-Use independent subagents when available. Give each reviewer the base/head refs or complete diff target plus the selected ticket. Reviewers should not share conclusions before producing their own findings.
+Read root `AGENTS.md`, the selected TEL ticket, its context manifest, relevant
+index risk tags, and only the invariants/spec/code needed for the selected
+review lanes.
 
-Run these lanes in parallel when practical:
+The parent always performs a complete self-review. Independent reviewers are
+reserved for distinct falsification targets; do not create a reviewer merely to
+repeat a general code review. Runtime model/profile selection remains external
+configuration and is not hard-coded in this skill. Apply the role defaults and
+escalation rules in `docs/CODEX_MODEL_POLICY.md`.
+
+## Risk-adaptive lane routing
+
+Classify the actual diff together with the selected ticket metadata before
+starting reviewers. Use the smallest lane set that can independently challenge
+the changed behavior:
+
+| Evidence in ticket/diff | Required independent lanes |
+| --- | --- |
+| docs-only typo or routing correction | documentation/provenance |
+| normal content-definition addition | correctness, tests |
+| ordinary Core feature | correctness, tests |
+| architecture or public API boundary | correctness, architecture |
+| RNG or determinism path | correctness, architecture/determinism, tests |
+| save DTO or migration | correctness, save/architecture, tests; elevate the strongest lane |
+| Godot/UI/projection behavior | correctness, presentation; tests when applicable |
+| workflow, security, or trust boundary | correctness, security |
+| gate-claim ticket (for example TEL-127/128) | gate-specific, correctness |
+
+Add a lane only when it has a distinct falsification target. If multiple rows
+apply, take their union and deduplicate equivalent targets. If the diff is
+ambiguous, use the smallest safe escalation and state the reason.
+
+Use independent subagents when available. Give each reviewer the base/head refs
+or complete diff target, selected ticket, and its lane target. Reviewers should
+not share conclusions before producing their own findings.
+
+## Review lanes
 
 ### Lane A — Correctness and edge cases
 
@@ -36,7 +73,7 @@ Inspect against `docs/INVARIANTS.md`, `docs/ARCHITECTURE.md`, ADRs, and ticket c
 - content-definition separation;
 - carried vs secured progress;
 - save DTO, migration, schema/version, backward compatibility, and replay impact;
-- accidental hard-coding of unresolved configuration/tuning/design decisions.
+- accidental hard-coding of unresolved configuration/tuning decisions.
 
 ### Lane C — Tests and regression evidence
 
@@ -47,8 +84,7 @@ Inspect for:
 - missing negative/boundary/deterministic/event-order/save tests;
 - weak assertions that could pass despite a broken feature;
 - untested public API or migration behavior;
-- verification commands inconsistent with repository policy;
-- headless tests being presented as proof of a Godot-visible behavior that the ticket requires to be observed manually.
+- verification commands inconsistent with repository policy.
 
 ### Lane D — Documentation and provenance
 
@@ -60,53 +96,11 @@ Inspect:
 - ExecPlan progress/completion when one exists;
 - generated audit/status views and generator usage;
 - README/DEVELOPMENT/INVARIANTS/ADR updates only where durable contracts changed;
-- stale statements, false verification claims, or undocumented deferred work;
-- for TEL-120–TEL-128, synchronization with the active Godot umbrella ExecPlan and relevant gate state;
-- TEL-127 only claiming Playable Godot Slice acceptance and TEL-128 separately owning Art Production Ready;
-- no production-art TEL work being marked eligible before TEL-128 / `ART-PRODUCTION-READY` has passing evidence.
+- stale statements, false verification claims, or undocumented deferred work.
 
-## Presentation lane
+## Additional lanes
 
-Add this lane whenever Terminal/Godot/UI/presentation behavior or renderer-facing projections/resources change. For Godot/client/readiness work read:
-
-- `docs/presentation/GODOT_CLIENT_BLUEPRINT.md`;
-- the selected TEL ticket's required blueprint context;
-- `docs/gates/GODOT-PLAYABLE-SLICE.md` for TEL-127/playable claims;
-- `docs/gates/ART-PRODUCTION-READY.md` for TEL-128/readiness claims.
-
-Inspect for:
-
-- direct Godot/UI/scene/animation mutation of authoritative `GameState`;
-- UI callbacks or animation signals resolving combat, movement, feature, wealth,
-  item, knowledge, or death outcomes rather than submitting commands;
-- renderer FPS affecting authoritative simulation behavior;
-- Godot scenes reading hidden Core/content internals because the presentation
-  projection is incomplete;
-- presentation projections leaking raw danger, unobserved geography, hidden
-  monster stats, hidden feature outcomes, or other unearned knowledge;
-- duplicated gameplay/content rules in Godot scripts/scenes;
-- Godot resource paths, scene UIDs, texture/audio paths, or transient scene
-  objects leaking into authoritative save DTOs/state;
-- content/presentation identity mapped by scattered hard-coded scene conditions
-  instead of the presentation asset registry once TEL-123 owns that boundary;
-- silent fallback for missing required production mappings;
-- required keyboard/controller/manual Godot observation missing from evidence;
-- final production assets being introduced before TEL-128 passes Art Production
-  Ready, except explicit concept/style/placeholder work permitted by the
-  blueprint;
-- TEL-128 inventing unresolved art direction, binary/LFS policy, or other
-  product/repository policy simply to make the gate pass;
-- final assets masking an unresolved scale, camera, UX, or presentation-contract
-  problem that should remain a placeholder until fixed.
-
-A visible Godot change with required manual acceptance cannot pass this lane on
-headless tests alone.
-
-## Security lane
-
-Add a security lane when the diff changes trust boundaries, external inputs, credentials, workflow permissions, serialization attack surface, file/resource loading, or other security-sensitive behavior.
-
-For future asset/resource registry work, include path validation, malformed resource/manifest handling, and untrusted external asset metadata as appropriate to the ticket.
+Add a presentation-observation lane when Terminal/Godot/UI behavior changed. Add a security lane when the diff changes trust boundaries, external inputs, credentials, workflow permissions, serialization attack surface, or other security-sensitive behavior.
 
 ## Finding standard
 
@@ -115,16 +109,16 @@ Return only actionable findings that are supported by repository evidence. Each 
 - severity: `P0`, `P1`, `P2`, or `P3`;
 - concrete file path and line/range when possible;
 - the failure/risk;
-- why it violates a ticket, invariant, contract, blueprint/gate, or expected behavior;
-- the smallest reasonable correction or missing test/observation.
+- why it violates a ticket, invariant, contract, or expected behavior;
+- the smallest reasonable correction or missing test.
 
 Do not invent findings to fill a quota. If a lane finds no actionable issues, report that lane as clean.
 
 Prioritize:
 
 - P0: destructive/catastrophic correctness or security issue; never merge.
-- P1: ticket failure, invariant violation, determinism/save corruption, presentation-authority violation, hidden-information leak, or serious regression; never merge.
-- P2: meaningful correctness/test/docs/acceptance defect that should be fixed before merge.
+- P1: ticket failure, invariant violation, determinism/save corruption, or serious regression; never merge.
+- P2: meaningful correctness/test/docs defect that should be fixed before merge.
 - P3: low-risk maintainability or clarity issue; fix when proportional and in scope.
 
 ## Synthesis
@@ -140,7 +134,7 @@ p0: <count>
 p1: <count>
 p2: <count>
 p3: <count>
-lanes: correctness=<pass/fail>, architecture=<pass/fail>, tests=<pass/fail>, docs=<pass/fail>, presentation=<pass/fail|n/a>, security=<pass/fail|n/a>
+lanes: <selected lane>=<pass/fail>, ...
 ```
 
 Any unresolved P0/P1/P2 means `changes-required`. P3 findings may remain only when explicitly judged non-blocking and out of proportion to the selected slice.
