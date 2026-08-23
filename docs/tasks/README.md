@@ -9,7 +9,7 @@ This ledger is derived from the ordered TEL tickets in `docs/modern-telengard-sp
 - Every task preserves renderer-independent authoritative simulation, deterministic replay, explicit save DTOs/migrations, content separation, and documented non-goals.
 - Status is `Not started` until implementation and verification evidence exist.
 - This ledger is the current authority for TEL-ticket status. `docs/BUILD_STATUS.md` is append-only verification history; it does not override this ledger when historical evidence and current status differ.
-- For TEL-110–TEL-127 selection, also follow `docs/presentation/GODOT_CLIENT_BLUEPRINT.md`; the content and Godot-client tracks may progress in parallel when explicit dependencies are satisfied.
+- For TEL-110–TEL-128 selection, also follow `docs/presentation/GODOT_CLIENT_BLUEPRINT.md`; the content and Godot-client tracks may progress in parallel when explicit dependencies are satisfied.
 - Production-art tickets must not be introduced or selected until `docs/gates/ART-PRODUCTION-READY.md` has passing evidence.
 
 ## Ordered ledger
@@ -159,8 +159,9 @@ the already-owned feature, journal, wealth, inn, or death mechanics.
 
 TEL-091 is the visual Modern renderer prototype and TEL-093 proves renderer
 separation/save compatibility. The tickets below own the separate transition to
-a complete playable Godot application. Follow
-`docs/presentation/GODOT_CLIENT_BLUEPRINT.md` and the active umbrella ExecPlan.
+a complete playable Godot application and the later art-production handoff.
+Follow `docs/presentation/GODOT_CLIENT_BLUEPRINT.md` and the active umbrella
+ExecPlan.
 
 The client track intentionally overlaps the content track: TEL-120–TEL-123 may
 proceed when their dependencies are satisfied while TEL-110–TEL-116 are still
@@ -175,12 +176,13 @@ slice eligibility.
 - [TEL-124.md](TEL-124.md) — Build first-slice dungeon and content graybox presentation — Not started
 - [TEL-125.md](TEL-125.md) — Build playable HUD and first-slice interaction flows — Not started
 - [TEL-126.md](TEL-126.md) — Integrate Godot save, suspend, resume, and session lifecycle — Not started
-- [TEL-127.md](TEL-127.md) — Verify playable Godot vertical slice and art-production readiness — Not started
+- [TEL-127.md](TEL-127.md) — Verify playable Godot vertical slice — Not started
+- [TEL-128.md](TEL-128.md) — Verify Art Production Ready gate — Not started
 
 ### Presentation production gates
 
-- `docs/gates/GODOT-PLAYABLE-SLICE.md` must pass using real first-slice content and placeholder/graybox presentation before the client is treated as a playable production-shaped vertical slice.
-- `docs/gates/ART-PRODUCTION-READY.md` must pass before systematic final tiles, sprites, animations, VFX, UI-art, icon, or production-audio TEL batches are created.
+- `docs/gates/GODOT-PLAYABLE-SLICE.md` must pass using real first-slice content and placeholder/graybox presentation before the client is treated as a playable production-shaped vertical slice. TEL-127 owns this acceptance.
+- `docs/gates/ART-PRODUCTION-READY.md` must pass before systematic final tiles, sprites, animations, VFX, UI-art, icon, or production-audio TEL batches are created. TEL-128 owns this separate acceptance.
 - Concept art, style studies, UI wireframes, technical rendering tests, and explicit placeholders are allowed before Art Production Ready because they exist to validate the client and art direction rather than freeze production inventory.
 
 ## Repository engineering tickets
@@ -202,8 +204,9 @@ the existing ledger and current implementation evidence:
 - **Knowledge between Legacy characters:** TEL-106 owns the death-to-new-character profile handoff required by §51.
 - **Core Alpha composition:** TEL-107 provides deterministic headless end-to-end evidence and explicitly leaves production content and renderer/client integration separate.
 - **First vertical-slice content:** TEL-109–TEL-116 own the data-driven pack and representative authored content.
-- **Playable Godot client:** TEL-090–TEL-093 prove renderer boundaries but do not provide an application host or full playable UI. TEL-120–TEL-127 now own host/bootstrap, input/time, scene/session flow, production presentation identity, graybox world presentation, interaction UX, persistence, and acceptance.
-- **Production art:** intentionally not ticketed yet. Production batches are derived from the validated first-slice asset inventory only after `ART-PRODUCTION-READY` passes.
+- **Playable Godot client:** TEL-090–TEL-093 prove renderer boundaries but do not provide an application host or full playable UI. TEL-120–TEL-127 own host/bootstrap, input/time, scene/session flow, production presentation identity, graybox world presentation, interaction UX, persistence, and playable-client acceptance.
+- **Production-art readiness:** TEL-128 separately owns the Art Production Ready gate so unresolved visual direction or asset-pipeline policy cannot make TEL-127 ambiguously complete.
+- **Production art:** intentionally not ticketed yet. Production batches are derived from the validated first-slice asset inventory only after TEL-128 passes.
 - **Depth ecology, broad content counts, and other post-alpha systems:** remain outside the representative slice until separately planned.
 
 ## Definition of ledger completion
