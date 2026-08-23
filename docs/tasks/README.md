@@ -1,6 +1,6 @@
 # Modern Telengard implementation task ledger
 
-This ledger is derived from the ordered TEL tickets in `docs/modern-telengard-spec.md` §49. The Core Alpha and first-vertical-slice extension tickets below are project-local implementation tasks, not additions or changes to the source specification. Numeric gaps in the specification-defined series remain intentional.
+This ledger is derived from the ordered TEL tickets in `docs/modern-telengard-spec.md` §49. The Core Alpha, first-vertical-slice content, and playable-Godot-client extension tickets below are project-local implementation tasks, not additions or changes to the source specification. Numeric gaps in the specification-defined series remain intentional.
 
 ## Rules
 
@@ -9,6 +9,8 @@ This ledger is derived from the ordered TEL tickets in `docs/modern-telengard-sp
 - Every task preserves renderer-independent authoritative simulation, deterministic replay, explicit save DTOs/migrations, content separation, and documented non-goals.
 - Status is `Not started` until implementation and verification evidence exist.
 - This ledger is the current authority for TEL-ticket status. `docs/BUILD_STATUS.md` is append-only verification history; it does not override this ledger when historical evidence and current status differ.
+- For TEL-110–TEL-127 selection, also follow `docs/presentation/GODOT_CLIENT_BLUEPRINT.md`; the content and Godot-client tracks may progress in parallel when explicit dependencies are satisfied.
+- Production-art tickets must not be introduced or selected until `docs/gates/ART-PRODUCTION-READY.md` has passing evidence.
 
 ## Ordered ledger
 
@@ -153,52 +155,57 @@ the already-owned feature, journal, wealth, inn, or death mechanics.
   - Provide data definitions and outcomes for exactly fountain, altar, pit, and teleporter using the existing generic feature and knowledge contracts.
   - Do not duplicate the already-implemented feature resolvers or encode feature behavior in a renderer.
 
+## Playable Godot client extensions (project-local)
+
+TEL-091 is the visual Modern renderer prototype and TEL-093 proves renderer
+separation/save compatibility. The tickets below own the separate transition to
+a complete playable Godot application. Follow
+`docs/presentation/GODOT_CLIENT_BLUEPRINT.md` and the active umbrella ExecPlan.
+
+The client track intentionally overlaps the content track: TEL-120–TEL-123 may
+proceed when their dependencies are satisfied while TEL-110–TEL-116 are still
+being authored. TEL-124 onward declares the content dependencies needed for
+real first-slice integration. Numerical order alone does not determine next
+slice eligibility.
+
+- [TEL-120.md](TEL-120.md) — Build playable Godot application host and bootstrap — Not started
+- [TEL-121.md](TEL-121.md) — Implement Godot input-to-command and simulation-clock bridge — Not started
+- [TEL-122.md](TEL-122.md) — Implement Godot client session and scene flow — Not started
+- [TEL-123.md](TEL-123.md) — Expand production presentation contract and asset registry — Not started
+- [TEL-124.md](TEL-124.md) — Build first-slice dungeon and content graybox presentation — Not started
+- [TEL-125.md](TEL-125.md) — Build playable HUD and first-slice interaction flows — Not started
+- [TEL-126.md](TEL-126.md) — Integrate Godot save, suspend, resume, and session lifecycle — Not started
+- [TEL-127.md](TEL-127.md) — Verify playable Godot vertical slice and art-production readiness — Not started
+
+### Presentation production gates
+
+- `docs/gates/GODOT-PLAYABLE-SLICE.md` must pass using real first-slice content and placeholder/graybox presentation before the client is treated as a playable production-shaped vertical slice.
+- `docs/gates/ART-PRODUCTION-READY.md` must pass before systematic final tiles, sprites, animations, VFX, UI-art, icon, or production-audio TEL batches are created.
+- Concept art, style studies, UI wireframes, technical rendering tests, and explicit placeholders are allowed before Art Production Ready because they exist to validate the client and art direction rather than freeze production inventory.
+
 ## Repository engineering tickets
 
 - [TEL-117.md](TEL-117.md) — Harden coverage and mutation tooling scope — Implemented and verified
 - [TEL-118.md](TEL-118.md) — Reconcile audit remediation status and documentation provenance — Implemented and verified
 - [TEL-119.md](TEL-119.md) — Generate audit status fields from the canonical ticket/exec-plan ledger — Implemented and verified
 
-## Core Alpha coverage audit
+## Core Alpha and playable-slice coverage audit
 
 The audit compares §26 Character Creation, §48 Recommended First Vertical
-Slice, and §51 Definition of Core Alpha with the existing ledger and current
-implementation evidence:
+Slice, §51 Definition of Core Alpha, and the post-Phase-9 presentation gap with
+the existing ledger and current implementation evidence:
 
-- **Character creation:** TEL-100 owns the common boundary, while TEL-101–TEL-103
-  own the three required modes; each mode has different validation and
-  determinism decisions.
-- **Initial player setup and deterministic world-seed selection:** no existing
-  ticket owned selecting/persisting the seed and creating a ready-at-inn game;
-  TEL-104 owns that boundary.
-- **Dungeon entry, generation, mapping, hidden geography, descent, return,
-  carried/secured wealth, fight, flee, threat, features, suspend/resume, and
-  renderer independence:** already represented by existing TEL-010–TEL-016,
-  TEL-020–TEL-025, TEL-030–TEL-045, TEL-050–TEL-056, and TEL-090–TEL-093
-  tickets. No duplicate extensions were created.
-- **Monster appearance:** TEL-030 and TEL-031 own the content/runtime contract
-  and deterministic configured trigger. No content-expansion ticket is added.
-- **Treasure found underground:** item schemas and carried gold exist, but no
-  existing ticket owns loot resolution into unsecured expedition state;
-  TEL-105 owns that gap.
-- **Feature and monster journal observations:** the existing TEL-051,
-  TEL-054, and TEL-055 tickets own the observation pipeline and knowledge
-  categories; no duplicate ticket is added.
-- **Knowledge between Legacy characters:** existing legacy tickets do not own
-  the death-to-new-character profile handoff required by §51; TEL-106 owns
-  that narrow gap.
-- **First vertical-slice content:** the generic schemas and mechanics exist,
-  but authored data, a data-driven content pack boundary, the single biome,
-  rosters, and encounter/loot tables are absent. TEL-109–TEL-116 now own that
-  narrowly scoped §48 content work. TEL-107 remains an integration/evidence
-  ticket and does not expand beyond the slice content assigned here.
-- **Developer debug commands and deterministic test mode:** the existing
-  harness only accepts `--seed` and `--deterministic`; §43–§44 are not
-  owned by an existing TEL ticket. TEL-108 owns the tooling surface without
-  moving authority into tooling.
-- **Depth ecology, broad content counts, and other post-alpha systems:** not
-  required to close the §51 checklist and deliberately not ticketed here.
+- **Character creation:** TEL-100 owns the common boundary, while TEL-101–TEL-103 own the three required modes; each mode has different validation and determinism decisions.
+- **Initial player setup and deterministic world-seed selection:** TEL-104 owns selecting/persisting the seed and creating a ready-at-inn game.
+- **Dungeon entry, generation, mapping, hidden geography, descent, return, carried/secured wealth, fight, flee, threat, features, suspend/resume, and renderer independence:** represented by TEL-010–TEL-016, TEL-020–TEL-025, TEL-030–TEL-045, TEL-050–TEL-056, and TEL-090–TEL-093.
+- **Treasure found underground:** TEL-105 owns loot resolution into unsecured expedition state.
+- **Knowledge between Legacy characters:** TEL-106 owns the death-to-new-character profile handoff required by §51.
+- **Core Alpha composition:** TEL-107 provides deterministic headless end-to-end evidence and explicitly leaves production content and renderer/client integration separate.
+- **First vertical-slice content:** TEL-109–TEL-116 own the data-driven pack and representative authored content.
+- **Playable Godot client:** TEL-090–TEL-093 prove renderer boundaries but do not provide an application host or full playable UI. TEL-120–TEL-127 now own host/bootstrap, input/time, scene/session flow, production presentation identity, graybox world presentation, interaction UX, persistence, and acceptance.
+- **Production art:** intentionally not ticketed yet. Production batches are derived from the validated first-slice asset inventory only after `ART-PRODUCTION-READY` passes.
+- **Depth ecology, broad content counts, and other post-alpha systems:** remain outside the representative slice until separately planned.
 
 ## Definition of ledger completion
 
-The ledger is complete when every listed task has a focused implementation, tests proportional to its domain behavior, and evidence against its acceptance criteria. Creating these documents does not implement gameplay.
+The ledger is complete when every listed task has a focused implementation, tests proportional to its domain behavior, and evidence against its acceptance criteria. Creating these documents does not implement gameplay or a playable client.
