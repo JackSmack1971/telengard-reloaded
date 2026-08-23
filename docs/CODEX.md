@@ -26,9 +26,24 @@ Set environment variable `CODEX_SKIP_VERIFY_GUARD=1` for a session if you intent
 
 ## Skills
 
-- `$telengard-ticket` — implement or continue a TEL ticket using spec-first scoping, dependency inspection, deterministic tests, and status updates.
-- `$telengard-review` — perform a high-signal Telengard-specific review, optionally using read-only parallel subagents for architecture, determinism/save, and test gaps.
+- `$telengard-next-slice` — select and execute exactly one eligible TEL slice through repository preflight, planning, implementation, testing/observation, independent review, documentation, PR, CI gate, and handoff. During the current milestone it evaluates both TEL-110–TEL-116 content and TEL-120–TEL-127 Godot-client tracks.
+- `$telengard-review` — perform a high-signal independent Telengard-specific review with correctness, architecture/determinism/save, tests, documentation/provenance, and presentation/security lanes when relevant.
+
+## Current milestone context
+
+The current convergence milestone is the **Playable Godot Vertical Slice**.
+
+Codex should use:
+
+- `docs/presentation/GODOT_CLIENT_BLUEPRINT.md` for the durable post-TEL-091 client methodology;
+- `docs/exec-plans/active/GODOT-PLAYABLE-VERTICAL-SLICE.md` for living multi-ticket coordination;
+- `docs/gates/GODOT-PLAYABLE-SLICE.md` for placeholder-playable acceptance;
+- `docs/gates/ART-PRODUCTION-READY.md` before systematic final art/audio asset batches.
+
+TEL-091 remains the renderer prototype/separation proof. It is not the complete playable Godot client.
 
 ## Design references
 
-The control plane follows current official Codex guidance: keep `AGENTS.md` concise and scoped; use repository docs as the deeper system of record; use project `.codex/config.toml` for repo-specific behavior; use skills for repeatable workflows with progressive disclosure; use hooks for deterministic lifecycle enforcement; and use ExecPlans for long-running implementation work.
+The control plane follows current official Codex guidance: keep `AGENTS.md` scoped and authoritative; use repository docs as the deeper system of record; use project `.codex/config.toml` for repo-specific behavior; use skills for repeatable workflows with progressive disclosure; use hooks for deterministic lifecycle enforcement; and use ExecPlans for long-running or multi-ticket implementation work.
+
+The presentation methodology deliberately separates exploratory visual work, placeholder/graybox client implementation, and gated production asset work so Codex does not spend final-art effort before content identities, UX, presentation contracts, and asset mappings are stable.
