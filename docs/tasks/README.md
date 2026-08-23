@@ -133,7 +133,7 @@ the already-owned feature, journal, wealth, inn, or death mechanics.
 - TEL-109 — Establish the data-driven vertical-slice content pack — Implemented and verified
   - Define the external content files, catalog/loader boundary, validation, and content-version handling for the slice.
   - Keep authored definitions separate from simulation logic and presentation; do not add renderer-owned content rules.
-- TEL-110 — Author the floors 1–5 dungeon biome and band data — Not started
+- [TEL-110.md](TEL-110.md) — Author the floors 1–5 dungeon biome and band data — Implemented and verified
   - Provide one biome covering only floors 1–5, with data references for its encounter, feature, and loot ecology.
   - Keep unresolved pacing, weights, and balance as `CONFIGURATION/TUNING DECISION REQUIRED`.
 - TEL-111 — Author the first-slice monster roster — Not started

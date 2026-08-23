@@ -27,3 +27,4 @@ All notable changes to this project will be documented in this file.
 - Added a deterministic Core Alpha vertical-slice integration proof covering success, Legacy failure/restart, save reload, knowledge, and wealth boundaries
 - Added deterministic headless developer debug scripts with simulation-routed state setup, stable JSON Lines output, and save/load replay comparison
 - Added renderer-independent save compatibility proof across the Modern and Terminal presentation boundaries
+- Added the versioned Upper Ruins dungeon band definition for representative floors 1–5

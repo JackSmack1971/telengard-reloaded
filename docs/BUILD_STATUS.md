@@ -2735,3 +2735,30 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
   verification passed; `./eng/verify.ps1 -Mode Full` passed with a Release build
   of 0 warnings and 0 errors and 401 Release tests. TEL-110–TEL-116 authored
   content remains intentionally deferred.
+
+## TEL-110 verification
+
+- Status: implemented and verified; the content pack now exposes one validated
+  `DungeonBandDefinition` for the Upper Ruins representative slice through
+  `ContentPack.Bands`.
+- Files/modules affected: `src/Telengard.Content/Definitions/DungeonBandDefinition.cs`,
+  `src/Telengard.Content/Definitions/ContentPack.cs`,
+  `src/Telengard.Content/Definitions/ContentPackLoader.cs`,
+  `src/Telengard.Content/Definitions/README.md`,
+  `content/bands/upper-ruins.json`,
+  `tests/Telengard.Architecture.Tests/DungeonBandTests.cs`,
+  `docs/tasks/TEL-110.md`, `docs/tasks/README.md`, and `CHANGELOG.md`.
+- New public APIs: `DungeonBandDefinition`, `ContentPack.Bands`, and
+  `ContentPack.TryGetBandForFloor`.
+- Save-schema impact: none; save version, DTOs, migrations, and content-version
+  fields are unchanged.
+- Design choices: the band is the v1 biome unit; the record covers only floors
+  1–5, carries no resolver logic, and keeps future encounter, feature, and loot
+  ecology references configuration-only until TEL-112, TEL-114, and TEL-116.
+- Invariants: content remains immutable and renderer-independent; band ranges
+  are validated before publication; stable ordinal loading and floor lookup do
+  not use RNG or mutate authoritative state.
+- Acceptance: focused band/loader tests passed (12);
+  `./eng/dotnet.ps1 format Telengard.sln --verify-no-changes` passed; and
+  `./eng/verify.ps1 -Mode Full` passed with a Release build of 0 warnings,
+  0 errors, and 409 Release tests.

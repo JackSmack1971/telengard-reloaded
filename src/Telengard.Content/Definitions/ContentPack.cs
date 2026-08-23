@@ -54,7 +54,8 @@ public sealed class ContentPack
         IEnumerable<SpellDefinition>? spells = null,
         IEnumerable<FeatureDefinition>? features = null,
         IEnumerable<TalentDefinition>? talents = null,
-        IEnumerable<LootTable>? lootTables = null)
+        IEnumerable<LootTable>? lootTables = null,
+        IEnumerable<DungeonBandDefinition>? bands = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(contentVersion);
 
@@ -65,6 +66,7 @@ public sealed class ContentPack
         Features = new ContentCatalog<FeatureDefinition>(features ?? [], definition => definition.Id);
         Talents = new ContentCatalog<TalentDefinition>(talents ?? [], definition => definition.Id);
         LootTables = new ContentCatalog<LootTable>(lootTables ?? [], table => table.Id);
+        Bands = new ContentCatalog<DungeonBandDefinition>(bands ?? [], band => band.Id);
     }
 
     public string ContentVersion { get; }
@@ -74,4 +76,20 @@ public sealed class ContentPack
     public ContentCatalog<FeatureDefinition> Features { get; }
     public ContentCatalog<TalentDefinition> Talents { get; }
     public ContentCatalog<LootTable> LootTables { get; }
+    public ContentCatalog<DungeonBandDefinition> Bands { get; }
+
+    public bool TryGetBandForFloor(int floor, out DungeonBandDefinition band)
+    {
+        foreach (var candidate in Bands.Definitions.Values)
+        {
+            if (candidate.CoversFloor(floor))
+            {
+                band = candidate;
+                return true;
+            }
+        }
+
+        band = null!;
+        return false;
+    }
 }
