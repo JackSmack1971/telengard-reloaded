@@ -11,6 +11,8 @@ var _client_state := ClientState.STARTUP
 var _previous_authoritative_scene := ""
 var _feedback := ""
 var _clock_accumulator := 0.0
+var _request_pending := false
+var _queued_intent: Dictionary = {}
 const DOTNET_SCRIPT := "../../eng/dotnet.ps1"
 const HOST_ASSEMBLY := "../../tools/Telengard.GodotHost/bin/Debug/net8.0/Telengard.GodotHost.dll"
 const CONTENT_ROOT := "../../content"
@@ -122,12 +124,27 @@ func _register_joy(action: StringName, axis: JoyAxis, value: float) -> void:
 	InputMap.action_add_event(action, joy)
 
 func _request_frame() -> void:
-	_http.request("http://127.0.0.1:18120/frame")
+	if _request_pending:
+		return
+	_request_pending = true
+	var request_result := _http.request("http://127.0.0.1:18120/frame")
+	if request_result != OK:
+		_request_pending = false
+		_show_error("Unable to request the authoritative session frame (%s)." % request_result)
 
 func _send_intent(intent: Dictionary) -> void:
-	_http.request("http://127.0.0.1:18120/command", ["Content-Type: application/json"], HTTPClient.METHOD_POST, JSON.stringify(intent))
+	if _request_pending:
+		if intent.get("type", "") != "advance":
+			_queued_intent = intent.duplicate(true)
+		return
+	_request_pending = true
+	var request_result := _http.request("http://127.0.0.1:18120/command", ["Content-Type: application/json"], HTTPClient.METHOD_POST, JSON.stringify(intent))
+	if request_result != OK:
+		_request_pending = false
+		_show_error("Unable to submit authoritative intent (%s)." % request_result)
 
 func _on_request_completed(result: int, response_code: int, _headers: PackedStringArray, body: PackedByteArray) -> void:
+	_request_pending = false
 	if result != HTTPRequest.RESULT_SUCCESS:
 		_show_error("Unable to reach authoritative session (network result %s)." % result)
 		return
@@ -142,6 +159,10 @@ func _on_request_completed(result: int, response_code: int, _headers: PackedStri
 			_show_error(_feedback)
 		_update_authoritative_state(parsed["frame"])
 		_refresh_renderer()
+	if not _queued_intent.is_empty():
+		var queued_intent := _queued_intent
+		_queued_intent = {}
+		_send_intent(queued_intent)
 
 func _update_authoritative_state(frame: Dictionary) -> void:
 	if _client_state == ClientState.STARTUP:

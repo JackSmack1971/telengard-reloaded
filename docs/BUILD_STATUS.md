@@ -2826,3 +2826,14 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
   frame at tick 0 and accepted `enter_dungeon` into a `dungeon` frame; canonical
   Full verification passed with 444 tests. Interactive keyboard/controller
   observation remains pending with the existing TEL-121 gate.
+
+## TEL-122 input observation follow-up
+
+- Fixed the Godot request boundary so clock requests cannot drop or overlap
+  keyboard/controller gameplay intents; queued intents dispatch after the
+  current host response.
+- Godot 4.7.2 runtime input probe passed keyboard startup/new/character/inn/
+  dungeon/pause/resume transitions and recognized controller left-axis north
+  input as `move_north` without request-overlap errors.
+- Visual/manual observation remains unresolved because the current execution
+  environment cannot create a usable Godot desktop window.
