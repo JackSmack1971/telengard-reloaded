@@ -13,9 +13,11 @@ var _feedback := ""
 var _clock_accumulator := 0.0
 var _request_pending := false
 var _queued_intents: Array[Dictionary] = []
+var _initial_frame_attempts := 0
 const DOTNET_SCRIPT := "../../eng/dotnet.ps1"
 const HOST_ASSEMBLY := "../../tools/Telengard.GodotHost/bin/Debug/net8.0/Telengard.GodotHost.dll"
 const CONTENT_ROOT := "../../content"
+const MAX_INITIAL_FRAME_ATTEMPTS := 20
 
 func _ready() -> void:
 	_register_input_actions()
@@ -126,11 +128,12 @@ func _register_joy(action: StringName, axis: JoyAxis, value: float) -> void:
 func _request_frame() -> void:
 	if _request_pending:
 		return
+	_initial_frame_attempts += 1
 	_request_pending = true
 	var request_result := _http.request("http://127.0.0.1:18120/frame")
 	if request_result != OK:
 		_request_pending = false
-		_show_error("Unable to request the authoritative session frame (%s)." % request_result)
+		_schedule_initial_frame_retry("Unable to request the authoritative session frame (%s)." % request_result)
 
 func _send_intent(intent: Dictionary) -> void:
 	if _request_pending:
@@ -146,8 +149,9 @@ func _send_intent(intent: Dictionary) -> void:
 func _on_request_completed(result: int, response_code: int, _headers: PackedStringArray, body: PackedByteArray) -> void:
 	_request_pending = false
 	if result != HTTPRequest.RESULT_SUCCESS:
-		_show_error("Unable to reach authoritative session (network result %s)." % result)
+		_schedule_initial_frame_retry("Unable to reach authoritative session (network result %s)." % result)
 		return
+	_initial_frame_attempts = 0
 	var parsed: Variant = JSON.parse_string(body.get_string_from_utf8())
 	if not parsed is Dictionary:
 		_show_error("Authoritative session returned invalid JSON.")
@@ -162,6 +166,12 @@ func _on_request_completed(result: int, response_code: int, _headers: PackedStri
 	if not _queued_intents.is_empty():
 		var queued_intent: Dictionary = _queued_intents.pop_front()
 		_send_intent(queued_intent)
+
+func _schedule_initial_frame_retry(error_message: String) -> void:
+	if _client_state == ClientState.STARTUP and _initial_frame_attempts < MAX_INITIAL_FRAME_ATTEMPTS:
+		get_tree().create_timer(0.25).timeout.connect(_request_frame, CONNECT_ONE_SHOT)
+	else:
+		_show_error(error_message)
 
 func _update_authoritative_state(frame: Dictionary) -> void:
 	if _client_state == ClientState.STARTUP:

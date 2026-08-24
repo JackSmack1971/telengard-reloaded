@@ -2837,3 +2837,11 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
   input as `move_north` without request-overlap errors.
 - Visual/manual observation remains unresolved because the current execution
   environment cannot create a usable Godot desktop window.
+
+## TEL-122 host startup follow-up
+
+- Fixed the initial Godot `/frame` request race by retrying transient
+  `HTTPRequest` connection failures for a bounded startup window while the
+  spawned .NET host listener binds its port.
+- The reported Godot network result `2` is therefore treated as a transient
+  startup condition rather than immediately rendered as a client error.
