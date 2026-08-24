@@ -98,13 +98,28 @@ internal static class Program
         return Path.GetFullPath(args[index + 1]);
     }
 
-    private static object FrameJson(ModernRenderFrame frame) => new
+    internal static object FrameJson(ModernRenderFrame frame) => new
     {
         scene = frame.Scene.ToString().ToLowerInvariant(),
         player_position = Position(frame.PlayerPosition),
         environment = new { dynamic_lighting = frame.Environment.DynamicLighting, atmospheric_effects = frame.Environment.AtmosphericEffects, theme_id = frame.Environment.ThemeId },
         tiles = frame.Tiles.Select(tile => new { position = Position(tile.Position), knowledge = tile.Knowledge.ToString().ToLowerInvariant(), connections = tile.Connections.ToString() }),
         features = frame.Features.Select(feature => new { instance_id = feature.InstanceId, definition_id = feature.DefinitionId, presentation_key = feature.PresentationKey, position = Position(feature.Position), activation_count = feature.ActivationCount }),
+        combat = frame.Combat is null ? null : new
+        {
+            encounter_id = frame.Combat.EncounterId,
+            phase = frame.Combat.Phase.ToString().ToLowerInvariant(),
+            round = frame.Combat.Round,
+            threat_level = frame.Combat.ThreatLevel?.ToString().ToLowerInvariant(),
+            monster = new
+            {
+                instance_id = frame.Combat.Monster.InstanceId,
+                definition_id = frame.Combat.Monster.DefinitionId,
+                presentation_key = frame.Combat.Monster.PresentationKey,
+                current_hit_points = frame.Combat.Monster.CurrentHitPoints,
+                position = Position(frame.Combat.Monster.Position)
+            }
+        },
         hud = new { player_id = frame.Hud.PlayerId, level = frame.Hud.Level, hit_points = frame.Hud.HitPoints, max_hit_points = frame.Hud.MaxHitPoints, spell_power = frame.Hud.SpellPower, max_spell_power = frame.Hud.MaxSpellPower, carried_gold = frame.Hud.CarriedGold, secured_gold = frame.Hud.SecuredGold, alive = frame.Hud.Alive }
     };
 
@@ -149,7 +164,7 @@ internal sealed class GodotSession
     {
         var projection = PresentationStateAdapter.Create(_dispatcher.CurrentState);
         var frame = ModernRenderer.Create(projection, _events);
-        return new SessionFrame(new { scene = frame.Scene.ToString().ToLowerInvariant(), player_position = new { floor = frame.PlayerPosition.Floor, x = frame.PlayerPosition.X, y = frame.PlayerPosition.Y }, environment = new { dynamic_lighting = frame.Environment.DynamicLighting, atmospheric_effects = frame.Environment.AtmosphericEffects, theme_id = frame.Environment.ThemeId }, tiles = frame.Tiles.Select(tile => new { position = new { floor = tile.Position.Floor, x = tile.Position.X, y = tile.Position.Y }, knowledge = tile.Knowledge.ToString().ToLowerInvariant(), connections = tile.Connections.ToString() }), features = frame.Features.Select(feature => new { instance_id = feature.InstanceId, definition_id = feature.DefinitionId, presentation_key = feature.PresentationKey, position = new { floor = feature.Position.Floor, x = feature.Position.X, y = feature.Position.Y }, activation_count = feature.ActivationCount }), hud = new { player_id = frame.Hud.PlayerId, level = frame.Hud.Level, hit_points = frame.Hud.HitPoints, max_hit_points = frame.Hud.MaxHitPoints, spell_power = frame.Hud.SpellPower, max_spell_power = frame.Hud.MaxSpellPower, carried_gold = frame.Hud.CarriedGold, secured_gold = frame.Hud.SecuredGold, alive = frame.Hud.Alive } }, projection.SimulationTick);
+        return new SessionFrame(Program.FrameJson(frame), projection.SimulationTick);
     }
 }
 

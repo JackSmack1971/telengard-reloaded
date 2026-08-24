@@ -2825,3 +2825,17 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
 - Evidence: focused projection/registry tests passed (9); Godot 4.7.2
   headless editor/runtime loading passed; host Debug build passed with zero
   warnings/errors; canonical Full verification passed with 447 Release tests.
+
+## TEL-124 verification
+
+- 2026-08-24 — Implemented content-aware Godot graybox presentation. The
+  renderer now distinguishes unknown/observed/visited/current map states,
+  draws observed tile connections, resolves stable placeholder colors through
+  the presentation registry for all four first-slice features and monster
+  identities, and receives the safe combat projection from the Godot host.
+- Save impact: none.
+- Focused evidence: 9 projection/registry tests passed; Godot 4.7.2 editor and
+  headless runtime loading passed; host Debug build passed with zero warnings or
+  errors.
+- Full gate: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File
+  ./eng/verify.ps1 -Mode Full` passed; 447 Release tests passed.

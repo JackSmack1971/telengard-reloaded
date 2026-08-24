@@ -194,7 +194,8 @@ The final plan validation includes:
 - [ ] TEL-122 — session/scene flow.
 - [x] TEL-123 — production presentation/asset contract (projection identity,
   observed geometry, and placeholder-capable presentation registry verified).
-- [ ] TEL-124 — content-aware dungeon graybox.
+- [x] TEL-124 — content-aware dungeon graybox (renderer-safe tile states,
+  connections, combat identity, and registry-backed feature placeholders).
 - [ ] TEL-125 — HUD and interaction flows.
 - [ ] TEL-126 — persistence/application lifecycle.
 - [ ] TEL-127 — playable Godot vertical-slice acceptance.
