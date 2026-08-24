@@ -42,9 +42,13 @@ public static class ContentPackLoader
             contentRoot,
             "bands",
             ParseDungeonBand);
+        var encounterTables = LoadDefinitions(
+            contentRoot,
+            "encounter_tables",
+            ParseEncounterTable);
 
-        var pack = new ContentPack(contentVersion, monsters, items, spells, features, talents, lootTables, bands);
-        ValidateReferences(pack);
+        var pack = new ContentPack(contentVersion, monsters, items, spells, features, talents, lootTables, bands, encounterTables);
+        ValidateReferences(pack, Directory.Exists(Path.Combine(contentRoot, "encounter_tables")));
         return pack;
     }
 
@@ -232,6 +236,24 @@ public static class ContentPackLoader
             OptionalString(root, "lootProfile"),
             RequiredString(root, "visualTheme"),
             RequiredString(root, "audioTheme"));
+    }
+
+    private static EncounterTable ParseEncounterTable(string json)
+    {
+        var root = ParseRoot(json);
+        var entries = RequiredArray(root, "entries")
+            .EnumerateArray()
+            .Select(entry => new EncounterTableEntry(
+                RequiredString(entry, "monsterId"),
+                RequiredLong(entry, "weight"),
+                RequiredInt(entry, "level"),
+                RequiredInt(entry, "currentHitPoints")))
+            .ToArray();
+        return new EncounterTable(
+            RequiredString(root, "id"),
+            RequiredInt(root, "floorMin"),
+            RequiredInt(root, "floorMax"),
+            entries);
     }
 
     private static IReadOnlyList<FeatureOutcome> FeatureOutcomes(JsonElement root, string propertyName)
@@ -445,9 +467,42 @@ public static class ContentPackLoader
     private static string NormalizePropertyName(string propertyName) =>
         propertyName.Replace("_", string.Empty, StringComparison.Ordinal);
 
-    private static void ValidateReferences(ContentPack pack)
+    private static void ValidateReferences(ContentPack pack, bool hasEncounterTableCatalog)
     {
         ValidateBandRanges(pack);
+        ValidateEncounterTableRanges(pack);
+
+        foreach (var table in pack.EncounterTables.Definitions.Values)
+        {
+            foreach (var entry in table.Entries)
+            {
+                if (!pack.Monsters.TryGet(entry.MonsterId, out _))
+                {
+                    throw new InvalidDataException(
+                        $"Encounter table '{table.Id}' references missing monster '{entry.MonsterId}'.");
+                }
+            }
+        }
+
+        foreach (var band in pack.Bands.Definitions.Values)
+        {
+            if (hasEncounterTableCatalog
+                && band.EncounterEcologyId is not null
+                && !pack.EncounterTables.TryGet(band.EncounterEcologyId, out _))
+            {
+                throw new InvalidDataException(
+                    $"Dungeon band '{band.Id}' references missing encounter table '{band.EncounterEcologyId}'.");
+            }
+
+            if (hasEncounterTableCatalog
+                && band.EncounterEcologyId is not null
+                && pack.EncounterTables.TryGet(band.EncounterEcologyId, out var resolvedTable)
+                && (resolvedTable.FloorMin > band.FloorMin || resolvedTable.FloorMax < band.FloorMax))
+            {
+                throw new InvalidDataException(
+                    $"Encounter table '{resolvedTable.Id}' does not cover dungeon band '{band.Id}'.");
+            }
+        }
 
         foreach (var table in pack.LootTables.Definitions.Values)
         {
@@ -486,6 +541,38 @@ public static class ContentPackLoader
                 throw new InvalidDataException(
                     $"Dungeon bands '{bands[index - 1].Id}' and '{bands[index].Id}' have overlapping floor ranges.");
             }
+        }
+    }
+
+    private static void ValidateEncounterTableRanges(ContentPack pack)
+    {
+        var tables = pack.EncounterTables.Definitions.Values
+            .OrderBy(table => table.FloorMin)
+            .ThenBy(table => table.FloorMax)
+            .ThenBy(table => table.Id, StringComparer.Ordinal)
+            .ToArray();
+
+        if (tables.Length == 0)
+        {
+            return;
+        }
+
+        var nextFloor = 1;
+
+        for (var index = 0; index < tables.Length; index++)
+        {
+            if (tables[index].FloorMin != nextFloor)
+            {
+                throw new InvalidDataException(
+                    $"Encounter tables do not provide contiguous floor coverage at floor {nextFloor}.");
+            }
+
+            nextFloor = tables[index].FloorMax + 1;
+        }
+
+        if (nextFloor != 6)
+        {
+            throw new InvalidDataException("Encounter tables must provide contiguous coverage for floors 1 through 5.");
         }
     }
 

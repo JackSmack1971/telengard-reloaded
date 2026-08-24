@@ -139,7 +139,7 @@ the already-owned feature, journal, wealth, inn, or death mechanics.
 - TEL-111 — Author the first-slice monster roster — Implemented and verified
   - Provide 8–12 distinct monster definitions using families, traits, behaviors, actions, resistances, vulnerabilities, spawn rules, and loot references.
   - Require ecological differences; do not fill the roster with stat-scaled variations of one monster.
-- TEL-112 — Author first-slice encounter ecology tables — Not started
+- TEL-112 — Author first-slice encounter ecology tables — Implemented and verified
   - Provide deterministic, data-driven floor-band encounter tables for floors 1–5 that reference the TEL-111 monster IDs.
   - Keep encounter selection and validation in the existing simulation/content boundary, not in renderer code.
 - TEL-113 — Author the first-slice item roster — Not started

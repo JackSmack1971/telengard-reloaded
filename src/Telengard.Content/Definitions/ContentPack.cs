@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using Telengard.Core.Combat;
 
 namespace Telengard.Content;
 
@@ -55,7 +56,8 @@ public sealed class ContentPack
         IEnumerable<FeatureDefinition>? features = null,
         IEnumerable<TalentDefinition>? talents = null,
         IEnumerable<LootTable>? lootTables = null,
-        IEnumerable<DungeonBandDefinition>? bands = null)
+        IEnumerable<DungeonBandDefinition>? bands = null,
+        IEnumerable<EncounterTable>? encounterTables = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(contentVersion);
 
@@ -67,6 +69,7 @@ public sealed class ContentPack
         Talents = new ContentCatalog<TalentDefinition>(talents ?? [], definition => definition.Id);
         LootTables = new ContentCatalog<LootTable>(lootTables ?? [], table => table.Id);
         Bands = new ContentCatalog<DungeonBandDefinition>(bands ?? [], band => band.Id);
+        EncounterTables = new ContentCatalog<EncounterTable>(encounterTables ?? [], table => table.Id);
     }
 
     public string ContentVersion { get; }
@@ -77,6 +80,7 @@ public sealed class ContentPack
     public ContentCatalog<TalentDefinition> Talents { get; }
     public ContentCatalog<LootTable> LootTables { get; }
     public ContentCatalog<DungeonBandDefinition> Bands { get; }
+    public ContentCatalog<EncounterTable> EncounterTables { get; }
 
     public bool TryGetBandForFloor(int floor, out DungeonBandDefinition band)
     {
@@ -91,5 +95,27 @@ public sealed class ContentPack
 
         band = null!;
         return false;
+    }
+
+    public bool TryGetEncounterTableForFloor(int floor, out EncounterTable table)
+    {
+        foreach (var candidate in EncounterTables.Definitions.Values)
+        {
+            if (candidate.CoversFloor(floor))
+            {
+                table = candidate;
+                return true;
+            }
+        }
+
+        table = null!;
+        return false;
+    }
+
+    public EncounterTriggerConfiguration CreateEncounterTriggerConfiguration(int floor, double triggerChance)
+    {
+        return TryGetEncounterTableForFloor(floor, out var table)
+            ? table.ToTriggerConfiguration(triggerChance)
+            : throw new KeyNotFoundException($"No encounter table covers floor {floor}.");
     }
 }

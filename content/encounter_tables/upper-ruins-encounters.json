@@ -1,0 +1,15 @@
+{
+  "id": "upper-ruins-encounters",
+  "floor_min": 1,
+  "floor_max": 5,
+  "entries": [
+    { "monster_id": "cave-ooze", "weight": 1, "level": 1, "current_hit_points": 1 },
+    { "monster_id": "cave-rat", "weight": 1, "level": 1, "current_hit_points": 1 },
+    { "monster_id": "crypt-wight", "weight": 1, "level": 1, "current_hit_points": 1 },
+    { "monster_id": "gargoyle-sentinel", "weight": 1, "level": 1, "current_hit_points": 1 },
+    { "monster_id": "goblin-skirmisher", "weight": 1, "level": 1, "current_hit_points": 1 },
+    { "monster_id": "lesser-imp", "weight": 1, "level": 1, "current_hit_points": 1 },
+    { "monster_id": "rust-beetle", "weight": 1, "level": 1, "current_hit_points": 1 },
+    { "monster_id": "skeleton-guard", "weight": 1, "level": 1, "current_hit_points": 1 }
+  ]
+}
