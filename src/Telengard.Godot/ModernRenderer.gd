@@ -13,6 +13,7 @@ const FLOOR_COLOR := Color("26334b")
 const VISITED_COLOR := Color("344968")
 const CURRENT_COLOR := Color("4c8fc6")
 const FEATURE_COLOR := Color("d9ad62")
+const UNKNOWN_COLOR := Color("111827")
 const ASSET_REGISTRY_SCRIPT := preload("res://PresentationAssetRegistry.gd")
 
 var _frame: Dictionary = {}
@@ -74,13 +75,16 @@ func _draw_world() -> void:
 		var position: Dictionary = tile.get("position", {})
 		var cell := MAP_ORIGIN + Vector2(float(position.get("x", 0)), float(position.get("y", 0))) * TILE_SIZE
 		var knowledge: String = str(tile.get("knowledge", "observed"))
-		var color := FLOOR_COLOR
+		var color := UNKNOWN_COLOR
 		if knowledge == "visited":
 			color = VISITED_COLOR
+		elif knowledge == "observed":
+			color = FLOOR_COLOR
 		elif knowledge == "current":
 			color = CURRENT_COLOR
 		draw_rect(Rect2(cell, Vector2(TILE_SIZE - 2.0, TILE_SIZE - 2.0)), color, true)
 		draw_rect(Rect2(cell, Vector2(TILE_SIZE - 2.0, TILE_SIZE - 2.0)), PANEL_EDGE, false, 1.0)
+		_draw_connections(cell, str(tile.get("connections", "None")), color)
 
 	for feature in _frame.get("features", []):
 		var position: Dictionary = feature.get("position", {})
@@ -92,11 +96,22 @@ func _draw_world() -> void:
 			center + Vector2(0, 12),
 			center + Vector2(-12, 0)
 		])
-		draw_colored_polygon(diamond, FEATURE_COLOR)
 		var presentation_key := str(feature.get("presentation_key", feature.get("definition_id", "feature.unknown")))
 		var resource_id := _asset_registry.resolve(presentation_key)
+		var feature_color := _asset_registry.placeholder_color(presentation_key)
+		draw_colored_polygon(diamond, feature_color if resource_id.begins_with(ASSET_REGISTRY_SCRIPT.PLACEHOLDER_PREFIX) else FEATURE_COLOR)
 		if resource_id.begins_with(ASSET_REGISTRY_SCRIPT.PLACEHOLDER_PREFIX):
-			draw_string(ThemeDB.fallback_font, cell + Vector2(2, TILE_SIZE + 14), "PLACEHOLDER %s" % presentation_key, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color("f0c674"))
+			draw_string(ThemeDB.fallback_font, cell + Vector2(2, TILE_SIZE + 14), _short_identity(presentation_key), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color("f0c674"))
+
+	var combat: Dictionary = _frame.get("combat", {})
+	if not combat.is_empty():
+		var monster: Dictionary = combat.get("monster", {})
+		var monster_position: Dictionary = monster.get("position", {})
+		var monster_cell := MAP_ORIGIN + Vector2(float(monster_position.get("x", 0)), float(monster_position.get("y", 0))) * TILE_SIZE
+		var monster_key := str(monster.get("presentation_key", monster.get("definition_id", "monster.unknown")))
+		var monster_center := monster_cell + Vector2(TILE_SIZE * 0.5 - 1.0, TILE_SIZE * 0.5 - 1.0)
+		draw_circle(monster_center, 14.0, _asset_registry.placeholder_color(monster_key))
+		draw_string(ThemeDB.fallback_font, monster_cell + Vector2(2, -6), _short_identity(monster_key), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color("f0c674"))
 
 	if not _frame.is_empty():
 		var player_position: Dictionary = _frame.get("player_position", {})
@@ -119,6 +134,7 @@ func _draw_hud() -> void:
 	draw_string(font, Vector2(916, 264), "SP   %s / %s" % [hud.get("spell_power", 0), hud.get("max_spell_power", 0)], HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color("7cb9e8"))
 	draw_string(font, Vector2(916, 304), "Carried gold   %s" % hud.get("carried_gold", 0), HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("d9ad62"))
 	draw_string(font, Vector2(916, 330), "Secured gold   %s" % hud.get("secured_gold", 0), HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("d9ad62"))
+	draw_string(font, Vector2(916, 356), "Map: unknown / visited / visible", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("8295b5"))
 
 	var combat: Dictionary = _frame.get("combat", {})
 	if not combat.is_empty():
@@ -183,3 +199,19 @@ func _scene_label() -> String:
 	var environment: Dictionary = _frame.get("environment", {})
 	var scene := "INN" if _frame.get("scene", "dungeon") == "inn" else "DUNGEON"
 	return "%s · %s" % [scene, environment.get("theme_id", "unknown")]
+
+func _draw_connections(cell: Vector2, connections: String, color: Color) -> void:
+	var center := cell + Vector2(TILE_SIZE * 0.5 - 1.0, TILE_SIZE * 0.5 - 1.0)
+	var half := TILE_SIZE * 0.5 - 5.0
+	if connections.contains("North"):
+		draw_line(center, center + Vector2(0, -half), color.lightened(0.25), 3.0)
+	if connections.contains("South"):
+		draw_line(center, center + Vector2(0, half), color.lightened(0.25), 3.0)
+	if connections.contains("East"):
+		draw_line(center, center + Vector2(half, 0), color.lightened(0.25), 3.0)
+	if connections.contains("West"):
+		draw_line(center, center + Vector2(-half, 0), color.lightened(0.25), 3.0)
+
+func _short_identity(identity: String) -> String:
+	var parts := identity.split(".")
+	return parts[-1].replace("-", " ").to_upper()
