@@ -41,6 +41,12 @@ From repository root, keep the pre-selection context deliberately small:
 3. Inspect current branch/worktree, remote `main`, recent commits, open PRs,
    and CI state.
 4. Detect overlapping/stale work before choosing a ticket.
+5. When any candidate has `verification.godot_manual: true`, run
+   `powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./eng/godot-doctor.ps1`.
+   Treat its discovered executable path and reported version as the authoritative
+   local availability evidence. This check includes WinGet-installed Godot
+   locations; do not conclude that Godot is absent from a failed PATH lookup
+   alone.
 
 Do not load the full human task ledger, invariants, development guide,
 architecture, blueprint, or ExecPlan merely to construct the initial candidate
@@ -191,8 +197,9 @@ Capture exact pass/fail evidence.
 If the change affects Terminal/Godot/UI/CLI/integration behavior, exercise the observable surface and record concise evidence. Skip presentation observation for pure headless domain work unless the ticket requires it.
 
 For Godot-visible work, headless projection tests do not replace required
-manual observation; record the relevant runtime/version and input path when the
-ticket or gate requires it.
+manual observation; record the discovered executable path, runtime version, and
+input path when the ticket or gate requires it. If `godot-doctor.ps1` reports an
+installed runtime, use it before reporting an environment blocker.
 
 ## 9. Self-review the full diff
 

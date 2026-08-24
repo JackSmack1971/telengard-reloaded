@@ -191,7 +191,7 @@ TEL-128 must not invent unresolved visual-direction, binary/LFS, or other produc
 
 A Godot-visible ticket must perform the manual/interactive observation required by its acceptance criteria. Record the Godot/runtime version and fixed seed when useful. `./eng/verify.ps1 -Mode Full` remains mandatory for code changes but does not replace required presentation acceptance.
 
-If the implementation environment lacks required Godot tooling, do not weaken the ticket. The next-slice selector should choose another eligible slice when possible or report the concrete environment blocker.
+Before declaring Godot unavailable, run `powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./eng/godot-doctor.ps1`. The doctor checks PATH, common installation roots, and WinGet package locations, then reports the executable path and runtime version. If it finds an installed runtime, use that executable for manual acceptance. If no runtime is found, do not weaken the ticket; choose another eligible slice when possible or report the concrete environment blocker.
 
 ## Save-schema changes
 

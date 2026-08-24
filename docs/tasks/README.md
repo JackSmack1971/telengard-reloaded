@@ -170,7 +170,7 @@ real first-slice integration. Numerical order alone does not determine next
 slice eligibility.
 
 - [TEL-120.md](TEL-120.md) — Build playable Godot application host and bootstrap — Implemented and verified
-- [TEL-121.md](TEL-121.md) — Implement Godot input-to-command and simulation-clock bridge — Not started
+- [TEL-121.md](TEL-121.md) — Implement Godot input-to-command and simulation-clock bridge — Implemented and headlessly verified; interactive observation pending
 - [TEL-122.md](TEL-122.md) — Implement Godot client session and scene flow — Not started
 - [TEL-123.md](TEL-123.md) — Expand production presentation contract and asset registry — Not started
 - [TEL-124.md](TEL-124.md) — Build first-slice dungeon and content graybox presentation — Not started
