@@ -100,6 +100,9 @@ tool contracts, then dynamic task and verification material.
 - `docs/CODEX_MODEL_POLICY.md` defines effort escalation and reviewer role
   defaults; `high` is never a global subagent default.
 - The canonical local gate is `powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./eng/verify.ps1 -Mode Full`.
+- Before reporting a Godot/manual-observation environment blocker, run
+  `powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./eng/godot-doctor.ps1`;
+  it discovers PATH, common-install, and WinGet-installed Godot runtimes.
 - `.github/workflows/verification.yml` checks generated audit status and runs
   the same full gate for PRs and pushes to `main`.
 

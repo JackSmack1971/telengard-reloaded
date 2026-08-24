@@ -2803,3 +2803,10 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
 - Design choices: authored outcomes use only existing resolver-supported effects and observations. Teleporter network and destination-rule values remain content references; mapping logic remains in `TeleporterResolver`. No permanent odds, damage, destination, resource, or balance policy was added.
 - Invariants: definitions remain separate from runtime state; loading is deterministic and does not create knowledge; existing resolver validation and event ordering remain authoritative.
 - Acceptance: focused content/feature tests (7 passed), formatter verification, zero-warning Release build, and the canonical full verification gate passed with 440 Release tests.
+
+## TEL-121 verification
+
+- Status: input and controller intents now cross a persistent local .NET host boundary; Core owns time modes, tick advancement, validation, mutation, events, and projection refresh.
+- Save-schema impact: none; clock/input/host state is transient application state.
+- Invariants: render cadence is decoupled from tick production; Godot does not mutate authoritative state or resolve gameplay; rejected commands do not mutate state.
+- Evidence: focused clock tests passed (4); host Debug build passed with zero warnings/errors; bootstrap emitted a valid inn frame; `eng/godot-doctor.ps1` found WinGet Godot 4.7.2 and the headless project smoke check passed. Interactive input observation remains pending.
