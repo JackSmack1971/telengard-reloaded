@@ -2786,3 +2786,14 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
 - Design choices: costs, targeting rules, effect identifiers, interaction identifiers, and descriptions remain content-supplied configuration. No spell mechanics, formulas, or permanent balance policy was added.
 - Invariants: content definitions remain separate from authoritative runtime state; loading is deterministic and does not create player knowledge; existing validation and spell-cast event ordering remain authoritative.
 - Acceptance: focused roster and casting tests (2 passed), formatter verification, zero-warning Release build, and the canonical full verification gate passed with 422 Release tests.
+
+## TEL-116 verification
+
+- Status: implemented and verified; the versioned content pack now contains exactly one fountain, altar, pit, and teleporter definition for the first slice.
+- Tests added: `FirstSliceFeatureTests` validates the four-type roster, canonical loading, hidden-information preservation, and activation through the existing four resolvers. `ContentPackLoaderTests` covers malformed outcomes, unsupported effects, and missing teleporter references.
+- Files/modules affected: `content/features/*.json`, `src/Telengard.Content/Definitions/ContentPackLoader.cs`, `tests/Telengard.Architecture.Tests/FirstSliceFeatureTests.cs`, `tests/Telengard.Architecture.Tests/ContentPackLoaderTests.cs`, this status document, and the task ledger.
+- New public APIs/events: none.
+- Save-schema impact: none. Feature definitions remain content metadata; resolver, knowledge, mapping, simulation, and save contracts are unchanged.
+- Design choices: authored outcomes use only existing resolver-supported effects and observations. Teleporter network and destination-rule values remain content references; mapping logic remains in `TeleporterResolver`. No permanent odds, damage, destination, resource, or balance policy was added.
+- Invariants: definitions remain separate from runtime state; loading is deterministic and does not create knowledge; existing resolver validation and event ordering remain authoritative.
+- Acceptance: focused content/feature tests (7 passed), formatter verification, zero-warning Release build, and the canonical full verification gate passed with 440 Release tests.

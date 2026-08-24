@@ -1,0 +1,18 @@
+{
+  "id": "azure-fountain",
+  "type": "Fountain",
+  "presentation_key": "feature.fountain.azure",
+  "interaction_options": ["drink"],
+  "hint_rules": {
+    "color": "azure",
+    "temperature": "cold"
+  },
+  "knowledge_category": "fountain",
+  "outcome_table": [
+    {
+      "weight": 1,
+      "effects": ["restore_spell_power"],
+      "observations": ["cold_water"]
+    }
+  ]
+}

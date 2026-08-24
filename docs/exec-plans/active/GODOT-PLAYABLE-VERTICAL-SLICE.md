@@ -186,6 +186,9 @@ The final plan validation includes:
   authored; TEL-120–TEL-128 client/readiness slices added to the task system.
 - [x] 2026-08-23 — TEL-114 loot table data, references, validation, and
   deterministic carried-wealth acceptance evidence completed; save impact none.
+- [x] 2026-08-23 — TEL-116 fountain, altar, pit, and teleporter definitions,
+  complete-pack validation, deterministic loading, and resolver acceptance
+  evidence completed; save impact none.
 - [ ] TEL-120 — application host/bootstrap.
 - [ ] TEL-121 — input/clock bridge.
 - [ ] TEL-122 — session/scene flow.

@@ -1,0 +1,16 @@
+{
+  "id": "bottomless-pit",
+  "type": "Pit",
+  "presentation_key": "feature.pit.bottomless",
+  "interaction_options": ["descend"],
+  "hint_rules": {
+    "sound": "loose_stone"
+  },
+  "knowledge_category": "pit",
+  "outcome_table": [
+    {
+      "weight": 1,
+      "observations": ["loose_stone"]
+    }
+  ]
+}
