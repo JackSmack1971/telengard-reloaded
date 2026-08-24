@@ -2810,3 +2810,18 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
 - Save-schema impact: none; clock/input/host state is transient application state.
 - Invariants: render cadence is decoupled from tick production; Godot does not mutate authoritative state or resolve gameplay; rejected commands do not mutate state.
 - Evidence: focused clock tests passed (4); host Debug build passed with zero warnings/errors; bootstrap emitted a valid inn frame; `eng/godot-doctor.ps1` found WinGet Godot 4.7.2 and the headless project smoke check passed. Interactive input observation remains pending.
+
+## TEL-123 verification
+
+- Status: implemented and verified; renderer-safe presentation identity and
+  observed tile geometry now cross the host boundary, and a presentation-side
+  stable-ID asset registry provides deterministic lookup with explicit
+  development placeholders.
+- Save-schema impact: none; Godot resource paths remain outside authoritative
+  state and save DTOs.
+- Invariants: only observed map positions and discovered/observed content
+  identities are projected; hidden feature state remains redacted; registry
+  mappings do not affect simulation or replay.
+- Evidence: focused projection/registry tests passed (9); Godot 4.7.2
+  headless editor/runtime loading passed; host Debug build passed with zero
+  warnings/errors; canonical Full verification passed with 447 Release tests.

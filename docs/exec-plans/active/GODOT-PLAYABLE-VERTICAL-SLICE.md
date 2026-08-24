@@ -192,7 +192,8 @@ The final plan validation includes:
 - [x] TEL-120 — application host/bootstrap (Godot 4.7.2 smoke-verified; authoritative bootstrap remains in the external .NET host).
 - [x] TEL-121 — input/clock bridge (headless verification passed; interactive Godot observation pending).
 - [ ] TEL-122 — session/scene flow.
-- [ ] TEL-123 — production presentation/asset contract.
+- [x] TEL-123 — production presentation/asset contract (projection identity,
+  observed geometry, and placeholder-capable presentation registry verified).
 - [ ] TEL-124 — content-aware dungeon graybox.
 - [ ] TEL-125 — HUD and interaction flows.
 - [ ] TEL-126 — persistence/application lifecycle.

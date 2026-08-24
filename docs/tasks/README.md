@@ -172,7 +172,7 @@ slice eligibility.
 - [TEL-120.md](TEL-120.md) — Build playable Godot application host and bootstrap — Implemented and verified
 - [TEL-121.md](TEL-121.md) — Implement Godot input-to-command and simulation-clock bridge — In progress
 - [TEL-122.md](TEL-122.md) — Implement Godot client session and scene flow — Not started
-- [TEL-123.md](TEL-123.md) — Expand production presentation contract and asset registry — Not started
+- [TEL-123.md](TEL-123.md) — Expand production presentation contract and asset registry — Implemented and verified
 - [TEL-124.md](TEL-124.md) — Build first-slice dungeon and content graybox presentation — Not started
 - [TEL-125.md](TEL-125.md) — Build playable HUD and first-slice interaction flows — Not started
 - [TEL-126.md](TEL-126.md) — Integrate Godot save, suspend, resume, and session lifecycle — Not started
