@@ -293,3 +293,26 @@ blockers: <concise blockers or none>
 ```
 
 For an Automation, this handoff is the terminal result of the scheduled run. A later run starts again from fresh repository state.
+
+## Skill-local telemetry
+
+Use `scripts/skill_telemetry.py` as best-effort, non-gating instrumentation. Resolve `<skill-root>` once as the directory containing this `SKILL.md`, then invoke an available Python 3 executable with `<skill-root>/scripts/skill_telemetry.py`; do not rediscover the helper path for each event. Runtime records stay under this skill's `telemetry/` directory. If Python or telemetry writes are unavailable, continue the slice workflow and mention the instrumentation failure in the final handoff; telemetry never relaxes selection, verification, review, or merge gates.
+
+Start example: `python <skill-root>/scripts/skill_telemetry.py start --ticket none`. Semantic events use `event <name> --field key=value`; end with `end --outcome <RUN_RESULT-status> --ticket TEL-###`.
+
+Start one session at the beginning of the transaction, before candidate selection; use ticket `none` until a slice is selected. Record normalized workflow facts rather than private selection reasoning:
+
+- `candidate_set` with the compact candidate count;
+- `candidate_rejected` with TEL id and one normalized reason: `dependency_incomplete`, `active_pr`, `undefined_product_decision`, `scope_too_broad`, `prerequisite_more_fundamental`, `repository_health`, `manual_observation_unavailable`, or `pre_tel128_final_asset`;
+- `candidate_selected` for the initial choice and `candidate_selection_changed` if deeper evidence forces a different selection;
+- `context_required_missing`, `unexpected_context_needed`, `context_conflict`, `legacy_ticket_fallback`, and `unmapped_risk` when those branches occur;
+- `godot_runtime_resolved`, `godot_runtime_unavailable`, and `godot_manual_blocked` for Godot/manual-observation decisions;
+- `review_requested`, `review_result`, and `review_rerun` at the independent-review boundary; record only verdict/severity counts, not finding prose;
+- `merge_gate_checked`, `merge_gate_blocked` with a normalized `reason`, `pr_created`, `merge_attempted`, `merge_succeeded`, and `ready_for_human` for external gate outcomes;
+- `second_slice_attempted` if the one-slice transaction boundary is ever violated, and `missing_terminal_result` if the run cannot emit the required handoff.
+
+Use `probe` for declared/expected required paths where first-attempt resolution matters. Use `run` only for consequential commands: task-index validation, Godot doctor, focused/subsystem tests, formatter/build gates, generators, ticket verification, and canonical final verification. Set the canonical full gate to `--kind full-verification --label verify-full`. Routine reads, searches, `git status`, metadata inspection, and diff review run normally. Reuse stable labels for retries; inspect the concrete failure and make a targeted correction before rerunning. Prefer repository PowerShell `-File` entry points and do not place complex inline PowerShell behind the Python wrapper.
+
+External GitHub/tool actions are logged semantically rather than forced through the command wrapper. Do not log prompts/private reasoning, diff or source contents, command stdout/stderr, environment variables, credentials, PR bodies, API payloads, or access tokens.
+
+End the telemetry session with the same terminal disposition as `RUN_RESULT`: `merged`, `ready-for-human`, `blocked`, or `no-work` (use `failed`/`inconclusive` only when that accurately describes an abnormal run). Generate an improvement report when requested with `scripts/skill_telemetry.py report --write`; compare fingerprint cohorts rather than overwriting historical evidence.
