@@ -83,8 +83,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		_refresh_renderer()
 
 func _process(delta: float) -> void:
+	if _client_state not in [ClientState.INN, ClientState.DUNGEON]:
+		_clock_accumulator = 0.0
+		return
 	_clock_accumulator += delta
-	if _host_pid > 0 and _client_state in [ClientState.INN, ClientState.DUNGEON] and _clock_accumulator >= 0.1 and _http.get_http_client_status() != HTTPClient.STATUS_REQUESTING:
+	if _host_pid > 0 and _clock_accumulator >= 0.1 and _http.get_http_client_status() != HTTPClient.STATUS_REQUESTING:
 		var elapsed := _clock_accumulator
 		_clock_accumulator = 0.0
 		_send_intent({"type": "advance", "elapsed_seconds": elapsed})
