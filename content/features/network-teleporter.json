@@ -1,0 +1,17 @@
+{
+  "id": "network-teleporter",
+  "type": "Teleporter",
+  "presentation_key": "feature.teleporter.network",
+  "interaction_options": ["enter"],
+  "hint_rules": {
+    "network_id": "first-slice",
+    "destination_rule": "configured"
+  },
+  "knowledge_category": "teleporter",
+  "outcome_table": [
+    {
+      "weight": 1,
+      "observations": ["the_air_folds"]
+    }
+  ]
+}

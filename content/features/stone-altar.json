@@ -1,0 +1,17 @@
+{
+  "id": "stone-altar",
+  "type": "Altar",
+  "presentation_key": "feature.altar.stone",
+  "interaction_options": ["offer"],
+  "hint_rules": {
+    "material": "stone",
+    "markings": "worn_runes"
+  },
+  "knowledge_category": "altar",
+  "outcome_table": [
+    {
+      "weight": 1,
+      "observations": ["worn_runes"]
+    }
+  ]
+}

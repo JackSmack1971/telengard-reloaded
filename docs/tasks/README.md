@@ -151,7 +151,7 @@ the already-owned feature, journal, wealth, inn, or death mechanics.
 - TEL-115 — Author the first-slice spell roster — Implemented and verified
   - Provide 6–8 spell definitions with targeting, effects, interactions, costs, and discovery descriptions for the existing spell system.
   - Leave balance and undefined spell formulas configurable.
-- TEL-116 — Author the four first-slice dungeon feature definitions — Not started
+- TEL-116 — Author the four first-slice dungeon feature definitions — Implemented and verified
   - Provide data definitions and outcomes for exactly fountain, altar, pit, and teleporter using the existing generic feature and knowledge contracts.
   - Do not duplicate the already-implemented feature resolvers or encode feature behavior in a renderer.
 

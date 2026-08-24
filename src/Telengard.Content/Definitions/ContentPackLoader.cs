@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Collections.ObjectModel;
+using Telengard.Core.World.Features;
 
 namespace Telengard.Content;
 
@@ -477,6 +478,7 @@ public static class ContentPackLoader
     {
         ValidateBandRanges(pack);
         ValidateEncounterTableRanges(pack);
+        ValidateFeatureDefinitions(pack);
 
         foreach (var table in pack.EncounterTables.Definitions.Values)
         {
@@ -537,6 +539,74 @@ public static class ContentPackLoader
                 throw new InvalidDataException(
                     $"Monster '{monster.Id}' references missing loot table '{monster.LootTable}'.");
             }
+        }
+    }
+
+    private static void ValidateFeatureDefinitions(ContentPack pack)
+    {
+        foreach (var feature in pack.Features.Definitions.Values)
+        {
+            if (feature.InteractionOptions.Count == 0)
+            {
+                throw new InvalidDataException(
+                    $"Feature '{feature.Id}' must define at least one interaction option.");
+            }
+
+            if (string.IsNullOrWhiteSpace(feature.KnowledgeCategory))
+            {
+                throw new InvalidDataException(
+                    $"Feature '{feature.Id}' must define a knowledge category.");
+            }
+
+            if (!feature.OutcomeTable.Any(outcome => outcome.Weight > 0))
+            {
+                throw new InvalidDataException(
+                    $"Feature '{feature.Id}' must define at least one positive-weight outcome.");
+            }
+
+            foreach (var outcome in feature.OutcomeTable)
+            {
+                HashSet<string>? supportedEffects = feature.Type switch
+                {
+                    FeatureType.Fountain => new HashSet<string>(
+                        [
+                            FountainEffectIds.RestoreSpellPower,
+                            FountainEffectIds.Blindness,
+                            FountainEffectIds.CleansePoison,
+                            FountainEffectIds.UnknownTransformation
+                        ],
+                        StringComparer.Ordinal),
+                    FeatureType.Pit => new HashSet<string>(
+                        [PitEffectIds.DropTwoFloors],
+                        StringComparer.Ordinal),
+                    FeatureType.Altar or FeatureType.Teleporter => [],
+                    _ => null
+                };
+
+                var unsupported = supportedEffects is null
+                    ? null
+                    : outcome.Effects.FirstOrDefault(effect => !supportedEffects.Contains(effect));
+                if (unsupported is not null)
+                {
+                    throw new InvalidDataException(
+                        $"Feature '{feature.Id}' uses unsupported effect '{unsupported}'.");
+                }
+            }
+
+            if (feature.Type == FeatureType.Teleporter)
+            {
+                RequireHintRule(feature, "network_id");
+                RequireHintRule(feature, "destination_rule");
+            }
+        }
+    }
+
+    private static void RequireHintRule(FeatureDefinition feature, string name)
+    {
+        if (!feature.HintRules.TryGetValue(name, out var value) || string.IsNullOrWhiteSpace(value))
+        {
+            throw new InvalidDataException(
+                $"Teleporter feature '{feature.Id}' must define hint rule '{name}'.");
         }
     }
 

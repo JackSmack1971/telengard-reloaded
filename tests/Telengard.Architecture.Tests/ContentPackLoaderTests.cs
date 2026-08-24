@@ -19,7 +19,7 @@ public sealed class ContentPackLoaderTests : IDisposable
         Write("loot_tables", "common.json", "{\"id\":\"common\",\"entries\":[{\"item_id\":\"tooth\",\"weight\":1}]}");
         Write("monsters", "rat.json", "{\"id\":\"rat\",\"display_name\":\"Cave Rat\",\"family\":\"Beasts\",\"base_stats\":{\"hit_points\":3},\"loot_table\":\"common\"}");
         Write("spells", "spark.json", "{\"id\":\"spark\",\"name\":\"Spark\",\"initial_description\":\"A spark.\",\"discovered_descriptions\":[],\"cost\":1,\"targeting_rule\":\"single_target\"}");
-        Write("features", "fountain.json", "{\"id\":\"fountain\",\"type\":\"Fountain\",\"presentation_key\":\"feature.fountain\"}");
+        Write("features", "fountain.json", "{\"id\":\"fountain\",\"type\":\"Fountain\",\"presentation_key\":\"feature.fountain\",\"interaction_options\":[\"drink\"],\"knowledge_category\":\"fountain\",\"outcome_table\":[{\"weight\":1}]}");
         Write("talents", "first-step.json", "{\"id\":\"first-step\",\"constellation\":\"Survival\",\"prerequisites\":[],\"effects\":[],\"cost\":0}");
 
         var pack = ContentPackLoader.Load(_root);
@@ -100,6 +100,28 @@ public sealed class ContentPackLoaderTests : IDisposable
 
         var duplicateAlias = Assert.Throws<InvalidDataException>(() => ContentPackLoader.Load(_root));
         Assert.Contains("duplicate-alias.json", duplicateAlias.Message);
+    }
+
+    [Fact]
+    public void Load_rejects_malformed_feature_outcomes_effects_and_teleporter_references()
+    {
+        WriteManifest("slice-1");
+        Write("features", "missing-outcome.json", "{\"id\":\"fountain\",\"type\":\"Fountain\",\"presentation_key\":\"feature.fountain\",\"interaction_options\":[\"drink\"],\"knowledge_category\":\"fountain\",\"outcome_table\":[{\"weight\":0}]}");
+
+        var missingOutcome = Assert.Throws<InvalidDataException>(() => ContentPackLoader.Load(_root));
+        Assert.Contains("positive-weight outcome", missingOutcome.Message);
+
+        File.Delete(Path.Combine(_root, "features", "missing-outcome.json"));
+        Write("features", "unsupported-effect.json", "{\"id\":\"fountain\",\"type\":\"Fountain\",\"presentation_key\":\"feature.fountain\",\"interaction_options\":[\"drink\"],\"knowledge_category\":\"fountain\",\"outcome_table\":[{\"weight\":1,\"effects\":[\"unknown\"]}]}");
+
+        var unsupportedEffect = Assert.Throws<InvalidDataException>(() => ContentPackLoader.Load(_root));
+        Assert.Contains("unsupported effect 'unknown'", unsupportedEffect.Message);
+
+        File.Delete(Path.Combine(_root, "features", "unsupported-effect.json"));
+        Write("features", "teleporter.json", "{\"id\":\"teleporter\",\"type\":\"Teleporter\",\"presentation_key\":\"feature.teleporter\",\"interaction_options\":[\"enter\"],\"knowledge_category\":\"teleporter\",\"outcome_table\":[{\"weight\":1}]}");
+
+        var missingReference = Assert.Throws<InvalidDataException>(() => ContentPackLoader.Load(_root));
+        Assert.Contains("hint rule 'network_id'", missingReference.Message);
     }
 
     public void Dispose()
