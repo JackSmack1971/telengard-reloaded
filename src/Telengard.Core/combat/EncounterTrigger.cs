@@ -7,20 +7,23 @@ namespace Telengard.Core.Combat;
 
 public sealed record EncounterSpawnOption
 {
-    public EncounterSpawnOption(string definitionId, int level, int currentHitPoints)
+    public EncounterSpawnOption(string definitionId, int level, int currentHitPoints, long weight = 1)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(definitionId);
         ArgumentOutOfRangeException.ThrowIfLessThan(level, 1);
         ArgumentOutOfRangeException.ThrowIfNegative(currentHitPoints);
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(weight);
 
         DefinitionId = definitionId;
         Level = level;
         CurrentHitPoints = currentHitPoints;
+        Weight = weight;
     }
 
     public string DefinitionId { get; }
     public int Level { get; }
     public int CurrentHitPoints { get; }
+    public long Weight { get; }
 }
 
 public sealed record EncounterTriggerConfiguration
@@ -81,7 +84,33 @@ public static class EncounterTriggerResolver
             return new CommandResult(state);
         }
 
-        var optionIndex = stream.NextInt(0, configuration.SpawnOptions.Count);
+        var optionIndex = 0;
+        if (configuration.SpawnOptions.All(option => option.Weight == 1))
+        {
+            optionIndex = stream.NextInt(0, configuration.SpawnOptions.Count);
+        }
+        else
+        {
+            var weightedStream = new DeterministicRng(state.WorldSeed, state.Versions.GeneratorVersion)
+                .CreateStream(
+                    "encounter",
+                    "selection:weighted-v1",
+                    $"expedition:{state.Expedition.ExpeditionId?.ToString() ?? "none"}",
+                    $"tick:{state.SimulationTick}",
+                    $"floor:{position.Floor}",
+                    $"x:{position.X}",
+                    $"y:{position.Y}");
+            var totalWeight = configuration.SpawnOptions.Aggregate(0L, (total, option) => checked(total + option.Weight));
+            var selection = weightedStream.NextLong(0, totalWeight);
+            var cumulativeWeight = 0L;
+            foreach (var candidate in configuration.SpawnOptions)
+            {
+                cumulativeWeight = checked(cumulativeWeight + candidate.Weight);
+                if (selection < cumulativeWeight) break;
+
+                optionIndex++;
+            }
+        }
         var option = configuration.SpawnOptions[optionIndex];
         var monster = new MonsterInstance(
             CreateInstanceId(state, position, option, optionIndex),

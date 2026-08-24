@@ -2762,3 +2762,16 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
   `./eng/dotnet.ps1 format Telengard.sln --verify-no-changes` passed; and
   `./eng/verify.ps1 -Mode Full` passed with a Release build of 0 warnings,
   0 errors, and 409 Release tests.
+## TEL-112 — First-slice encounter ecology tables
+
+- Implemented the versioned `EncounterTable` content boundary and Upper Ruins
+  floors 1–5 table referencing the TEL-111 roster.
+- Added validation for positive/overflow-safe weights, unique entries,
+  contiguous floors 1–5, unknown monster references, and band references.
+- Extended the existing encounter trigger options with weighted deterministic
+  selection; no event or save contract changed.
+- Encounter chance, spawn level/hit points, weights, and pacing remain
+  `CONFIGURATION/TUNING DECISION REQUIRED` where product policy is silent.
+- Verification: focused encounter/content tests passed (23 tests); canonical
+  `./eng/verify.ps1 -Mode Full` passed with 418 Release tests, 0 warnings, and
+  0 errors.
