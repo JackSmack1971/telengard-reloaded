@@ -64,6 +64,18 @@ unrelated blueprint documents or invariants, prior test output, or other
 reviewers' conclusions unless the selected lane explicitly requires them.
 Reviewers must not share conclusions before producing their own findings.
 
+Construct one handoff per selected lane, filling in the refs and ticket rather
+than copying the parent conversation:
+
+```text
+BASE_REF: <base ref>
+HEAD_REF: <head ref>
+TEL: <selected TEL id>
+LANE_OBJECTIVE: <one falsification target>
+REQUIRED_DOCS: <only this lane's required docs>
+OUTPUT: the finding schema below, at most five actionable findings
+```
+
 The lane-specific required-docs minimum is:
 
 | Lane | Required context |

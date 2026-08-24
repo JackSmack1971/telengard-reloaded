@@ -1,6 +1,12 @@
 # Local Codex and repository-control files
 /.agents/
 /.codex/*
+!/.codex/config.toml
+!/.codex/hooks.json
+!/.codex/hooks/
+!/.codex/hooks/**
+!/.codex/agents/
+!/.codex/agents/**
 !/.codex/skills/
 !/.codex/skills/**
 /.changelog/

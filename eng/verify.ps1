@@ -29,6 +29,11 @@ try {
     & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $RepoRoot 'eng\task-index.tests.ps1')
     if ($LASTEXITCODE -ne 0) { throw 'Task index validation failed.' }
 
+    Write-Host ''
+    Write-Host '== Context resolver validation =='
+    & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $RepoRoot 'eng\context.tests.ps1')
+    if ($LASTEXITCODE -ne 0) { throw 'Context resolver validation failed.' }
+
     if ($Mode -eq 'Full') {
         Invoke-DotNetStep -Name 'Restore' -Arguments @('restore','Telengard.sln')
         Invoke-DotNetStep -Name 'Format verification' -Arguments @('format','Telengard.sln','--verify-no-changes','--no-restore')
