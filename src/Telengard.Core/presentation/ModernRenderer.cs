@@ -33,7 +33,8 @@ public static class ModernRenderer
             state.Player.Position,
             new ModernEnvironment(
                 DynamicLighting: !state.IsAtInn,
-                AtmosphericEffects: !state.IsAtInn),
+                AtmosphericEffects: !state.IsAtInn,
+                ThemeId: state.IsAtInn ? "inn" : "dungeon"),
             CreateTiles(state),
             state.DiscoveredFeatures
                 .OrderBy(feature => feature.Position.Floor)
@@ -80,8 +81,21 @@ public static class ModernRenderer
             .OrderBy(pair => pair.Key.Floor)
             .ThenBy(pair => pair.Key.X)
             .ThenBy(pair => pair.Key.Y)
-            .Select(pair => new ModernTileMarker(pair.Key, pair.Value))
+            .Select(pair => new ModernTileMarker(pair.Key, pair.Value, Connections(pair.Key, tiles.Keys)))
             .ToArray();
+    }
+
+    private static ModernTileConnections Connections(
+        DungeonPosition position,
+        IEnumerable<DungeonPosition> knownPositions)
+    {
+        var known = knownPositions.ToHashSet();
+        var connections = ModernTileConnections.None;
+        if (known.Contains(new DungeonPosition(position.Floor, position.X, position.Y - 1))) connections |= ModernTileConnections.North;
+        if (known.Contains(new DungeonPosition(position.Floor, position.X, position.Y + 1))) connections |= ModernTileConnections.South;
+        if (known.Contains(new DungeonPosition(position.Floor, position.X + 1, position.Y))) connections |= ModernTileConnections.East;
+        if (known.Contains(new DungeonPosition(position.Floor, position.X - 1, position.Y))) connections |= ModernTileConnections.West;
+        return connections;
     }
 
     private static ModernCue? CreateCue(IDomainEvent domainEvent) => domainEvent switch
@@ -170,15 +184,34 @@ public enum ModernCueKind
     KnowledgeUpdated
 }
 
-public sealed record ModernEnvironment(bool DynamicLighting, bool AtmosphericEffects);
+public sealed record ModernEnvironment(
+    bool DynamicLighting,
+    bool AtmosphericEffects,
+    string ThemeId = "dungeon");
 
-public sealed record ModernTileMarker(DungeonPosition Position, ModernTileKnowledge Knowledge);
+public sealed record ModernTileMarker(
+    DungeonPosition Position,
+    ModernTileKnowledge Knowledge,
+    ModernTileConnections Connections = ModernTileConnections.None);
+
+[Flags]
+public enum ModernTileConnections
+{
+    None = 0,
+    North = 1,
+    South = 2,
+    East = 4,
+    West = 8
+}
 
 public sealed record ModernFeatureMarker(
     Guid InstanceId,
     string DefinitionId,
     DungeonPosition Position,
-    int ActivationCount);
+    int ActivationCount)
+{
+    public string PresentationKey => DefinitionId;
+}
 
 public sealed record ModernHud(
     Guid PlayerId,
@@ -227,6 +260,7 @@ public sealed record ModernMonsterMarker
     public string DefinitionId { get; }
     public int CurrentHitPoints { get; }
     public DungeonPosition Position { get; }
+    public string PresentationKey => DefinitionId;
 }
 
 public sealed record ModernCue(

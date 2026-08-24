@@ -38,6 +38,7 @@ public sealed class ModernRendererTests
         Assert.Equal(current, frame.PlayerPosition);
         Assert.True(frame.Environment.DynamicLighting);
         Assert.True(frame.Environment.AtmosphericEffects);
+        Assert.Equal("dungeon", frame.Environment.ThemeId);
         Assert.Equal(
             [
                 new ModernTileMarker(visited, ModernTileKnowledge.Visited),
@@ -278,6 +279,7 @@ public sealed class ModernRendererTests
         var marker = Assert.Single(frame.Features);
         Assert.Equal(featureId, marker.InstanceId);
         Assert.Equal("fountain", marker.DefinitionId);
+        Assert.Equal("fountain", marker.PresentationKey);
         Assert.Equal(position, marker.Position);
         Assert.Equal(2, marker.ActivationCount);
         Assert.Equal(state.Player.Id, frame.Hud.PlayerId);
@@ -295,6 +297,7 @@ public sealed class ModernRendererTests
         Assert.Equal(ThreatLevel.Dangerous, frame.Combat.ThreatLevel);
         Assert.Equal(monsterId, frame.Combat.Monster.InstanceId);
         Assert.Equal("rat", frame.Combat.Monster.DefinitionId);
+        Assert.Equal("rat", frame.Combat.Monster.PresentationKey);
         Assert.Equal(9, frame.Combat.Monster.CurrentHitPoints);
         Assert.Equal(position, frame.Combat.Monster.Position);
     }

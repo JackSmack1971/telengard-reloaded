@@ -13,9 +13,11 @@ const FLOOR_COLOR := Color("26334b")
 const VISITED_COLOR := Color("344968")
 const CURRENT_COLOR := Color("4c8fc6")
 const FEATURE_COLOR := Color("d9ad62")
+const ASSET_REGISTRY_SCRIPT := preload("res://PresentationAssetRegistry.gd")
 
 var _frame: Dictionary = {}
 var _elapsed := 0.0
+var _asset_registry = ASSET_REGISTRY_SCRIPT.new()
 
 
 func render_frame(frame: Dictionary) -> void:
@@ -76,6 +78,10 @@ func _draw_world() -> void:
 			center + Vector2(-12, 0)
 		])
 		draw_colored_polygon(diamond, FEATURE_COLOR)
+		var presentation_key := str(feature.get("presentation_key", feature.get("definition_id", "feature.unknown")))
+		var resource_id := _asset_registry.resolve(presentation_key)
+		if resource_id.begins_with(ASSET_REGISTRY_SCRIPT.PLACEHOLDER_PREFIX):
+			draw_string(ThemeDB.fallback_font, cell + Vector2(2, TILE_SIZE + 14), "PLACEHOLDER %s" % presentation_key, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color("f0c674"))
 
 	if not _frame.is_empty():
 		var player_position: Dictionary = _frame.get("player_position", {})
@@ -110,4 +116,6 @@ func _draw_hud() -> void:
 func _scene_label() -> String:
 	if _frame.is_empty():
 		return "renderer prototype"
-	return "INN" if _frame.get("scene", "dungeon") == "inn" else "DUNGEON"
+	var environment: Dictionary = _frame.get("environment", {})
+	var scene := "INN" if _frame.get("scene", "dungeon") == "inn" else "DUNGEON"
+	return "%s · %s" % [scene, environment.get("theme_id", "unknown")]
