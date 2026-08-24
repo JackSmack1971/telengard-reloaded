@@ -9,5 +9,5 @@
   "actions": ["claw", "stone-breath"],
   "behaviors": ["ambush-from-statue", "guard-threshold"],
   "spawn_rules": { "depth": "2-5", "terrain": "temple" },
-  "loot_table": null
+  "loot_table": "upper-ruins-loot"
 }

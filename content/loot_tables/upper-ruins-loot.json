@@ -1,0 +1,17 @@
+{
+  "id": "upper-ruins-loot",
+  "entries": [
+    { "item_id": "aetherial-lens", "weight": 1 },
+    { "item_id": "ashwood-staff", "weight": 1 },
+    { "item_id": "banded-mail", "weight": 1 },
+    { "item_id": "brass-key", "weight": 1 },
+    { "item_id": "dawnshield", "weight": 1 },
+    { "item_id": "healing-draught", "weight": 1 },
+    { "item_id": "iron-pike", "weight": 1 },
+    { "item_id": "moonstone-ring", "weight": 1 },
+    { "item_id": "pilgrim-cloak", "weight": 1 },
+    { "item_id": "shadow-ink", "weight": 1 },
+    { "item_id": "silvered-mace", "weight": 1 },
+    { "item_id": "wayfinder-scroll", "weight": 1 }
+  ]
+}

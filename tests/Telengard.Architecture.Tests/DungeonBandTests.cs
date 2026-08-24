@@ -92,6 +92,19 @@ public sealed class DungeonBandTests : IDisposable
     }
 
     [Fact]
+    public void Load_rejects_a_band_that_references_a_missing_loot_table()
+    {
+        WriteManifest();
+        WriteBand("upper-ruins.json", "upper-ruins", 1, 5);
+        Write("items", "tooth.json", "{\"id\":\"tooth\",\"display_name\":\"Rat Tooth\",\"category\":\"material\"}");
+        Write("loot_tables", "available.json", "{\"id\":\"available\",\"entries\":[{\"item_id\":\"tooth\",\"weight\":1}]}");
+
+        var exception = Assert.Throws<InvalidDataException>(() => ContentPackLoader.Load(_root));
+
+        Assert.Contains("references missing loot table 'upper-ruins-loot'", exception.Message);
+    }
+
+    [Fact]
     public void Definition_copies_nested_collections_into_read_only_views()
     {
         var band = new DungeonBandDefinition(
@@ -170,6 +183,12 @@ public sealed class DungeonBandTests : IDisposable
               "audio_theme": "{{id}}"
             }
             """);
+    }
+
+    private void Write(string relativeDirectory, string fileName, string json)
+    {
+        var directory = Directory.CreateDirectory(Path.Combine(_root, relativeDirectory));
+        File.WriteAllText(Path.Combine(directory.FullName, fileName), json);
     }
 
     private static string FindRepositoryRoot()

@@ -9,5 +9,5 @@
   "actions": ["grave-touch", "wail"],
   "behaviors": ["stalk", "raise-the-fallen"],
   "spawn_rules": { "depth": "4-5", "terrain": "crypt" },
-  "loot_table": null
+  "loot_table": "upper-ruins-loot"
 }

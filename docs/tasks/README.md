@@ -145,7 +145,7 @@ the already-owned feature, journal, wealth, inn, or death mechanics.
 - TEL-113 — Author the first-slice item roster — Implemented and verified
   - Provide 10–15 item definitions using the existing categories, properties, identification, affix, curse, and depth-rule fields.
   - Keep item-instance creation and treasure resolution in the existing item/expedition tickets.
-- TEL-114 — Author first-slice loot tables — Not started
+- TEL-114 — Author first-slice loot tables — Implemented and verified
   - Provide data-driven loot tables that reference TEL-113 item IDs and the existing carried-wealth/treasure boundary.
   - Do not invent a permanent drop-rate, value, or loss formula where the specification is silent.
 - TEL-115 — Author the first-slice spell roster — Implemented and verified

@@ -184,6 +184,8 @@ The final plan validation includes:
   development methodology.
 - [x] 2026-08-23 — durable Godot/UX/art/asset blueprints and acceptance gates
   authored; TEL-120–TEL-128 client/readiness slices added to the task system.
+- [x] 2026-08-23 — TEL-114 loot table data, references, validation, and
+  deterministic carried-wealth acceptance evidence completed; save impact none.
 - [ ] TEL-120 — application host/bootstrap.
 - [ ] TEL-121 — input/clock bridge.
 - [ ] TEL-122 — session/scene flow.

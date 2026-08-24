@@ -20,7 +20,7 @@ public sealed class FirstSliceMonsterRosterTests
             Assert.NotEmpty(monster.Actions);
             Assert.NotEmpty(monster.Behaviors);
             Assert.NotEmpty(monster.SpawnRules.Values);
-            Assert.Null(monster.LootTable);
+            Assert.Equal("upper-ruins-loot", monster.LootTable);
         });
 
         Assert.True(pack.Monsters.Definitions.Values.Select(monster => monster.Family).Distinct().Count() >= 5);

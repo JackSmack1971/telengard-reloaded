@@ -9,5 +9,5 @@
   "actions": ["short-blade", "throwing-stone"],
   "behaviors": ["harry", "retreat-and-return"],
   "spawn_rules": { "depth": "1-3", "terrain": "ruins" },
-  "loot_table": null
+  "loot_table": "upper-ruins-loot"
 }
