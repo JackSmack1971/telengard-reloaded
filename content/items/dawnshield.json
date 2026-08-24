@@ -1,0 +1,11 @@
+{
+  "id": "dawnshield",
+  "display_name": "Dawnshield",
+  "category": "shield",
+  "base_properties": { "defense": "2", "ward": "radiant" },
+  "affix_pool": ["steadfast"],
+  "curse_pool": ["blindness"],
+  "rarity_rules": { "tier": "rare", "tuning_note": "CONFIGURATION/TUNING DECISION REQUIRED" },
+  "depth_rules": { "minimum_floor": "3", "tuning_note": "CONFIGURATION/TUNING DECISION REQUIRED" },
+  "unidentified_name": "Pale Buckler"
+}

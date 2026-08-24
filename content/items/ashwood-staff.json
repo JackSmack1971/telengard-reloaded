@@ -1,0 +1,11 @@
+{
+  "id": "ashwood-staff",
+  "display_name": "Ashwood Staff",
+  "category": "weapon",
+  "base_properties": { "damage": "3", "damage_type": "blunt", "focus": "arcane" },
+  "affix_pool": ["keen", "ember-touched"],
+  "curse_pool": ["splintering"],
+  "rarity_rules": { "tier": "common", "tuning_note": "CONFIGURATION/TUNING DECISION REQUIRED" },
+  "depth_rules": { "minimum_floor": "1", "tuning_note": "CONFIGURATION/TUNING DECISION REQUIRED" },
+  "unidentified_name": "Bent Wooden Rod"
+}

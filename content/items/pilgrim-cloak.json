@@ -1,0 +1,11 @@
+{
+  "id": "pilgrim-cloak",
+  "display_name": "Pilgrim Cloak",
+  "category": "armor",
+  "base_properties": { "defense": "1", "travel": "quiet" },
+  "affix_pool": ["weatherproof"],
+  "curse_pool": ["tattered"],
+  "rarity_rules": { "tier": "common", "tuning_note": "CONFIGURATION/TUNING DECISION REQUIRED" },
+  "depth_rules": { "minimum_floor": "1", "tuning_note": "CONFIGURATION/TUNING DECISION REQUIRED" },
+  "unidentified_name": "Faded Traveling Cloak"
+}

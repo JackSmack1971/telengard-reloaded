@@ -1,0 +1,10 @@
+{
+  "id": "shadow-ink",
+  "display_name": "Shadow Ink",
+  "category": "material",
+  "base_properties": { "use": "inscription", "school": "umbra" },
+  "affix_pool": [],
+  "curse_pool": [],
+  "rarity_rules": { "tier": "uncommon", "tuning_note": "CONFIGURATION/TUNING DECISION REQUIRED" },
+  "depth_rules": { "minimum_floor": "2", "tuning_note": "CONFIGURATION/TUNING DECISION REQUIRED" }
+}
