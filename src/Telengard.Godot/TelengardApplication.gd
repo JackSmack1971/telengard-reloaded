@@ -8,6 +8,7 @@ var _http: HTTPRequest
 var _host_pid := -1
 enum ClientState { STARTUP, TITLE, NEW_GAME, LOAD_GAME, CHARACTER_CREATION, INN, DUNGEON, PAUSE, DEATH, RETURN_TO_INN }
 var _client_state := ClientState.STARTUP
+var _title_selection := ClientState.NEW_GAME
 var _previous_authoritative_scene := ""
 var _feedback := ""
 var _clock_accumulator := 0.0
@@ -29,12 +30,16 @@ func _ready() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if _client_state == ClientState.TITLE:
-		if event.is_action_pressed("new_game"):
+		if event.is_action_pressed("ui_up") or event.is_action_pressed("ui_down"):
+			_title_selection = ClientState.LOAD_GAME if _title_selection == ClientState.NEW_GAME else ClientState.NEW_GAME
+		elif event.is_action_pressed("new_game"):
+			_title_selection = ClientState.NEW_GAME
 			_client_state = ClientState.NEW_GAME
 		elif event.is_action_pressed("load_game"):
+			_title_selection = ClientState.LOAD_GAME
 			_client_state = ClientState.LOAD_GAME
 		elif event.is_action_pressed("ui_accept"):
-			_client_state = ClientState.NEW_GAME
+			_client_state = _title_selection
 		elif event.is_action_pressed("ui_cancel"):
 			_quit_client()
 		_refresh_renderer()
@@ -105,12 +110,20 @@ func _register_input_actions() -> void:
 	_register_key("toggle_pause", KEY_ESCAPE)
 	_register_key("new_game", KEY_N)
 	_register_key("load_game", KEY_L)
+	_register_key("ui_up", KEY_UP)
+	_register_key("ui_down", KEY_DOWN)
 	_register_joy("move_north", JOY_AXIS_LEFT_Y, -1.0)
 	_register_joy("move_south", JOY_AXIS_LEFT_Y, 1.0)
 	_register_joy("move_east", JOY_AXIS_LEFT_X, 1.0)
 	_register_joy("move_west", JOY_AXIS_LEFT_X, -1.0)
 	_register_key("ui_accept", KEY_ENTER)
 	_register_key("ui_cancel", KEY_ESCAPE)
+	_register_joy_button("ui_accept", JOY_BUTTON_A)
+	_register_joy_button("ui_cancel", JOY_BUTTON_B)
+	_register_joy_button("ui_up", JOY_BUTTON_DPAD_UP)
+	_register_joy_button("ui_down", JOY_BUTTON_DPAD_DOWN)
+	_register_joy_button("enter_dungeon", JOY_BUTTON_A)
+	_register_joy_button("toggle_pause", JOY_BUTTON_START)
 
 func _register_key(action: StringName, keycode: Key) -> void:
 	if not InputMap.has_action(action):
@@ -123,6 +136,13 @@ func _register_joy(action: StringName, axis: JoyAxis, value: float) -> void:
 	var joy := InputEventJoypadMotion.new()
 	joy.axis = axis
 	joy.axis_value = value
+	InputMap.action_add_event(action, joy)
+
+func _register_joy_button(action: StringName, button: JoyButton) -> void:
+	if not InputMap.has_action(action):
+		InputMap.add_action(action)
+	var joy := InputEventJoypadButton.new()
+	joy.button_index = button
 	InputMap.action_add_event(action, joy)
 
 func _request_frame() -> void:
@@ -194,9 +214,19 @@ func _authoritative_state() -> int:
 
 func _refresh_renderer() -> void:
 	renderer.set_client_state(ClientState.keys()[_client_state], _feedback)
+	renderer.set_title_selection(ClientState.keys()[_title_selection])
 
 func _quit_client() -> void:
+	_stop_host()
 	get_tree().quit()
+
+func _exit_tree() -> void:
+	_stop_host()
+
+func _stop_host() -> void:
+	if _host_pid > 0:
+		OS.kill(_host_pid)
+		_host_pid = -1
 
 func _show_error(message: String) -> void:
 	var label := Label.new()

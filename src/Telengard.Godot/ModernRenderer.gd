@@ -18,6 +18,7 @@ var _frame: Dictionary = {}
 var _elapsed := 0.0
 var _client_state := "STARTUP"
 var _feedback := ""
+var _title_selection := "NEW_GAME"
 
 
 func render_frame(frame: Dictionary) -> void:
@@ -27,6 +28,10 @@ func render_frame(frame: Dictionary) -> void:
 func set_client_state(client_state: String, feedback: String) -> void:
 	_client_state = client_state
 	_feedback = feedback
+	queue_redraw()
+
+func set_title_selection(title_selection: String) -> void:
+	_title_selection = title_selection
 	queue_redraw()
 
 func current_scene() -> String:
@@ -153,9 +158,10 @@ func _overlay_body() -> String:
 	}.get(_client_state, "")
 
 func _overlay_prompt() -> String:
+	if _client_state == "TITLE":
+		return "[%s] New game     [%s] Load game     Enter  Select     Esc  Quit" % ["X" if _title_selection == "NEW_GAME" else " ", "X" if _title_selection == "LOAD_GAME" else " "]
 	return {
 		"STARTUP": "",
-		"TITLE": "N  New game     L  Load game     Esc  Quit",
 		"NEW_GAME": "Enter  Continue     Esc  Back",
 		"LOAD_GAME": "Enter  Continue     Esc  Back",
 		"CHARACTER_CREATION": "Enter  Confirm     Esc  Back",
