@@ -35,6 +35,8 @@ public sealed class ItemInstanceTests
         Assert.Throws<ArgumentException>(() => new ItemInstance(id, ""));
         Assert.Throws<ArgumentOutOfRangeException>(() => new ItemInstance(id, "sword", durability: -1));
         Assert.Throws<ArgumentException>(() => new ItemInstance(id, "sword", [" "]));
+        Assert.Throws<ArgumentNullException>(() => new ItemInstance(id, "sword", new string?[] { null }!));
+        Assert.Throws<ArgumentException>(() => new ItemObservedState(id, true, new string?[] { null }!));
         Assert.Throws<ArgumentException>(() => new ItemInstance(id, "sword", ["keen", "keen"]));
     }
 

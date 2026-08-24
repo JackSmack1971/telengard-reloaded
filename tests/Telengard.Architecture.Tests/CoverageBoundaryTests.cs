@@ -364,6 +364,22 @@ public sealed class CoverageBoundaryTests
     }
 
     [Fact]
+    public void Legacy_save_dto_materializes_missing_history_collections()
+    {
+        var legacy = new LegacyStateDto
+        {
+            PersistentMap = PersistentMapStateDto.FromState(new PersistentMapState()),
+            PreviousHeroes = null,
+            Graves = null,
+            Heirlooms = null
+        }.ToState();
+
+        Assert.Empty(legacy.PreviousHeroes);
+        Assert.Empty(legacy.Graves);
+        Assert.Empty(legacy.Heirlooms);
+    }
+
+    [Fact]
     public void Save_migrations_cover_nullable_version_boundaries_and_invalid_feature_collections()
     {
         var baseSave = GameStateSaveDto.FromState(GameState.Create(1234));
@@ -394,6 +410,7 @@ public sealed class CoverageBoundaryTests
         var invalidSlots = new[]
         {
             baseSave with { Player = baseSave.Player with { EquipmentSlots = new EquipmentSlotDto[] { null! } } },
+            baseSave with { Player = baseSave.Player with { EquipmentSlots = [slot with { SlotId = null! }] } },
             baseSave with { Player = baseSave.Player with { EquipmentSlots = [slot with { SlotId = " " }] } },
             baseSave with { Player = baseSave.Player with { EquipmentSlots = [slot with { ItemInstanceId = Guid.Empty }] } },
             baseSave with { Player = baseSave.Player with { EquipmentSlots = [slot, slot with { SlotId = "weapon" }] } },
@@ -461,6 +478,129 @@ public sealed class CoverageBoundaryTests
         {
             Assert.Throws<SaveFormatException>(() => SaveMigrations.Validate(invalid));
         }
+    }
+
+    [Fact]
+    public void Save_validation_rejects_invalid_floors_in_each_persisted_position_collection()
+    {
+        var baseSave = GameStateSaveDto.FromState(GameState.Create(1234));
+        var position = new DungeonPositionDto { Floor = 0, X = 1, Y = 1 };
+        var upperPosition = new DungeonPositionDto { Floor = 51, X = 1, Y = 1 };
+        var mapping = MappingDto();
+        var feature = FeatureDto();
+        var hero = new DeadHeroRecordDto
+        {
+            HeroId = FeatureId,
+            Attributes = new PlayerAttributesDto(),
+            DeathPosition = position
+        };
+        var grave = new GraveRecordDto
+        {
+            HeroId = FeatureId,
+            Position = position
+        };
+        var invalid = new[]
+        {
+            baseSave with { Player = baseSave.Player with { Position = position } },
+            baseSave with
+            {
+                Legacy = baseSave.Legacy with
+                {
+                    PersistentMap = baseSave.Legacy.PersistentMap with { ObservedPositions = [position] }
+                }
+            },
+            baseSave with
+            {
+                Legacy = baseSave.Legacy with
+                {
+                    PersistentMap = baseSave.Legacy.PersistentMap with { VisitedPositions = [position] }
+                }
+            },
+            baseSave with
+            {
+                Knowledge = baseSave.Knowledge with
+                {
+                    TeleporterMappings = [mapping with { Source = position }]
+                }
+            },
+            baseSave with
+            {
+                Knowledge = baseSave.Knowledge with
+                {
+                    TeleporterMappings = [mapping with { Destination = position }]
+                }
+            },
+            baseSave with { Dungeon = baseSave.Dungeon with { Features = [feature with { Position = position }] } },
+            baseSave with { Legacy = baseSave.Legacy with { PreviousHeroes = [hero] } },
+            baseSave with { Legacy = baseSave.Legacy with { Graves = [grave] } }
+        };
+
+        Assert.All(invalid, save => Assert.Throws<SaveFormatException>(() => SaveMigrations.Validate(save)));
+
+        var upperInvalid = new[]
+        {
+            baseSave with { Player = baseSave.Player with { Position = upperPosition } },
+            baseSave with
+            {
+                Legacy = baseSave.Legacy with
+                {
+                    PersistentMap = baseSave.Legacy.PersistentMap with { ObservedPositions = [upperPosition] }
+                }
+            },
+            baseSave with
+            {
+                Legacy = baseSave.Legacy with
+                {
+                    PersistentMap = baseSave.Legacy.PersistentMap with { VisitedPositions = [upperPosition] }
+                }
+            },
+            baseSave with
+            {
+                Knowledge = baseSave.Knowledge with
+                {
+                    TeleporterMappings = [mapping with { Source = upperPosition }]
+                }
+            },
+            baseSave with
+            {
+                Knowledge = baseSave.Knowledge with
+                {
+                    TeleporterMappings = [mapping with { Destination = upperPosition }]
+                }
+            },
+            baseSave with { Dungeon = baseSave.Dungeon with { Features = [feature with { Position = upperPosition }] } },
+            baseSave with { Legacy = baseSave.Legacy with { PreviousHeroes = [hero with { DeathPosition = upperPosition }] } },
+            baseSave with { Legacy = baseSave.Legacy with { Graves = [grave with { Position = upperPosition }] } }
+        };
+
+        Assert.All(upperInvalid, save => Assert.Throws<SaveFormatException>(() => SaveMigrations.Validate(save)));
+    }
+
+    [Fact]
+    public void Save_validation_rejects_null_legacy_records_and_nested_values()
+    {
+        var baseSave = GameStateSaveDto.FromState(GameState.Create(1234));
+        var hero = new DeadHeroRecordDto
+        {
+            HeroId = FeatureId,
+            Attributes = new PlayerAttributesDto(),
+            DeathPosition = new DungeonPositionDto { Floor = 1 }
+        };
+        var grave = new GraveRecordDto
+        {
+            HeroId = FeatureId,
+            Position = new DungeonPositionDto { Floor = 1 }
+        };
+        var invalid = new[]
+        {
+            baseSave with { Legacy = baseSave.Legacy with { PreviousHeroes = [null!] } },
+            baseSave with { Legacy = baseSave.Legacy with { PreviousHeroes = [hero with { Attributes = null! }] } },
+            baseSave with { Legacy = baseSave.Legacy with { PreviousHeroes = [hero with { DeathPosition = null! }] } },
+            baseSave with { Legacy = baseSave.Legacy with { Graves = [null!] } },
+            baseSave with { Legacy = baseSave.Legacy with { Graves = [grave with { Position = null! }] } }
+        };
+
+        Assert.All(invalid, save => Assert.Throws<SaveFormatException>(() => SaveMigrations.Validate(save)));
     }
 
     private static FeatureInstance Feature() => new(

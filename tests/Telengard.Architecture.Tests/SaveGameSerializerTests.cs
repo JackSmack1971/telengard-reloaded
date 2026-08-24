@@ -515,6 +515,139 @@ public sealed class SaveGameSerializerTests
     }
 
     [Fact]
+    public void Validation_rejects_actions_and_threats_before_their_combat_phases()
+    {
+        var state = GameState.Create(1234) with
+        {
+            Expedition = new ExpeditionState { Active = true, FloorsVisited = [1] },
+            Inn = new InnState { IsAtInn = false },
+            Player = new PlayerState
+            {
+                Position = new DungeonPosition(1, 0, 0),
+                HitPoints = 1,
+                MaxHitPoints = 1
+            },
+            Combat = new CombatState(
+                new MonsterInstance(
+                    Guid.Parse("00000000-0000-0000-0000-000000000001"),
+                    "rat",
+                    1,
+                    3,
+                    new DungeonPosition(1, 0, 0)),
+                CombatPhase.Resolution,
+                selectedAction: CombatAction.Attack)
+        };
+        var save = GameStateSaveDto.FromState(state);
+
+        Assert.Throws<SaveFormatException>(() => SaveMigrations.Validate(save with
+        {
+            Combat = save.Combat! with { Phase = CombatPhase.Contact }
+        }));
+        Assert.Throws<SaveFormatException>(() => SaveMigrations.Validate(save with
+        {
+            Combat = save.Combat! with
+            {
+                Phase = CombatPhase.Contact,
+                SelectedAction = null,
+                ThreatLevel = ThreatLevel.Dangerous
+            }
+        }));
+        foreach (var phase in new[] { CombatPhase.Searching, CombatPhase.ThreatAssessment })
+        {
+            Assert.Throws<SaveFormatException>(() => SaveMigrations.Validate(save with
+            {
+                Combat = save.Combat! with { Phase = phase }
+            }));
+        }
+        foreach (var phase in new[] { CombatPhase.Searching, CombatPhase.ThreatAssessment })
+        {
+            Assert.Throws<SaveFormatException>(() => SaveMigrations.Validate(save with
+            {
+                Combat = save.Combat! with
+                {
+                    Phase = phase,
+                    SelectedAction = null,
+                    ThreatLevel = ThreatLevel.Dangerous
+                }
+            }));
+        }
+    }
+
+    [Fact]
+    public void Validation_rejects_negative_and_incoherent_scalar_state()
+    {
+        var save = GameStateSaveDto.FromState(GameState.Create(1234));
+        var invalid = new[]
+        {
+            save with { Player = save.Player with { Level = -1 } },
+            save with { Player = save.Player with { Experience = -1 } },
+            save with { Player = save.Player with { HitPoints = -1 } },
+            save with { Player = save.Player with { MaxHitPoints = -1 } },
+            save with { Player = save.Player with { HitPoints = 1, MaxHitPoints = 0 } },
+            save with { Player = save.Player with { SpellPower = -1 } },
+            save with { Player = save.Player with { MaxSpellPower = -1 } },
+            save with { Player = save.Player with { SpellPower = 1, MaxSpellPower = 0 } },
+            save with { Expedition = save.Expedition with { StartingFloor = 0 } },
+            save with { Expedition = save.Expedition with { DeepestFloorReached = 51 } },
+            save with { Expedition = save.Expedition with { StartSimulationTick = -1 } },
+            save with { Expedition = save.Expedition with { FloorsVisited = [0] } },
+            save with
+            {
+                Legacy = save.Legacy with
+                {
+                    PreviousHeroes = [new DeadHeroRecordDto
+                    {
+                        Attributes = new PlayerAttributesDto(),
+                        DeathPosition = new DungeonPositionDto { Floor = 1 },
+                        Level = -1
+                    }]
+                }
+            }
+        };
+
+        Assert.All(invalid, candidate => Assert.Throws<SaveFormatException>(
+            () => SaveMigrations.Validate(candidate)));
+    }
+
+    [Theory]
+    [InlineData(11)]
+    [InlineData(12)]
+    [InlineData(13)]
+    public void Migrations_materialize_missing_legacy_collections_for_each_legacy_version(int version)
+    {
+        var save = GameStateSaveDto.FromState(GameState.Create(1234)) with
+        {
+            SaveVersion = version,
+            Legacy = null!
+        };
+
+        var migrated = SaveMigrations.Migrate(save);
+
+        Assert.Equal(GameState.CurrentSaveVersion, migrated.SaveVersion);
+        Assert.NotNull(migrated.Legacy);
+    }
+
+    [Fact]
+    public void Version_fourteen_migration_preserves_missing_version_metadata_for_validation()
+    {
+        var save = GameStateSaveDto.FromState(GameState.Create(1234)) with
+        {
+            SaveVersion = 13,
+            Versions = null!
+        };
+
+        Assert.Null(SaveMigrations.Migrate(save).Versions);
+        Assert.Null(SaveMigrations.Migrate(save with { Expedition = null! }).Versions);
+
+        var existingExpedition = save with
+        {
+            Versions = GameVersionsDto.FromState(GameVersions.Current),
+            Expedition = save.Expedition with { ExpeditionId = Guid.NewGuid() }
+        };
+        Assert.Equal(1, SaveMigrations.Migrate(existingExpedition).ExpeditionSequence);
+    }
+
+    [Fact]
     public void Serializer_wraps_invalid_state_and_null_inputs_at_the_boundary()
     {
         var document = JsonNode.Parse(SaveGameSerializer.Serialize(GameState.Create(1234)))!.AsObject();

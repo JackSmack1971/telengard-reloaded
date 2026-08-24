@@ -71,6 +71,10 @@ public sealed class DungeonWalkingTests
         Assert.Throws<InvalidOperationException>(() => DungeonWalkingResolver.Move(
             atInn, new MoveCommand(walkable), layout));
         Assert.Equal(new PersistentMapState(), atInn.Legacy.PersistentMap);
+        Assert.Throws<InvalidOperationException>(() => DungeonWalkingResolver.Enter(
+            GameState.Create(1234) with { ExpeditionSequence = -1 },
+            new EnterDungeonCommand(),
+            layout));
     }
 
     [Fact]

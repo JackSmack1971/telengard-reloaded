@@ -1,8 +1,14 @@
 using Telengard.Core.Combat;
+using Telengard.Core.Economy;
+using Telengard.Core.Items;
+using Telengard.Core.Knowledge;
+using Telengard.Core.Magic;
 using Telengard.Core.Presentation;
+using Telengard.Core.Progression;
 using Telengard.Core.Simulation;
 using Telengard.Core.World.Features;
 using Telengard.Core.World.Generation;
+using Telengard.Core.Meta;
 using Xunit;
 
 namespace Telengard.Architecture.Tests;
@@ -119,5 +125,177 @@ public sealed class ModernRendererTests
         Assert.Throws<ArgumentException>(() => ModernRenderer.Create(
             PresentationStateAdapter.Create(state),
             new IDomainEvent[] { null! }));
+        var environment = new ModernEnvironment(false, false);
+        var hud = new ModernHud(Guid.Empty, 1, 1, 1, 1, 1, 0, 0, true);
+        Assert.Throws<ArgumentNullException>(() => new ModernRenderFrame(
+            ModernScene.Inn,
+            null!,
+            environment,
+            [],
+            [],
+            hud,
+            null,
+            []));
+        Assert.Throws<ArgumentException>(() => new ModernRenderFrame(
+            ModernScene.Inn,
+            new DungeonPosition(1, 0, 0),
+            environment,
+            new ModernTileMarker[] { null! },
+            [],
+            hud,
+            null,
+            []));
+    }
+
+    [Fact]
+    public void Create_projects_every_supported_event_into_a_safe_cue_and_ignores_unknown_events()
+    {
+        var position = new DungeonPosition(2, 3, 4);
+        var otherPosition = new DungeonPosition(3, 5, 6);
+        var entityId = Guid.Parse("00000000-0000-0000-0000-000000000030");
+        var monster = new MonsterInstance(
+            entityId,
+            "monster",
+            level: 2,
+            currentHitPoints: 10,
+            position);
+        var events = new IDomainEvent[]
+        {
+            new DungeonEnteredEvent(position),
+            new PlayerMovedEvent(position, otherPosition),
+            new FloorChangedEvent(position, otherPosition, StairDirection.Down),
+            new DungeonLeftEvent(otherPosition),
+            new FeatureDiscoveredEvent(entityId, position),
+            new FeatureActivatedEvent(entityId, position, ActivationCount: 2),
+            new EncounterStartedEvent(monster),
+            new EncounterEndedEvent(entityId),
+            new CombatPhaseChangedEvent(entityId, CombatPhase.PlayerAction, CombatPhase.EnemyAction, Round: 3),
+            new MonsterDamagedEvent(entityId, Amount: 3, RemainingHitPoints: 7),
+            new MonsterKilledEvent(entityId),
+            new SpellCastEvent(entityId, "spark", Cost: 2, RemainingSpellPower: 3),
+            new ItemIdentifiedEvent(entityId),
+            new ItemEquippedEvent("weapon", entityId),
+            new ItemUnequippedEvent("weapon", entityId),
+            new GoldAcquiredEvent(4, 4),
+            new GoldSecuredEvent(4, 4),
+            new PlayerLeveledUpEvent(1, 2, 10),
+            new ExperienceAwardedEvent(5, 10),
+            new PlayerDiedEvent(null, position),
+            new ExpeditionSucceededEvent(null, 3),
+            new ExpeditionFailedEvent(null, 3),
+            new KnowledgeObservationAddedEvent("monster", ["observed"]),
+            new KnowledgeSampleCountedEvent("monster", 2),
+            new KnowledgeConfidenceUpdatedEvent("monster", 2, 50),
+            new GameSuspendedEvent(null, position)
+        };
+
+        var frame = ModernRenderer.Create(
+            PresentationStateAdapter.Create(GameState.Create(1234) with
+            {
+                Player = new PlayerState { Position = position }
+            }),
+            events);
+
+        Assert.Equal(25, frame.Cues.Count);
+        Assert.Equal(
+            [
+                ModernCueKind.DungeonEntered,
+                ModernCueKind.PlayerMoved,
+                ModernCueKind.FloorChanged,
+                ModernCueKind.DungeonLeft,
+                ModernCueKind.FeatureDiscovered,
+                ModernCueKind.FeatureActivated,
+                ModernCueKind.CombatStarted,
+                ModernCueKind.CombatEnded,
+                ModernCueKind.CombatPhaseChanged,
+                ModernCueKind.MonsterDamaged,
+                ModernCueKind.MonsterKilled,
+                ModernCueKind.SpellCast,
+                ModernCueKind.ItemIdentified,
+                ModernCueKind.ItemEquipped,
+                ModernCueKind.ItemUnequipped,
+                ModernCueKind.GoldAcquired,
+                ModernCueKind.GoldSecured,
+                ModernCueKind.PlayerLeveledUp,
+                ModernCueKind.ExperienceAwarded,
+                ModernCueKind.PlayerDied,
+                ModernCueKind.ExpeditionSucceeded,
+                ModernCueKind.ExpeditionFailed,
+                ModernCueKind.KnowledgeUpdated,
+                ModernCueKind.KnowledgeUpdated,
+                ModernCueKind.KnowledgeUpdated
+            ],
+            frame.Cues.Select(cue => cue.Kind));
+        Assert.Equal(otherPosition, frame.Cues[1].Position);
+        Assert.Equal(entityId, frame.Cues[5].EntityId);
+        Assert.Equal(2, frame.Cues[5].Value);
+        Assert.Equal(CombatPhase.EnemyAction, (CombatPhase)frame.Cues[8].Value!);
+        Assert.Equal(3, frame.Cues[9].Value);
+        Assert.Equal(4, frame.Cues[15].Value);
+        Assert.Equal(2, frame.Cues[17].Value);
+    }
+
+    [Fact]
+    public void Create_exposes_all_projected_frame_properties_and_combat_details()
+    {
+        var position = new DungeonPosition(1, 2, 3);
+        var featureId = Guid.Parse("00000000-0000-0000-0000-000000000040");
+        var monsterId = Guid.Parse("00000000-0000-0000-0000-000000000041");
+        var state = GameState.Create(1234) with
+        {
+            Inn = new InnState { IsAtInn = false },
+            Player = new PlayerState
+            {
+                Id = Guid.Parse("00000000-0000-0000-0000-000000000042"),
+                Position = position,
+                Level = 4,
+                HitPoints = 8,
+                MaxHitPoints = 10,
+                SpellPower = 3,
+                MaxSpellPower = 5,
+                CarriedGold = 6,
+                Alive = true
+            },
+            SecuredProgress = new SecuredProgressState { SecuredGold = 7 },
+            Expedition = new ExpeditionState { Active = true },
+            Dungeon = new DungeonState
+            {
+                Features = [new FeatureInstance(featureId, "fountain", position, discovered: true, activationCount: 2)]
+            },
+            Combat = new CombatState(
+                new MonsterInstance(monsterId, "rat", 1, 9, position),
+                CombatPhase.EnemyAction,
+                round: 3,
+                threatLevel: ThreatLevel.Dangerous)
+        };
+
+        var frame = ModernRenderer.Create(PresentationStateAdapter.Create(state));
+
+        Assert.Equal(ModernScene.Dungeon, frame.Scene);
+        Assert.Equal(position, frame.PlayerPosition);
+        Assert.True(frame.Environment.DynamicLighting);
+        Assert.True(frame.Environment.AtmosphericEffects);
+        var marker = Assert.Single(frame.Features);
+        Assert.Equal(featureId, marker.InstanceId);
+        Assert.Equal("fountain", marker.DefinitionId);
+        Assert.Equal(position, marker.Position);
+        Assert.Equal(2, marker.ActivationCount);
+        Assert.Equal(state.Player.Id, frame.Hud.PlayerId);
+        Assert.Equal(4, frame.Hud.Level);
+        Assert.Equal(8, frame.Hud.HitPoints);
+        Assert.Equal(10, frame.Hud.MaxHitPoints);
+        Assert.Equal(3, frame.Hud.SpellPower);
+        Assert.Equal(5, frame.Hud.MaxSpellPower);
+        Assert.Equal(6, frame.Hud.CarriedGold);
+        Assert.Equal(7, frame.Hud.SecuredGold);
+        Assert.True(frame.Hud.Alive);
+        Assert.Equal(state.Combat.EncounterId, frame.Combat!.EncounterId);
+        Assert.Equal(CombatPhase.EnemyAction, frame.Combat.Phase);
+        Assert.Equal(3, frame.Combat.Round);
+        Assert.Equal(ThreatLevel.Dangerous, frame.Combat.ThreatLevel);
+        Assert.Equal(monsterId, frame.Combat.Monster.InstanceId);
+        Assert.Equal("rat", frame.Combat.Monster.DefinitionId);
+        Assert.Equal(9, frame.Combat.Monster.CurrentHitPoints);
+        Assert.Equal(position, frame.Combat.Monster.Position);
     }
 }

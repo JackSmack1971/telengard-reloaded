@@ -23,8 +23,21 @@ public sealed class PresentationStateAdapterTests
         Assert.Equal(state.Inn.IsAtInn, presentation.IsAtInn);
         Assert.Equal(state.SecuredProgress.SecuredGold, presentation.SecuredGold);
         Assert.Equal(state.Player.Position, presentation.Player.Position);
+        Assert.Equal(state.Player.Attributes, presentation.Player.Attributes);
+        Assert.Equal(state.Player.Experience, presentation.Player.Experience);
+        Assert.Equal(state.Player.EquipmentSlots, presentation.Player.EquipmentSlots);
+        Assert.Equal(state.Player.Talents, presentation.Player.Talents);
+        Assert.Equal(state.Player.Spells, presentation.Player.Spells);
+        Assert.Equal(state.Player.Injuries, presentation.Player.Injuries);
+        Assert.Equal(state.Player.TemporaryEffects, presentation.Player.TemporaryEffects);
         Assert.Equal(state.Player.Inventory, presentation.Player.Inventory);
         Assert.Equal(state.Expedition.FloorsVisited, presentation.Expedition.FloorsVisited);
+        Assert.Equal(state.Expedition.StartSimulationTick, presentation.Expedition.StartSimulationTick);
+        Assert.Equal(state.Expedition.SimulationTicks, presentation.Expedition.SimulationTicks);
+        Assert.Equal(state.Expedition.MonstersDefeated, presentation.Expedition.MonstersDefeated);
+        Assert.Equal(state.Expedition.DiscoveriesMade, presentation.Expedition.DiscoveriesMade);
+        Assert.Equal(state.Expedition.RoomsVisited, presentation.Expedition.RoomsVisited);
+        Assert.Equal(state.Expedition.Objectives, presentation.Expedition.Objectives);
         Assert.Equal(state.Legacy.PersistentMap.ObservedPositions, presentation.ObservedMap);
         Assert.Equal(state.Knowledge.Entries, presentation.Knowledge);
         Assert.DoesNotContain(state.Dungeon.Features, feature =>
@@ -82,6 +95,7 @@ public sealed class PresentationStateAdapterTests
         Assert.Equal(CombatPhase.PlayerAction, combat.Phase);
         Assert.Equal(3, combat.Round);
         Assert.Equal(ThreatLevel.Deadly, combat.ThreatLevel);
+        Assert.Equal(combat.SelectedAction, state.Combat!.SelectedAction);
         Assert.Equal(monster.DefinitionId, combat.Monster.DefinitionId);
         Assert.Equal(monster.CurrentHitPoints, combat.Monster.CurrentHitPoints);
         Assert.DoesNotContain(typeof(PresentationMonsterState).GetProperties(), property =>
@@ -102,6 +116,62 @@ public sealed class PresentationStateAdapterTests
         Assert.Throws<NotSupportedException>(() =>
             ((IList<DungeonPosition>)presentation.ObservedMap).Clear());
         Assert.Throws<ArgumentNullException>(() => PresentationStateAdapter.Create(null!));
+        var player = new PresentationPlayerState(state.Player);
+        var expedition = new PresentationExpeditionState(state.Expedition);
+        Assert.Throws<ArgumentNullException>(() => new PresentationState(
+            GameMode.Classic,
+            null!,
+            0,
+            true,
+            0,
+            player,
+            expedition,
+            [],
+            [],
+            [],
+            [],
+            null));
+        Assert.Throws<ArgumentNullException>(() => new PresentationState(
+            GameMode.Classic,
+            state.Versions,
+            0,
+            true,
+            0,
+            null!,
+            expedition,
+            [],
+            [],
+            [],
+            [],
+            null));
+        Assert.Throws<ArgumentNullException>(() => new PresentationState(
+            GameMode.Classic,
+            state.Versions,
+            0,
+            true,
+            0,
+            player,
+            null!,
+            [],
+            [],
+            [],
+            [],
+            null));
+        Assert.Throws<ArgumentException>(() => new PresentationState(
+            GameMode.Classic,
+            state.Versions,
+            0,
+            true,
+            0,
+            player,
+            expedition,
+            new DungeonPosition[] { null! },
+            [],
+            [],
+            [],
+            null));
+        Assert.Throws<ArgumentException>(() => new PresentationFeatureState(
+            new FeatureInstance(Guid.NewGuid(), "hidden", new DungeonPosition(1, 0, 0))));
     }
 
     private static GameState CreateState(Guid featureId)

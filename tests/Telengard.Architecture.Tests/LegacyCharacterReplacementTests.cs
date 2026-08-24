@@ -1,6 +1,7 @@
 using Telengard.Core.Combat;
 using Telengard.Core.Events;
 using Telengard.Core.Knowledge;
+using Telengard.Core.Items;
 using Telengard.Core.Simulation;
 using Telengard.Save;
 using Xunit;
@@ -112,6 +113,18 @@ public sealed class LegacyCharacterReplacementTests
             new FixedProvider(NewCharacter() with { Inventory = ["item"] })));
         Assert.Throws<ArgumentException>(() => ResolveWithProvider(
             dead,
+            new FixedProvider(NewCharacter() with { Alive = false })));
+        Assert.Throws<InvalidOperationException>(() => ResolveWithProvider(
+            dead with
+            {
+                Player = dead.Player with
+                {
+                    EquipmentSlots = [new EquipmentSlotState("weapon", Guid.NewGuid())]
+                }
+            },
+            ReplacementProvider()));
+        Assert.Throws<ArgumentException>(() => ResolveWithProvider(
+            dead,
             new FixedProvider(NewCharacter() with { Id = dead.Player.Id })));
         Assert.Throws<ArgumentException>(() => Resolve(
             dead with
@@ -126,6 +139,8 @@ public sealed class LegacyCharacterReplacementTests
                 }
             },
             Guid.Parse("00000000-0000-0000-0000-000000000104")));
+        Assert.Throws<InvalidOperationException>(() => Resolve(
+            dead with { Legacy = dead.Legacy with { PreviousHeroes = [] } }));
     }
 
     [Fact]
