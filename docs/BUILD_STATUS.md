@@ -7,6 +7,12 @@ status ledger. Use [the task ledger](tasks/README.md) for current TEL status.
 Audit-remediation status is maintained in the canonical ledger and its
 generated views described in [the audit-status engineering guide](engineering/audit-status.md).
 
+## TEL-120 verification
+
+- Added the minimal Godot application/bootstrap boundary: a .NET host loads the external content pack, creates deterministic authoritative setup state through Core, and serializes only the renderer-safe Modern projection to the Godot presentation shell.
+- Godot remains presentation-only; no save schema or authoritative state changed. The Godot shell does not resolve commands or own RNG.
+- Godot 4.7.2 startup smoke checks passed; the host emitted content version `0.2` with 8 monsters, 12 items, 6 spells, and 4 features; the full repository gate passed with 440 tests.
+
 ## AUD-004 verification
 
 - Status: implemented; `.github/workflows/verification.yml` runs the

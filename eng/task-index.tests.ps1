@@ -60,6 +60,7 @@ try {
     $tel114 = @($index.tickets | Where-Object { $_.id -eq 'TEL-114' })
     $tel116 = @($index.tickets | Where-Object { $_.id -eq 'TEL-116' })
     $tel120 = @($index.tickets | Where-Object { $_.id -eq 'TEL-120' })
+    $tel121 = @($index.tickets | Where-Object { $_.id -eq 'TEL-121' })
     $tel127 = @($index.tickets | Where-Object { $_.id -eq 'TEL-127' })
     Assert-Condition ($tel001.Count -eq 0 -and @($index.completed | Where-Object { $_ -eq 'TEL-001' }).Count -eq 1) 'Completed ledger entry was not compacted.'
     Assert-Condition ($tel111.Count -eq 0 -and @($index.completed | Where-Object { $_ -eq 'TEL-111' }).Count -eq 1) 'Completed monster-roster entry was not compacted.'
@@ -67,9 +68,10 @@ try {
     Assert-Condition ($tel113.Count -eq 0 -and @($index.completed | Where-Object { $_ -eq 'TEL-113' }).Count -eq 1) 'Completed item-roster entry was not compacted.'
     Assert-Condition ($tel114.Count -eq 0 -and @($index.completed | Where-Object { $_ -eq 'TEL-114' }).Count -eq 1) 'Completed loot-table entry was not compacted.'
     Assert-Condition ($tel116.Count -eq 0 -and @($index.completed | Where-Object { $_ -eq 'TEL-116' }).Count -eq 1) 'Completed feature-definition entry was not compacted.'
-    Assert-Condition ($tel120.Count -eq 1 -and $tel120[0].track -eq 'presentation' -and $tel120[0].decision_state -eq 'ready') 'Playable-client scheduling metadata was not projected.'
-    Assert-Condition (@($tel120[0].risk_tags).Count -gt 0 -and @($tel120[0].review.conditional) -contains 'presentation' -and $tel120[0].verification.godot_manual) 'Effective risk, review, and verification policy was not serialized.'
-    Assert-Condition ($tel127.Count -eq 1 -and $tel127[0].decision_state -eq 'blocked' -and $tel127[0].blocker -match 'TEL-120') 'Dependency-derived blocker metadata was not projected.'
+    Assert-Condition ($tel120.Count -eq 0 -and @($index.completed | Where-Object { $_ -eq 'TEL-120' }).Count -eq 1) 'Completed host ticket was not compacted.'
+    Assert-Condition ($tel121.Count -eq 1 -and $tel121[0].track -eq 'presentation' -and $tel121[0].decision_state -eq 'ready') 'Playable-client scheduling metadata was not projected.'
+    Assert-Condition (@($tel121[0].risk_tags).Count -gt 0 -and @($tel121[0].review.conditional) -contains 'presentation' -and $tel121[0].verification.godot_manual) 'Effective risk, review, and verification policy was not serialized.'
+    Assert-Condition ($tel127.Count -eq 1 -and $tel127[0].decision_state -eq 'blocked' -and $tel127[0].blocker -match 'TEL-121') 'Dependency-derived blocker metadata was not projected.'
     Assert-Condition ($index.context_template -eq 'docs/tasks/{id}.md') 'Ticket context template is missing.'
     Assert-Condition ($index.conditional_context_by_risk.'save-compatibility' -eq 'save') 'Risk-to-context routing is missing.'
 
