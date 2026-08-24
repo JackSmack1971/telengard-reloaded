@@ -2811,44 +2811,17 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
 - Invariants: render cadence is decoupled from tick production; Godot does not mutate authoritative state or resolve gameplay; rejected commands do not mutate state.
 - Evidence: focused clock tests passed (4); host Debug build passed with zero warnings/errors; bootstrap emitted a valid inn frame; `eng/godot-doctor.ps1` found WinGet Godot 4.7.2 and the headless project smoke check passed. Interactive input observation remains pending.
 
-## TEL-122 verification
+## TEL-123 verification
 
-- Status: implementation complete; interactive Godot observation remains
-  pending. The Godot presentation shell now provides
-  deterministic startup/title, new/load, character creation, inn, dungeon,
-  pause, death, and return-to-inn navigation states.
-- Save-schema impact: none; session and modal state remain transient client
-  state.
-- Invariants: modal input is captured; presentation-only states do not advance
-  the authoritative simulation clock; gameplay intents remain routed through
-  the .NET host and Core command boundary.
-- Evidence: Godot 4.7.2 headless launch passed; the host returned an `inn`
-  frame at tick 0 and accepted `enter_dungeon` into a `dungeon` frame; canonical
-  Full verification passed with 444 tests. Interactive keyboard/controller
-  observation remains pending with the existing TEL-121 gate.
-
-## TEL-122 input observation follow-up
-
-- Fixed the Godot request boundary so clock requests cannot drop or overlap
-  keyboard/controller gameplay intents; queued intents dispatch after the
-  current host response.
-- Godot 4.7.2 runtime input probe passed keyboard startup/new/character/inn/
-  dungeon/pause/resume transitions and recognized controller left-axis north
-  input as `move_north` without request-overlap errors.
-- Visual/manual observation remains unresolved because the current execution
-  environment cannot create a usable Godot desktop window.
-
-## TEL-122 host startup follow-up
-
-- Fixed the initial Godot `/frame` request race by retrying transient
-  `HTTPRequest` connection failures for a bounded startup window while the
-  spawned .NET host listener binds its port.
-- The reported Godot network result `2` is therefore treated as a transient
-  startup condition rather than immediately rendered as a client error.
-
-## TEL-122 host launch follow-up
-
-- The Godot client now invokes the repository-pinned `.dotnet/dotnet.exe`
-  directly instead of spawning the PowerShell wrapper, which keeps the
-  authoritative host process alive when launched from the desktop client.
-- Debug host build command: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./eng/dotnet.ps1 build tools/Telengard.GodotHost/Telengard.GodotHost.csproj --configuration Debug`.
+- Status: implemented and verified; renderer-safe presentation identity and
+  observed tile geometry now cross the host boundary, and a presentation-side
+  stable-ID asset registry provides deterministic lookup with explicit
+  development placeholders.
+- Save-schema impact: none; Godot resource paths remain outside authoritative
+  state and save DTOs.
+- Invariants: only observed map positions and discovered/observed content
+  identities are projected; hidden feature state remains redacted; registry
+  mappings do not affect simulation or replay.
+- Evidence: focused projection/registry tests passed (9); Godot 4.7.2
+  headless editor/runtime loading passed; host Debug build passed with zero
+  warnings/errors; canonical Full verification passed with 447 Release tests.
