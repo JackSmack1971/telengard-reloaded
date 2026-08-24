@@ -14,7 +14,7 @@ var _clock_accumulator := 0.0
 var _request_pending := false
 var _queued_intents: Array[Dictionary] = []
 var _initial_frame_attempts := 0
-const DOTNET_SCRIPT := "../../eng/dotnet.ps1"
+const DOTNET_EXECUTABLE := "../../.dotnet/dotnet.exe"
 const HOST_ASSEMBLY := "../../tools/Telengard.GodotHost/bin/Debug/net8.0/Telengard.GodotHost.dll"
 const CONTENT_ROOT := "../../content"
 const MAX_INITIAL_FRAME_ATTEMPTS := 20
@@ -24,7 +24,7 @@ func _ready() -> void:
 	_http = HTTPRequest.new()
 	add_child(_http)
 	_http.request_completed.connect(_on_request_completed)
-	_host_pid = OS.create_process("powershell.exe", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ProjectSettings.globalize_path(DOTNET_SCRIPT), "exec", ProjectSettings.globalize_path(HOST_ASSEMBLY), "--serve", "--content-root", ProjectSettings.globalize_path(CONTENT_ROOT)])
+	_host_pid = OS.create_process(ProjectSettings.globalize_path(DOTNET_EXECUTABLE), ["exec", ProjectSettings.globalize_path(HOST_ASSEMBLY), "--serve", "--content-root", ProjectSettings.globalize_path(CONTENT_ROOT)])
 	_request_frame.call_deferred()
 
 func _unhandled_input(event: InputEvent) -> void:

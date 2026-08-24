@@ -2845,3 +2845,10 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
   spawned .NET host listener binds its port.
 - The reported Godot network result `2` is therefore treated as a transient
   startup condition rather than immediately rendered as a client error.
+
+## TEL-122 host launch follow-up
+
+- The Godot client now invokes the repository-pinned `.dotnet/dotnet.exe`
+  directly instead of spawning the PowerShell wrapper, which keeps the
+  authoritative host process alive when launched from the desktop client.
+- Debug host build command: `./eng/dotnet.ps1 build tools/Telengard.GodotHost/Telengard.GodotHost.csproj --configuration Debug`.
