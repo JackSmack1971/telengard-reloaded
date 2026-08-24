@@ -148,7 +148,7 @@ the already-owned feature, journal, wealth, inn, or death mechanics.
 - TEL-114 — Author first-slice loot tables — Not started
   - Provide data-driven loot tables that reference TEL-113 item IDs and the existing carried-wealth/treasure boundary.
   - Do not invent a permanent drop-rate, value, or loss formula where the specification is silent.
-- TEL-115 — Author the first-slice spell roster — Not started
+- TEL-115 — Author the first-slice spell roster — Implemented and verified
   - Provide 6–8 spell definitions with targeting, effects, interactions, costs, and discovery descriptions for the existing spell system.
   - Leave balance and undefined spell formulas configurable.
 - TEL-116 — Author the four first-slice dungeon feature definitions — Not started

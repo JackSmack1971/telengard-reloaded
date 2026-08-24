@@ -1,0 +1,10 @@
+{
+  "id": "ember-bolt",
+  "name": "Ember Bolt",
+  "initial_description": "A spark gathers at your fingertips.",
+  "discovered_descriptions": ["The spark seeks a nearby foe.", "The bolt burns with fire."],
+  "cost": 3,
+  "targeting_rule": "single_target",
+  "effects": ["damage:fire"],
+  "interactions": ["oil_target"]
+}

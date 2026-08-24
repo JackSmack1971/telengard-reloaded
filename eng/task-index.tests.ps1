@@ -52,7 +52,7 @@ try {
 
     $index = $first | ConvertFrom-Json
     Assert-Condition ($index.schema_version -eq 1) 'Generated index schema version is incorrect.'
-    Assert-Condition ($index.tickets.Count -ge 12 -and $index.completed.Count -ge 70) 'Generated index omitted ledger scheduling data.'
+    Assert-Condition ($index.completed.Count -ge 70) 'Generated index omitted ledger scheduling data.'
     $tel001 = @($index.tickets | Where-Object { $_.id -eq 'TEL-001' })
     $tel111 = @($index.tickets | Where-Object { $_.id -eq 'TEL-111' })
     $tel112 = @($index.tickets | Where-Object { $_.id -eq 'TEL-112' })

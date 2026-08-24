@@ -1,0 +1,10 @@
+{
+  "id": "veil",
+  "name": "Veil",
+  "initial_description": "The edges of the room lose their certainty.",
+  "discovered_descriptions": ["The veil blurs hostile attention.", "The veil does not hide a sound already made."],
+  "cost": 2,
+  "targeting_rule": "self",
+  "effects": ["conceal:self"],
+  "interactions": ["enemy_awareness"]
+}

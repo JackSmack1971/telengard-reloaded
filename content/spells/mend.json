@@ -1,0 +1,10 @@
+{
+  "id": "mend",
+  "name": "Mend",
+  "initial_description": "Warmth gathers beneath your hands.",
+  "discovered_descriptions": ["The warmth closes a wound.", "Mend cannot restore what was never there."],
+  "cost": 2,
+  "targeting_rule": "self",
+  "effects": ["restore:health"],
+  "interactions": ["wounded_self"]
+}
