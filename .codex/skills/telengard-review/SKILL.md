@@ -193,7 +193,9 @@ Any unresolved P0/P1/P2 means `changes-required`. P3 findings may remain only wh
 
 ## Skill-local telemetry
 
-Use `scripts/skill_telemetry.py` as best-effort, non-gating instrumentation. Runtime records stay under this skill's `telemetry/` directory. If telemetry cannot run or write, continue the review and mention the instrumentation failure in the final handoff; never weaken or fail a review solely because telemetry is unavailable.
+Use `scripts/skill_telemetry.py` as best-effort, non-gating instrumentation. Resolve `<skill-root>` once as the directory containing this `SKILL.md`, then invoke an available Python 3 executable with `<skill-root>/scripts/skill_telemetry.py`; do not rediscover the helper path for each event. Runtime records stay under this skill's `telemetry/` directory. If Python or telemetry writes are unavailable, continue the review and mention the instrumentation failure in the final handoff; never weaken or fail a review solely because telemetry is unavailable.
+
+Start example: `python <skill-root>/scripts/skill_telemetry.py start --ticket TEL-### --base-ref <base> --head-ref <head>`. Semantic events use `event <name> --field key=value`; end with `end --outcome <result> --ticket TEL-###`.
 
 Start one session after the TEL id plus base/head refs are known. Record normalized workflow facts, not private reasoning:
 

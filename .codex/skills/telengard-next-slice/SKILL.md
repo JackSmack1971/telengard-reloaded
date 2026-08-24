@@ -296,7 +296,9 @@ For an Automation, this handoff is the terminal result of the scheduled run. A l
 
 ## Skill-local telemetry
 
-Use `scripts/skill_telemetry.py` as best-effort, non-gating instrumentation. Runtime records stay under this skill's `telemetry/` directory. If telemetry cannot run or write, continue the slice workflow and mention the instrumentation failure in the final handoff; telemetry never relaxes selection, verification, review, or merge gates.
+Use `scripts/skill_telemetry.py` as best-effort, non-gating instrumentation. Resolve `<skill-root>` once as the directory containing this `SKILL.md`, then invoke an available Python 3 executable with `<skill-root>/scripts/skill_telemetry.py`; do not rediscover the helper path for each event. Runtime records stay under this skill's `telemetry/` directory. If Python or telemetry writes are unavailable, continue the slice workflow and mention the instrumentation failure in the final handoff; telemetry never relaxes selection, verification, review, or merge gates.
+
+Start example: `python <skill-root>/scripts/skill_telemetry.py start --ticket none`. Semantic events use `event <name> --field key=value`; end with `end --outcome <RUN_RESULT-status> --ticket TEL-###`.
 
 Start one session at the beginning of the transaction, before candidate selection; use ticket `none` until a slice is selected. Record normalized workflow facts rather than private selection reasoning:
 
