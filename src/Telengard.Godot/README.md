@@ -12,7 +12,7 @@ renderer; it does not own or mutate authoritative state.
 Build the host before launching this project:
 
 ```powershell
-./eng/dotnet.ps1 build Telengard.sln --configuration Debug
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./eng/dotnet.ps1 build tools/Telengard.GodotHost/Telengard.GodotHost.csproj --configuration Debug
 ```
 
 The Godot node has no authoritative state and does not resolve commands,

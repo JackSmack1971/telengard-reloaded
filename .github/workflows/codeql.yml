@@ -37,12 +37,20 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
+      - name: Set up the repository SDK
+        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5
+        with:
+          dotnet-version: 8.0.100
+
       - name: Initialize CodeQL
         uses: github/codeql-action/init@4c0873ef8656cb3c50b3f42fb63bc1ade0cfa827 # v4
         with:
           languages: csharp
-          build-mode: none
+          build-mode: manual
           config-file: ./.github/codeql/codeql-config.yml
+
+      - name: Build C# solution for CodeQL
+        run: dotnet build Telengard.sln --configuration Release
 
       - name: Perform CodeQL analysis
         uses: github/codeql-action/analyze@4c0873ef8656cb3c50b3f42fb63bc1ade0cfa827 # v4
