@@ -9,6 +9,10 @@
 !/.codex/agents/**
 !/.codex/skills/
 !/.codex/skills/**
+/.codex/skills/*/telemetry/events.jsonl
+/.codex/skills/*/telemetry/current-session.json
+/.codex/skills/*/telemetry/report.md
+/.codex/skills/*/telemetry/report.json
 /.changelog/
 
 # Bundled local SDK

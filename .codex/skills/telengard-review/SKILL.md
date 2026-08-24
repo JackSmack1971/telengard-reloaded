@@ -190,3 +190,24 @@ lanes: <selected lane>=<pass/fail>, ...
 ```
 
 Any unresolved P0/P1/P2 means `changes-required`. P3 findings may remain only when explicitly judged non-blocking and out of proportion to the selected slice.
+
+## Skill-local telemetry
+
+Use `scripts/skill_telemetry.py` as best-effort, non-gating instrumentation. Runtime records stay under this skill's `telemetry/` directory. If telemetry cannot run or write, continue the review and mention the instrumentation failure in the final handoff; never weaken or fail a review solely because telemetry is unavailable.
+
+Start one session after the TEL id plus base/head refs are known. Record normalized workflow facts, not private reasoning:
+
+- `lane_selected` with `lane` and routing `trigger` for every independent lane;
+- `lane_escalated` with `lane` and `reason` only when effort rises above the role default;
+- `lane_profile_fallback` when the configured reviewer profile is unavailable;
+- `lane_context_missing` for a prescribed required path that cannot be loaded, and `unexpected_lane_context` when a lane needs material outside its stated minimum contract;
+- `lane_retry` when the same lane must be rerun after a material fix or inconclusive attempt;
+- `lane_result` with `lane`, `verdict`, and only `p0`/`p1`/`p2`/`p3` counts;
+- `finding_deduplication` with a `duplicates` count when synthesis removes truly identical findings;
+- `review_synthesis` with the final verdict and severity counts.
+
+Use `probe` only for prescribed lane-required paths where first-attempt resolution is useful evidence. Use `run` only for consequential tests or verification commands needed to falsify a review target; ordinary reads, searches, `git status`, and diff inspection run normally. Reuse the same `--kind` and `--label` for retries so retry counts remain meaningful. Prefer repository PowerShell `-File` entry points; do not place complex inline PowerShell behind the Python wrapper.
+
+Do not log reviewer prompts/reasoning, diff or source contents, finding prose, command stdout/stderr, environment variables, credentials, or API payloads. End the telemetry session with the same disposition as `REVIEW_RESULT` (`pass` or `changes-required`; use `blocked`/`failed`/`inconclusive` only when that is the actual review outcome).
+
+Generate an improvement report when requested with `scripts/skill_telemetry.py report --write`; use fingerprint cohorts for before/after comparisons rather than overwriting history.
