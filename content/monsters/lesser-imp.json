@@ -9,5 +9,5 @@
   "actions": ["claw", "ember"],
   "behaviors": ["circle-prey", "blink-away"],
   "spawn_rules": { "depth": "3-5", "terrain": "rift" },
-  "loot_table": null
+  "loot_table": "upper-ruins-loot"
 }

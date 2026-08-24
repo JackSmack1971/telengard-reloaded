@@ -48,7 +48,10 @@ public static class ContentPackLoader
             ParseEncounterTable);
 
         var pack = new ContentPack(contentVersion, monsters, items, spells, features, talents, lootTables, bands, encounterTables);
-        ValidateReferences(pack, Directory.Exists(Path.Combine(contentRoot, "encounter_tables")));
+        ValidateReferences(
+            pack,
+            Directory.Exists(Path.Combine(contentRoot, "encounter_tables")),
+            Directory.Exists(Path.Combine(contentRoot, "loot_tables")));
         return pack;
     }
 
@@ -467,7 +470,10 @@ public static class ContentPackLoader
     private static string NormalizePropertyName(string propertyName) =>
         propertyName.Replace("_", string.Empty, StringComparison.Ordinal);
 
-    private static void ValidateReferences(ContentPack pack, bool hasEncounterTableCatalog)
+    private static void ValidateReferences(
+        ContentPack pack,
+        bool hasEncounterTableCatalog,
+        bool hasLootTableCatalog)
     {
         ValidateBandRanges(pack);
         ValidateEncounterTableRanges(pack);
@@ -501,6 +507,14 @@ public static class ContentPackLoader
             {
                 throw new InvalidDataException(
                     $"Encounter table '{resolvedTable.Id}' does not cover dungeon band '{band.Id}'.");
+            }
+
+            if (hasLootTableCatalog
+                && band.LootProfile is not null
+                && !pack.LootTables.TryGet(band.LootProfile, out _))
+            {
+                throw new InvalidDataException(
+                    $"Dungeon band '{band.Id}' references missing loot table '{band.LootProfile}'.");
             }
         }
 

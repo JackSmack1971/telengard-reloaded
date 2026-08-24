@@ -9,5 +9,5 @@
   "actions": ["rusted-sword"],
   "behaviors": ["hold-position", "pursue"],
   "spawn_rules": { "depth": "1-4", "terrain": "crypt" },
-  "loot_table": null
+  "loot_table": "upper-ruins-loot"
 }

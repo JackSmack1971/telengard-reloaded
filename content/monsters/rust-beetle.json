@@ -9,5 +9,5 @@
   "actions": ["mandibles", "rust-spray"],
   "behaviors": ["territorial", "charge"],
   "spawn_rules": { "depth": "2-5", "terrain": "ruins" },
-  "loot_table": null
+  "loot_table": "upper-ruins-loot"
 }

@@ -9,5 +9,5 @@
   "actions": ["bite"],
   "behaviors": ["swarm", "flee-at-low-health"],
   "spawn_rules": { "depth": "1-2", "terrain": "ruins" },
-  "loot_table": null
+  "loot_table": "upper-ruins-loot"
 }

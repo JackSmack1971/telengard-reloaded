@@ -9,5 +9,5 @@
   "actions": ["pseudopod", "corrosive-pool"],
   "behaviors": ["slow-advance", "split-under-pressure"],
   "spawn_rules": { "depth": "2-5", "terrain": "cavern" },
-  "loot_table": null
+  "loot_table": "upper-ruins-loot"
 }
