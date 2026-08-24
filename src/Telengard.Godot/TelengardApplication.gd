@@ -12,7 +12,7 @@ var _previous_authoritative_scene := ""
 var _feedback := ""
 var _clock_accumulator := 0.0
 var _request_pending := false
-var _queued_intent: Dictionary = {}
+var _queued_intents: Array[Dictionary] = []
 const DOTNET_SCRIPT := "../../eng/dotnet.ps1"
 const HOST_ASSEMBLY := "../../tools/Telengard.GodotHost/bin/Debug/net8.0/Telengard.GodotHost.dll"
 const CONTENT_ROOT := "../../content"
@@ -135,7 +135,7 @@ func _request_frame() -> void:
 func _send_intent(intent: Dictionary) -> void:
 	if _request_pending:
 		if intent.get("type", "") != "advance":
-			_queued_intent = intent.duplicate(true)
+			_queued_intents.append(intent.duplicate(true))
 		return
 	_request_pending = true
 	var request_result := _http.request("http://127.0.0.1:18120/command", ["Content-Type: application/json"], HTTPClient.METHOD_POST, JSON.stringify(intent))
@@ -159,9 +159,8 @@ func _on_request_completed(result: int, response_code: int, _headers: PackedStri
 			_show_error(_feedback)
 		_update_authoritative_state(parsed["frame"])
 		_refresh_renderer()
-	if not _queued_intent.is_empty():
-		var queued_intent := _queued_intent
-		_queued_intent = {}
+	if not _queued_intents.is_empty():
+		var queued_intent: Dictionary = _queued_intents.pop_front()
 		_send_intent(queued_intent)
 
 func _update_authoritative_state(frame: Dictionary) -> void:
