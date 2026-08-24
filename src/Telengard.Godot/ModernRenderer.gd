@@ -16,11 +16,21 @@ const FEATURE_COLOR := Color("d9ad62")
 
 var _frame: Dictionary = {}
 var _elapsed := 0.0
+var _client_state := "STARTUP"
+var _feedback := ""
 
 
 func render_frame(frame: Dictionary) -> void:
 	_frame = frame.duplicate(true)
 	queue_redraw()
+
+func set_client_state(client_state: String, feedback: String) -> void:
+	_client_state = client_state
+	_feedback = feedback
+	queue_redraw()
+
+func current_scene() -> String:
+	return str(_frame.get("scene", "inn"))
 
 
 func _process(delta: float) -> void:
@@ -39,7 +49,7 @@ func _draw() -> void:
 func _draw_header() -> void:
 	var font := ThemeDB.fallback_font
 	draw_string(font, Vector2(36, 48), "MODERN TELENGARD", HORIZONTAL_ALIGNMENT_LEFT, -1, 26, Color("e5edf7"))
-	draw_string(font, Vector2(38, 73), _scene_label(), HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("8295b5"))
+	draw_string(font, Vector2(38, 73), _client_state, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("8295b5"))
 	draw_line(Vector2(36, 92), Vector2(1244, 92), PANEL_EDGE, 1.0)
 
 
@@ -105,6 +115,54 @@ func _draw_hud() -> void:
 		draw_string(font, Vector2(916, 408), "ENCOUNTER", HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color("e5edf7"))
 		draw_string(font, Vector2(916, 438), str(combat.get("phase", "contact")), HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("b4c3d9"))
 		draw_string(font, Vector2(916, 466), "Threat   %s" % combat.get("threat_level", "unknown"), HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("d9ad62"))
+
+	if _client_state != "INN" and _client_state != "DUNGEON":
+		_draw_overlay(font)
+
+func _draw_overlay(font: Font) -> void:
+	draw_rect(Rect2(180, 190, 760, 330), Color(0.05, 0.07, 0.12, 0.96), true)
+	draw_rect(Rect2(180, 190, 760, 330), PANEL_EDGE, false, 2.0)
+	draw_string(font, Vector2(230, 260), _overlay_title(), HORIZONTAL_ALIGNMENT_LEFT, -1, 30, Color("e5edf7"))
+	draw_string(font, Vector2(230, 312), _overlay_body(), HORIZONTAL_ALIGNMENT_LEFT, -1, 17, Color("b4c3d9"))
+	draw_string(font, Vector2(230, 360), _overlay_prompt(), HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color("d9ad62"))
+	if not _feedback.is_empty():
+		draw_string(font, Vector2(230, 420), _feedback, HORIZONTAL_ALIGNMENT_LEFT, 660, 14, Color("d36f78"))
+
+func _overlay_title() -> String:
+	return {
+		"STARTUP": "Starting Telengard",
+		"TITLE": "Telengard Reloaded",
+		"NEW_GAME": "New expedition",
+		"LOAD_GAME": "Load expedition",
+		"CHARACTER_CREATION": "Create adventurer",
+		"PAUSE": "Paused",
+		"DEATH": "The expedition has ended",
+		"RETURN_TO_INN": "Returned safely"
+	}.get(_client_state, _client_state)
+
+func _overlay_body() -> String:
+	return {
+		"STARTUP": "Connecting to the authoritative simulation…",
+		"TITLE": "Choose a session to begin.",
+		"NEW_GAME": "A new hosted session is ready.",
+		"LOAD_GAME": "Load flow is ready for the persistence slice.",
+		"CHARACTER_CREATION": "Choose a character mode before entering the inn.",
+		"PAUSE": "Simulation time is paused. Presentation focus is captured.",
+		"DEATH": "Review the result, then return to the session title.",
+		"RETURN_TO_INN": "Your secured progress is shown by the authoritative HUD."
+	}.get(_client_state, "")
+
+func _overlay_prompt() -> String:
+	return {
+		"STARTUP": "",
+		"TITLE": "N  New game     L  Load game     Esc  Quit",
+		"NEW_GAME": "Enter  Continue     Esc  Back",
+		"LOAD_GAME": "Enter  Continue     Esc  Back",
+		"CHARACTER_CREATION": "Enter  Confirm     Esc  Back",
+		"PAUSE": "Esc  Resume",
+		"DEATH": "Enter  Return to title",
+		"RETURN_TO_INN": "Enter  Continue at inn"
+	}.get(_client_state, "")
 
 
 func _scene_label() -> String:

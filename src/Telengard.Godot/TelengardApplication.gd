@@ -6,10 +6,11 @@ extends Node
 @onready var renderer: ModernRenderer = $ModernRenderer
 var _http: HTTPRequest
 var _host_pid := -1
-var _input_context := "INN"
+enum ClientState { STARTUP, TITLE, NEW_GAME, LOAD_GAME, CHARACTER_CREATION, INN, DUNGEON, PAUSE, DEATH, RETURN_TO_INN }
+var _client_state := ClientState.STARTUP
+var _previous_authoritative_scene := ""
 var _feedback := ""
 var _clock_accumulator := 0.0
-var _paused := false
 const DOTNET_SCRIPT := "../../eng/dotnet.ps1"
 const HOST_ASSEMBLY := "../../tools/Telengard.GodotHost/bin/Debug/net8.0/Telengard.GodotHost.dll"
 const CONTENT_ROOT := "../../content"
@@ -23,23 +24,67 @@ func _ready() -> void:
 	_request_frame.call_deferred()
 
 func _unhandled_input(event: InputEvent) -> void:
-	if _input_context == "EXPLORATION" and event.is_action_pressed("move_north"):
+	if _client_state == ClientState.TITLE:
+		if event.is_action_pressed("new_game"):
+			_client_state = ClientState.NEW_GAME
+		elif event.is_action_pressed("load_game"):
+			_client_state = ClientState.LOAD_GAME
+		elif event.is_action_pressed("ui_accept"):
+			_client_state = ClientState.NEW_GAME
+		elif event.is_action_pressed("ui_cancel"):
+			_quit_client()
+		_refresh_renderer()
+		return
+	if _client_state == ClientState.NEW_GAME or _client_state == ClientState.LOAD_GAME:
+		if event.is_action_pressed("ui_cancel"):
+			_client_state = ClientState.TITLE
+			_refresh_renderer()
+		elif event.is_action_pressed("ui_accept"):
+			_client_state = ClientState.CHARACTER_CREATION if _client_state == ClientState.NEW_GAME else ClientState.INN
+			_refresh_renderer()
+		return
+	if _client_state == ClientState.CHARACTER_CREATION:
+		if event.is_action_pressed("ui_cancel"):
+			_client_state = ClientState.NEW_GAME
+			_refresh_renderer()
+		elif event.is_action_pressed("ui_accept"):
+			_client_state = ClientState.INN
+			_refresh_renderer()
+		return
+	if _client_state == ClientState.PAUSE:
+		if event.is_action_pressed("ui_cancel") or event.is_action_pressed("toggle_pause"):
+			_client_state = _authoritative_state()
+			_send_intent({"type": "time_mode", "mode": "Normal"})
+			_refresh_renderer()
+		return
+	if _client_state == ClientState.DEATH:
+		if event.is_action_pressed("ui_accept"):
+			_client_state = ClientState.TITLE
+			_refresh_renderer()
+		return
+	if _client_state == ClientState.RETURN_TO_INN:
+		if event.is_action_pressed("ui_accept"):
+			_client_state = ClientState.INN
+			_refresh_renderer()
+		return
+	if _client_state == ClientState.DUNGEON and event.is_action_pressed("move_north"):
 		_send_intent({"type": "move", "direction": "North"})
-	elif _input_context == "EXPLORATION" and event.is_action_pressed("move_south"):
+	elif _client_state == ClientState.DUNGEON and event.is_action_pressed("move_south"):
 		_send_intent({"type": "move", "direction": "South"})
-	elif _input_context == "EXPLORATION" and event.is_action_pressed("move_east"):
+	elif _client_state == ClientState.DUNGEON and event.is_action_pressed("move_east"):
 		_send_intent({"type": "move", "direction": "East"})
-	elif _input_context == "EXPLORATION" and event.is_action_pressed("move_west"):
+	elif _client_state == ClientState.DUNGEON and event.is_action_pressed("move_west"):
 		_send_intent({"type": "move", "direction": "West"})
-	elif _input_context == "INN" and event.is_action_pressed("enter_dungeon"):
+	elif _client_state == ClientState.INN and event.is_action_pressed("enter_dungeon"):
 		_send_intent({"type": "enter_dungeon"})
-	elif event.is_action_pressed("toggle_pause"):
-		_paused = not _paused
-		_send_intent({"type": "time_mode", "mode": "Paused" if _paused else "Normal"})
+	elif (_client_state == ClientState.INN or _client_state == ClientState.DUNGEON) and event.is_action_pressed("toggle_pause"):
+		_client_state = ClientState.PAUSE
+		_send_intent({"type": "time_mode", "mode": "Paused"})
+		_refresh_renderer()
 
 func _process(delta: float) -> void:
 	_clock_accumulator += delta
-	if _host_pid > 0 and _clock_accumulator >= 0.1 and _http.get_http_client_status() != HTTPClient.STATUS_REQUESTING:
+	if _host_pid > 0 and _client_state in [ClientState.INN, ClientState.DUNGEON] and _clock_accumulator >= 0.1 and _http.get_http_client_status() != HTTPClient.STATUS_REQUESTING:
 		var elapsed := _clock_accumulator
 		_clock_accumulator = 0.0
 		_send_intent({"type": "advance", "elapsed_seconds": elapsed})
@@ -51,10 +96,14 @@ func _register_input_actions() -> void:
 	_register_key("move_west", KEY_A)
 	_register_key("enter_dungeon", KEY_E)
 	_register_key("toggle_pause", KEY_ESCAPE)
+	_register_key("new_game", KEY_N)
+	_register_key("load_game", KEY_L)
 	_register_joy("move_north", JOY_AXIS_LEFT_Y, -1.0)
 	_register_joy("move_south", JOY_AXIS_LEFT_Y, 1.0)
 	_register_joy("move_east", JOY_AXIS_LEFT_X, 1.0)
 	_register_joy("move_west", JOY_AXIS_LEFT_X, -1.0)
+	_register_key("ui_accept", KEY_ENTER)
+	_register_key("ui_cancel", KEY_ESCAPE)
 
 func _register_key(action: StringName, keycode: Key) -> void:
 	if not InputMap.has_action(action):
@@ -88,7 +137,33 @@ func _on_request_completed(result: int, response_code: int, _headers: PackedStri
 		_feedback = str(parsed.get("error", ""))
 		if not _feedback.is_empty():
 			_show_error(_feedback)
-		_input_context = "EXPLORATION" if parsed["frame"].get("scene", "inn") == "dungeon" else "INN"
+		_update_authoritative_state(parsed["frame"])
+		_refresh_renderer()
+
+func _update_authoritative_state(frame: Dictionary) -> void:
+	if _client_state == ClientState.STARTUP:
+		_client_state = ClientState.TITLE
+		_previous_authoritative_scene = str(frame.get("scene", "inn"))
+		return
+	if _client_state in [ClientState.TITLE, ClientState.NEW_GAME, ClientState.LOAD_GAME, ClientState.CHARACTER_CREATION, ClientState.PAUSE, ClientState.DEATH, ClientState.RETURN_TO_INN]:
+		return
+	var authoritative_scene := str(frame.get("scene", "inn"))
+	if not bool(frame.get("hud", {}).get("alive", true)):
+		_client_state = ClientState.DEATH
+	elif _previous_authoritative_scene == "dungeon" and authoritative_scene == "inn":
+		_client_state = ClientState.RETURN_TO_INN
+	else:
+		_client_state = ClientState.DUNGEON if authoritative_scene == "dungeon" else ClientState.INN
+	_previous_authoritative_scene = authoritative_scene
+
+func _authoritative_state() -> int:
+	return ClientState.DUNGEON if renderer.current_scene() == "dungeon" else ClientState.INN
+
+func _refresh_renderer() -> void:
+	renderer.set_client_state(ClientState.keys()[_client_state], _feedback)
+
+func _quit_client() -> void:
+	get_tree().quit()
 
 func _show_error(message: String) -> void:
 	var label := Label.new()

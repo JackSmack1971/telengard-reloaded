@@ -2810,3 +2810,19 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
 - Save-schema impact: none; clock/input/host state is transient application state.
 - Invariants: render cadence is decoupled from tick production; Godot does not mutate authoritative state or resolve gameplay; rejected commands do not mutate state.
 - Evidence: focused clock tests passed (4); host Debug build passed with zero warnings/errors; bootstrap emitted a valid inn frame; `eng/godot-doctor.ps1` found WinGet Godot 4.7.2 and the headless project smoke check passed. Interactive input observation remains pending.
+
+## TEL-122 verification
+
+- Status: implementation complete; interactive Godot observation remains
+  pending. The Godot presentation shell now provides
+  deterministic startup/title, new/load, character creation, inn, dungeon,
+  pause, death, and return-to-inn navigation states.
+- Save-schema impact: none; session and modal state remain transient client
+  state.
+- Invariants: modal input is captured; presentation-only states do not advance
+  the authoritative simulation clock; gameplay intents remain routed through
+  the .NET host and Core command boundary.
+- Evidence: Godot 4.7.2 headless launch passed; the host returned an `inn`
+  frame at tick 0 and accepted `enter_dungeon` into a `dungeon` frame; canonical
+  Full verification passed with 444 tests. Interactive keyboard/controller
+  observation remains pending with the existing TEL-121 gate.
