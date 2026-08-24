@@ -2851,4 +2851,4 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
 - The Godot client now invokes the repository-pinned `.dotnet/dotnet.exe`
   directly instead of spawning the PowerShell wrapper, which keeps the
   authoritative host process alive when launched from the desktop client.
-- Debug host build command: `./eng/dotnet.ps1 build tools/Telengard.GodotHost/Telengard.GodotHost.csproj --configuration Debug`.
+- Debug host build command: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./eng/dotnet.ps1 build tools/Telengard.GodotHost/Telengard.GodotHost.csproj --configuration Debug`.
