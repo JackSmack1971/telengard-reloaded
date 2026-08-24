@@ -16,9 +16,12 @@ public sealed class EquipmentTests
     public void Slot_state_validates_identity_and_is_immutable()
     {
         Assert.Throws<ArgumentException>(() => new EquipmentSlotState(" "));
+        Assert.Throws<ArgumentNullException>(() => new EquipmentSlotState(null!));
         Assert.Throws<ArgumentException>(() => new EquipmentSlotState("weapon", Guid.Empty));
 
         var empty = new EquipmentSlotState("weapon");
+        Assert.Null(new EquipmentSlotState("weapon", null).ItemInstanceId);
+        Assert.Throws<ArgumentException>(() => empty.Equip(Guid.Empty));
         var equipped = empty.Equip(ItemId);
 
         Assert.Null(empty.ItemInstanceId);
@@ -85,6 +88,12 @@ public sealed class EquipmentTests
         Assert.Throws<InvalidOperationException>(() => EquipmentResolver.Equip(
             equipped.State,
             new EquipItemCommand("off-hand", ItemId)));
+        Assert.Throws<InvalidOperationException>(() => EquipmentResolver.Equip(
+            CreateState([new EquipmentSlotState("weapon"), new EquipmentSlotState("off-hand", ItemId)]),
+            new EquipItemCommand("weapon", ItemId)));
+        Assert.Equal(OtherItemId, EquipmentResolver.Equip(
+            CreateState([new EquipmentSlotState("weapon"), new EquipmentSlotState("off-hand")]),
+            new EquipItemCommand("off-hand", OtherItemId)).State.Player.EquipmentSlots[1].ItemInstanceId);
         Assert.Throws<InvalidOperationException>(() => EquipmentResolver.Unequip(
             state,
             new UnequipItemCommand("weapon")));

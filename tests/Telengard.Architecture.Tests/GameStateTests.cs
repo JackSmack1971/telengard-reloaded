@@ -152,5 +152,8 @@ public sealed class GameStateTests
     {
         Assert.Throws<ArgumentException>(() => new PlayerState { Inventory = [null!] });
         Assert.Throws<ArgumentException>(() => new ExpeditionState { Objectives = [null!] });
+        Assert.Throws<ArgumentException>(() => new LegacyState { PreviousHeroes = [null!] });
+        Assert.Throws<ArgumentException>(() => new LegacyState { Graves = [null!] });
+        Assert.Throws<ArgumentException>(() => new LegacyState { Heirlooms = [null!] });
     }
 }

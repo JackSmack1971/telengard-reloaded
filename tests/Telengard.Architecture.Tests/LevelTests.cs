@@ -81,6 +81,10 @@ public sealed class LevelTests
         {
             Player = new PlayerState { Level = 2, Experience = 10 }
         };
+        var integerMaximum = GameState.Create(1234) with
+        {
+            Player = new PlayerState { Level = int.MaxValue, Experience = 10 }
+        };
 
         Assert.Throws<InvalidOperationException>(() => LevelResolver.LevelUp(away, command, configuration));
         Assert.Throws<InvalidOperationException>(() => LevelResolver.LevelUp(active, command, configuration));
@@ -89,6 +93,7 @@ public sealed class LevelTests
         Assert.Throws<InvalidOperationException>(() => LevelResolver.LevelUp(negativeExperience, command, configuration));
         Assert.Throws<InvalidOperationException>(() => LevelResolver.LevelUp(invalidLevel, command, configuration));
         Assert.Throws<InvalidOperationException>(() => LevelResolver.LevelUp(maximum, command, configuration));
+        Assert.Throws<InvalidOperationException>(() => LevelResolver.LevelUp(integerMaximum, command, configuration));
         Assert.Equal(1, away.Player.Level);
         Assert.Equal(1, insufficient.Player.Level);
     }

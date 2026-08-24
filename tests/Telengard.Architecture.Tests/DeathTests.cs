@@ -258,6 +258,8 @@ public sealed class DeathTests
             ActiveState() with { Player = ActiveState().Player with { HitPoints = 1 } }, command));
         Assert.Throws<InvalidOperationException>(() => PlayerDeathResolver.Resolve(
             ActiveState() with { Player = ActiveState().Player with { Alive = false } }, command));
+        Assert.Throws<ArgumentOutOfRangeException>(() => PlayerDeathResolver.Resolve(
+            ActiveState() with { CurrentMode = (GameMode)999 }, command));
     }
 
     [Fact]

@@ -175,6 +175,7 @@ public sealed class TreasureAcquisitionTests
                     "x:4",
                     "y:5",
                     "acquisition:0")));
+        Assert.IsType<string>(LootTableEngine.Select(table, 1234, "content-1", position, null, 0));
     }
 
     [Fact]
@@ -183,6 +184,18 @@ public sealed class TreasureAcquisitionTests
         Assert.Throws<ArgumentException>(() => new AcquireTreasureCommand(0));
         Assert.Throws<ArgumentException>(() => new AcquireTreasureCommand(0, [" "]));
         Assert.Throws<ArgumentOutOfRangeException>(() => new AcquireTreasureCommand(-1, ["relic"]));
+        var negative = InDungeon(new ExpeditionState { Active = true, CarriedGold = -1 }) with
+        {
+            Player = new PlayerState { CarriedGold = -1 }
+        };
+        Assert.Throws<InvalidOperationException>(() => TreasureAcquisitionResolver.Resolve(
+            negative,
+            new AcquireTreasureCommand(1)));
+        Assert.Throws<ArgumentException>(() => new LootTable("empty", []));
+        Assert.Throws<ArgumentException>(() => new LootTable("null", new LootTableEntry[] { null! }));
+        Assert.Throws<ArgumentException>(() => new LootTable("duplicate", [
+            new LootTableEntry("relic", 1),
+            new LootTableEntry("relic", 2)]));
     }
 
     private static GameState InDungeon(ExpeditionState expedition) => GameState.Create(1234) with

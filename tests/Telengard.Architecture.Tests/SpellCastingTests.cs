@@ -75,6 +75,10 @@ public sealed class SpellCastingTests
             state with { Player = state.Player with { Spells = [] } },
             new CastSpellCommand("ember-bolt"),
             Definition("ember-bolt", cost: 1)));
+        Assert.Throws<InvalidOperationException>(() => SpellCastResolver.Resolve(
+            state with { Player = state.Player with { SpellPower = -1 } },
+            new CastSpellCommand("ember-bolt"),
+            Definition("ember-bolt", cost: 1)));
         Assert.Equal(2, state.Player.SpellPower);
         Assert.Equal(CombatPhase.Resolution, state.Combat!.Phase);
     }

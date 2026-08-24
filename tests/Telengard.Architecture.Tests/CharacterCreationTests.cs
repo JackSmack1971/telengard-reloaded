@@ -51,6 +51,12 @@ public sealed class CharacterCreationTests
 
         Assert.Equal(before, SaveGameSerializer.Serialize(state));
         Assert.Equal(0, provider.CallCount);
+
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
+            CharacterCreationResolver.Resolve(
+                state,
+                new CreateCharacterCommand(new CharacterCreationRequest(CharacterCreationMode.Rolled)),
+                new RecordingProvider((CharacterCreationMode)999, state.Player)));
     }
 
     [Fact]
@@ -236,6 +242,9 @@ public sealed class CharacterCreationTests
         Assert.Throws<InvalidOperationException>(() => provider.Create(
             state, new CharacterCreationRequest(CharacterCreationMode.DailySeed)));
         Assert.Equal(before, SaveGameSerializer.Serialize(state));
+        Assert.Throws<ArgumentNullException>(() => new RolledCharacterCreationProvider(null!));
+        Assert.Throws<ArgumentException>(() => new RolledCharacterCreationConfiguration(
+            "v1", new RolledAttributeRange[] { new(3, 18), new(3, 18), new(3, 18), new(3, 18), new(3, 18), null! }));
     }
 
     [Fact]
@@ -315,6 +324,7 @@ public sealed class CharacterCreationTests
 
         var roundTrip = SaveGameSerializer.Deserialize(SaveGameSerializer.Serialize(first.State));
         Assert.Equal(first.State.Player.Attributes, roundTrip.Player.Attributes);
+        Assert.Throws<ArgumentNullException>(() => new DailySeedCharacterCreationProvider(null!));
     }
 
     [Fact]
@@ -464,6 +474,12 @@ public sealed class CharacterCreationTests
             new PointAllocationCharacterCreationConfiguration(-1, 3, 18));
         Assert.Throws<ArgumentException>(() =>
             new PointAllocationCharacterCreationConfiguration(78, 18, 3));
+        Assert.Throws<ArgumentNullException>(() => new PointAllocationCharacterCreationInput(null!));
+        Assert.Throws<ArgumentNullException>(() => new PointAllocationCharacterCreationProvider(null!));
+        Assert.Throws<InvalidOperationException>(() => provider.Create(
+            state,
+            new CharacterCreationRequest(CharacterCreationMode.DailySeed,
+                new DailySeedCharacterCreationInput("seed"))));
     }
 
     [Theory]
@@ -574,6 +590,10 @@ public sealed class CharacterCreationTests
             CharacterCreationResolver.Resolve(state, new CreateCharacterCommand(
                 new CharacterCreationRequest(CharacterCreationMode.Rolled)), null!));
         Assert.Throws<ArgumentNullException>(() => new CharacterCreationResult(null!));
+        Assert.Throws<InvalidOperationException>(() => CharacterCreationResolver.Resolve(
+            state,
+            new CreateCharacterCommand(new CharacterCreationRequest(CharacterCreationMode.Rolled)),
+            new NullProvider()));
     }
 
     private static readonly Guid PlayerId = Guid.Parse("00000000-0000-0000-0000-000000000001");
@@ -593,5 +613,12 @@ public sealed class CharacterCreationTests
             LastRequest = request;
             return new CharacterCreationResult(player);
         }
+    }
+
+    private sealed class NullProvider : ICharacterCreationProvider
+    {
+        public CharacterCreationMode Mode => CharacterCreationMode.Rolled;
+
+        public CharacterCreationResult Create(GameState state, CharacterCreationRequest request) => null!;
     }
 }
