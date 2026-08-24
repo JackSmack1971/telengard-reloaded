@@ -2775,3 +2775,14 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
 - Verification: focused encounter/content tests passed (23 tests); canonical
   `./eng/verify.ps1 -Mode Full` passed with 418 Release tests, 0 warnings, and
   0 errors.
+
+## TEL-115 verification
+
+- Status: implemented and verified; the first-slice content pack now contains six stable spell definitions consumed by the existing spell-casting boundary.
+- Tests added: `FirstSliceSpellRosterTests` validates the inclusive roster count, unique IDs, required fields, canonical loading, and casting of a loaded definition without exposing runtime state.
+- Files/modules affected: `content/spells/*.json`, `tests/Telengard.Architecture.Tests/FirstSliceSpellRosterTests.cs`, `eng/task-index.tests.ps1`, this status document, and the task ledger.
+- New public APIs/events: none.
+- Save-schema impact: none. Spell definitions remain content metadata; save, simulation, generator, and content versions are unchanged.
+- Design choices: costs, targeting rules, effect identifiers, interaction identifiers, and descriptions remain content-supplied configuration. No spell mechanics, formulas, or permanent balance policy was added.
+- Invariants: content definitions remain separate from authoritative runtime state; loading is deterministic and does not create player knowledge; existing validation and spell-cast event ordering remain authoritative.
+- Acceptance: focused roster and casting tests (2 passed), formatter verification, zero-warning Release build, and the canonical full verification gate passed with 422 Release tests.

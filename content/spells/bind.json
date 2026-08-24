@@ -1,0 +1,10 @@
+{
+  "id": "bind",
+  "name": "Bind",
+  "initial_description": "A thread of force reaches toward a foe.",
+  "discovered_descriptions": ["The thread slows a nearby foe.", "The thread breaks under sufficient force."],
+  "cost": 3,
+  "targeting_rule": "single_target",
+  "effects": ["hinder:movement"],
+  "interactions": ["grounded_target"]
+}

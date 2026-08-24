@@ -1,0 +1,10 @@
+{
+  "id": "lantern",
+  "name": "Lantern",
+  "initial_description": "A pale light waits behind your eyes.",
+  "discovered_descriptions": ["The light reveals nearby detail.", "The light has no warmth."],
+  "cost": 1,
+  "targeting_rule": "self",
+  "effects": ["reveal:nearby"],
+  "interactions": ["unknown_space"]
+}

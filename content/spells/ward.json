@@ -1,0 +1,10 @@
+{
+  "id": "ward",
+  "name": "Ward",
+  "initial_description": "A quiet boundary settles around you.",
+  "discovered_descriptions": ["The ward turns aside hostile force.", "The ward is strongest when held close."],
+  "cost": 2,
+  "targeting_rule": "self",
+  "effects": ["protect:self"],
+  "interactions": ["incoming_attack"]
+}
