@@ -1,0 +1,11 @@
+{
+  "id": "aetherial-lens",
+  "display_name": "Aetherial Lens",
+  "category": "accessory",
+  "base_properties": { "focus": "arcane", "observation": "CONFIGURATION/TUNING DECISION REQUIRED" },
+  "affix_pool": ["clear-sight"],
+  "curse_pool": ["dimming"],
+  "rarity_rules": { "tier": "uncommon", "tuning_note": "CONFIGURATION/TUNING DECISION REQUIRED" },
+  "depth_rules": { "minimum_floor": "2", "tuning_note": "CONFIGURATION/TUNING DECISION REQUIRED" },
+  "unidentified_name": "Clouded Lens"
+}

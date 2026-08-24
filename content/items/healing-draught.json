@@ -1,0 +1,11 @@
+{
+  "id": "healing-draught",
+  "display_name": "Healing Draught",
+  "category": "consumable",
+  "base_properties": { "effect": "restore-health", "charges": "1" },
+  "affix_pool": [],
+  "curse_pool": ["nauseating"],
+  "rarity_rules": { "tier": "common", "tuning_note": "CONFIGURATION/TUNING DECISION REQUIRED" },
+  "depth_rules": { "minimum_floor": "1", "tuning_note": "CONFIGURATION/TUNING DECISION REQUIRED" },
+  "unidentified_name": "Bitter Red Vial"
+}

@@ -1,0 +1,11 @@
+{
+  "id": "silvered-mace",
+  "display_name": "Silvered Mace",
+  "category": "weapon",
+  "base_properties": { "damage": "4", "damage_type": "blunt", "bane": "undead" },
+  "affix_pool": ["consecrated"],
+  "curse_pool": ["hollow-ring"],
+  "rarity_rules": { "tier": "uncommon", "tuning_note": "CONFIGURATION/TUNING DECISION REQUIRED" },
+  "depth_rules": { "minimum_floor": "2", "tuning_note": "CONFIGURATION/TUNING DECISION REQUIRED" },
+  "unidentified_name": "Weighted Mace"
+}

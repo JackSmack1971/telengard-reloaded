@@ -1,0 +1,10 @@
+{
+  "id": "brass-key",
+  "display_name": "Brass Key",
+  "category": "material",
+  "base_properties": { "use": "lock-opening", "rarity_hint": "CONFIGURATION/TUNING DECISION REQUIRED" },
+  "affix_pool": [],
+  "curse_pool": [],
+  "rarity_rules": { "tier": "common", "tuning_note": "CONFIGURATION/TUNING DECISION REQUIRED" },
+  "depth_rules": { "minimum_floor": "1", "tuning_note": "CONFIGURATION/TUNING DECISION REQUIRED" }
+}

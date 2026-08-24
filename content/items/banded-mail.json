@@ -1,0 +1,11 @@
+{
+  "id": "banded-mail",
+  "display_name": "Banded Mail",
+  "category": "armor",
+  "base_properties": { "defense": "3", "protection": "physical" },
+  "affix_pool": ["reinforced"],
+  "curse_pool": ["heaviness"],
+  "rarity_rules": { "tier": "common", "tuning_note": "CONFIGURATION/TUNING DECISION REQUIRED" },
+  "depth_rules": { "minimum_floor": "1", "tuning_note": "CONFIGURATION/TUNING DECISION REQUIRED" },
+  "unidentified_name": "Dented Mail"
+}

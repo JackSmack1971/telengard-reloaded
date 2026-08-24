@@ -1,0 +1,11 @@
+{
+  "id": "moonstone-ring",
+  "display_name": "Moonstone Ring",
+  "category": "accessory",
+  "base_properties": { "resistance": "cold", "focus": "dreams" },
+  "affix_pool": ["calming"],
+  "curse_pool": ["restless"],
+  "rarity_rules": { "tier": "uncommon", "tuning_note": "CONFIGURATION/TUNING DECISION REQUIRED" },
+  "depth_rules": { "minimum_floor": "2", "tuning_note": "CONFIGURATION/TUNING DECISION REQUIRED" },
+  "unidentified_name": "Pale Stone Band"
+}
