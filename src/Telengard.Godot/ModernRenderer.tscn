@@ -1,6 +1,10 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://ModernRenderer.gd" id="1_modern"]
+[ext_resource type="Script" path="res://TelengardApplication.gd" id="2_app"]
 
-[node name="ModernRenderer" type="Node2D"]
+[node name="TelengardApplication" type="Node"]
+script = ExtResource("2_app")
+
+[node name="ModernRenderer" type="Node2D" parent="."]
 script = ExtResource("1_modern")

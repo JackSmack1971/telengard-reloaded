@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Telengard.GodotHost</RootNamespace>
+    <AssemblyName>Telengard.GodotHost</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/Telengard.Core/Telengard.Core.csproj" />
+    <ProjectReference Include="../../src/Telengard.Content/Telengard.Content.csproj" />
+  </ItemGroup>
+</Project>

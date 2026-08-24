@@ -189,7 +189,7 @@ The final plan validation includes:
 - [x] 2026-08-23 — TEL-116 fountain, altar, pit, and teleporter definitions,
   complete-pack validation, deterministic loading, and resolver acceptance
   evidence completed; save impact none.
-- [ ] TEL-120 — application host/bootstrap.
+- [x] TEL-120 — application host/bootstrap (Godot 4.7.2 smoke-verified; authoritative bootstrap remains in the external .NET host).
 - [ ] TEL-121 — input/clock bridge.
 - [ ] TEL-122 — session/scene flow.
 - [ ] TEL-123 — production presentation/asset contract.
