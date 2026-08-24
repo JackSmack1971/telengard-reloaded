@@ -1,0 +1,13 @@
+{
+  "id": "gargoyle-sentinel",
+  "display_name": "Gargoyle Sentinel",
+  "family": "Constructs",
+  "base_stats": { "hit_points": 14, "attack": 4, "defense": 6 },
+  "traits": ["stone-body", "watchful"],
+  "resistances": ["physical", "poison"],
+  "vulnerabilities": ["sonic"],
+  "actions": ["claw", "stone-breath"],
+  "behaviors": ["ambush-from-statue", "guard-threshold"],
+  "spawn_rules": { "depth": "2-5", "terrain": "temple" },
+  "loot_table": null
+}

@@ -1,0 +1,13 @@
+{
+  "id": "lesser-imp",
+  "display_name": "Lesser Imp",
+  "family": "Demons",
+  "base_stats": { "hit_points": 6, "attack": 3, "defense": 3 },
+  "traits": ["fire-born", "mischievous"],
+  "resistances": ["fire"],
+  "vulnerabilities": ["cold"],
+  "actions": ["claw", "ember"],
+  "behaviors": ["circle-prey", "blink-away"],
+  "spawn_rules": { "depth": "3-5", "terrain": "rift" },
+  "loot_table": null
+}

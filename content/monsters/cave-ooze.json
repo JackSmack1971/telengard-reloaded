@@ -1,0 +1,13 @@
+{
+  "id": "cave-ooze",
+  "display_name": "Cave Ooze",
+  "family": "Aberrations",
+  "base_stats": { "hit_points": 11, "attack": 2, "defense": 2 },
+  "traits": ["amorphous", "corrosive"],
+  "resistances": ["physical", "poison"],
+  "vulnerabilities": ["cold"],
+  "actions": ["pseudopod", "corrosive-pool"],
+  "behaviors": ["slow-advance", "split-under-pressure"],
+  "spawn_rules": { "depth": "2-5", "terrain": "cavern" },
+  "loot_table": null
+}
