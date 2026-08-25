@@ -77,7 +77,7 @@ internal static class Program
         eventBus.Publish(result.Events);
         return new GodotSession(
             dispatcher,
-            new FloorLayoutGenerator().Generate(120, GameVersions.Current.GeneratorVersion, 1),
+            new FloorLayoutCache(120, GameVersions.Current.GeneratorVersion),
             committedEvents,
             pack,
             gameplayConfiguration);
@@ -159,7 +159,7 @@ internal static class Program
 public sealed class GodotSession
 {
     private readonly CommandDispatcher _dispatcher;
-    private readonly FloorLayout _layout;
+    private readonly FloorLayoutCache _layouts;
     private readonly List<IDomainEvent> _events;
     private readonly ContentPack _contentPack;
     private readonly GodotGameplayConfiguration? _gameplayConfiguration;
@@ -167,19 +167,22 @@ public sealed class GodotSession
 
     public GodotSession(
         CommandDispatcher dispatcher,
-        FloorLayout layout,
+        FloorLayoutCache layouts,
         List<IDomainEvent> events,
         ContentPack contentPack,
         GodotGameplayConfiguration? gameplayConfiguration = null)
     {
         _dispatcher = dispatcher;
-        _layout = layout;
+        _layouts = layouts ?? throw new ArgumentNullException(nameof(layouts));
         _events = events;
         _contentPack = contentPack;
         _gameplayConfiguration = gameplayConfiguration;
         _dispatcher.Register<AdvanceSimulationCommand>(SimulationTimeResolver.Advance);
-        _dispatcher.Register<EnterDungeonCommand>((state, command) => DungeonWalkingResolver.Enter(state, command, _layout));
-        _dispatcher.Register<MoveCommand>((state, command) => DungeonWalkingResolver.Move(state, command, _layout));
+        _dispatcher.Register<EnterDungeonCommand>((state, command) => DungeonWalkingResolver.Enter(state, command, _layouts.Get(1)));
+        _dispatcher.Register<MoveCommand>((state, command) => DungeonWalkingResolver.Move(state, command, _layouts.Get(state.Player.Position.Floor)));
+        _dispatcher.Register<ChangeFloorCommand>((state, command) =>
+            FloorTransitionResolver.Apply(state, command, _layouts.Get(state.Player.Position.Floor), _layouts.Get(TargetFloor(state, command))));
+        _dispatcher.Register<LeaveDungeonCommand>((state, command) => DungeonWalkingResolver.Leave(state, command, _layouts.Get(1)));
         _dispatcher.Register<SelectCombatActionCommand>(CombatStateResolver.SelectAction);
         _dispatcher.Register<AdvanceCombatCommand>(CombatStateResolver.Advance);
         _dispatcher.Register<AssessThreatCommand>(ResolveThreat);
@@ -209,6 +212,8 @@ public sealed class GodotSession
         {
             case "enter_dungeon": _dispatcher.Dispatch(new EnterDungeonCommand()); break;
             case "move": _dispatcher.Dispatch(new MoveCommand(Enum.Parse<MovementDirection>(request.GetProperty("direction").GetString()!, true))); break;
+            case "change_floor": _dispatcher.Dispatch(new ChangeFloorCommand(Enum.Parse<StairDirection>(request.GetProperty("direction").GetString()!, true))); break;
+            case "leave_dungeon": _dispatcher.Dispatch(new LeaveDungeonCommand()); break;
             case "combat_action": _dispatcher.Dispatch(new SelectCombatActionCommand(Enum.Parse<CombatAction>(request.GetProperty("action").GetString()!, true))); break;
             case "advance_combat": _dispatcher.Dispatch(new AdvanceCombatCommand()); break;
             case "assess_threat": _dispatcher.Dispatch(new AssessThreatCommand()); break;
@@ -235,6 +240,9 @@ public sealed class GodotSession
         }
         return new { accepted = true, frame = Frame().frame };
     }
+
+    private static int TargetFloor(GameState state, ChangeFloorCommand command) =>
+        state.Player.Position.Floor + (command.Direction is StairDirection.Down ? 1 : -1);
 
     private CommandResult ResolveThreat(GameState state, AssessThreatCommand command)
     {
