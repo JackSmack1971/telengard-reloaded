@@ -5,7 +5,9 @@ using Telengard.Content;
 using Telengard.Core.Presentation;
 using Telengard.Core.Simulation;
 using Telengard.Core.Events;
+using Telengard.Core.Combat;
 using Telengard.Core.World.Generation;
+using Telengard.Core.World.Features;
 
 namespace Telengard.GodotHost;
 
@@ -120,7 +122,10 @@ internal static class Program
                 position = Position(frame.Combat.Monster.Position)
             }
         },
-        hud = new { player_id = frame.Hud.PlayerId, level = frame.Hud.Level, hit_points = frame.Hud.HitPoints, max_hit_points = frame.Hud.MaxHitPoints, spell_power = frame.Hud.SpellPower, max_spell_power = frame.Hud.MaxSpellPower, carried_gold = frame.Hud.CarriedGold, secured_gold = frame.Hud.SecuredGold, alive = frame.Hud.Alive }
+        hud = new { player_id = frame.Hud.PlayerId, level = frame.Hud.Level, hit_points = frame.Hud.HitPoints, max_hit_points = frame.Hud.MaxHitPoints, spell_power = frame.Hud.SpellPower, max_spell_power = frame.Hud.MaxSpellPower, carried_gold = frame.Hud.CarriedGold, secured_gold = frame.Hud.SecuredGold, alive = frame.Hud.Alive },
+        inventory = frame.Inventory,
+        spells = frame.Spells,
+        journal = frame.Journal
     };
 
     private static object Position(DungeonPosition position) => new { floor = position.Floor, x = position.X, y = position.Y };
@@ -141,6 +146,8 @@ internal sealed class GodotSession
         _dispatcher.Register<AdvanceSimulationCommand>(SimulationTimeResolver.Advance);
         _dispatcher.Register<EnterDungeonCommand>((state, command) => DungeonWalkingResolver.Enter(state, command, _layout));
         _dispatcher.Register<MoveCommand>((state, command) => DungeonWalkingResolver.Move(state, command, _layout));
+        _dispatcher.Register<SelectCombatActionCommand>(CombatStateResolver.SelectAction);
+        _dispatcher.Register<ActivateFeatureCommand>(FeatureActivationResolver.Activate);
     }
 
     public object Dispatch(JsonElement request)
@@ -150,6 +157,13 @@ internal sealed class GodotSession
         {
             case "enter_dungeon": _dispatcher.Dispatch(new EnterDungeonCommand()); break;
             case "move": _dispatcher.Dispatch(new MoveCommand(Enum.Parse<MovementDirection>(request.GetProperty("direction").GetString()!, true))); break;
+            case "combat_action": _dispatcher.Dispatch(new SelectCombatActionCommand(Enum.Parse<CombatAction>(request.GetProperty("action").GetString()!, true))); break;
+            case "interact":
+                var position = _dispatcher.CurrentState.Player.Position;
+                var feature = _dispatcher.CurrentState.Dungeon.Features.SingleOrDefault(candidate => candidate.Discovered && candidate.Position == position)
+                    ?? throw new InvalidOperationException("There is no discovered feature at the current position.");
+                _dispatcher.Dispatch(new ActivateFeatureCommand(feature.InstanceId));
+                break;
             case "time_mode": _clock.SetMode(Enum.Parse<SimulationTimeMode>(request.GetProperty("mode").GetString()!, true)); break;
             case "advance":
                 var ticks = _clock.Advance(request.GetProperty("elapsed_seconds").GetDouble());

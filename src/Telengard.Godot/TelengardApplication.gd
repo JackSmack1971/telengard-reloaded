@@ -9,6 +9,7 @@ var _host_pid := -1
 enum ClientState { STARTUP, TITLE, NEW_GAME, LOAD_GAME, CHARACTER_CREATION, INN, DUNGEON, PAUSE, DEATH, RETURN_TO_INN }
 var _client_state := ClientState.STARTUP
 var _title_selection := ClientState.NEW_GAME
+var _panel := ""
 var _previous_authoritative_scene := ""
 var _feedback := ""
 var _clock_accumulator := 0.0
@@ -66,6 +67,35 @@ func _unhandled_input(event: InputEvent) -> void:
 			_send_intent({"type": "time_mode", "mode": "Normal"})
 			_refresh_renderer()
 		return
+	if _panel != "":
+		if event.is_action_pressed("ui_cancel"):
+			_panel = ""
+		elif event.is_action_pressed("open_map"):
+			_panel = "" if _panel == "MAP" else "MAP"
+		elif event.is_action_pressed("open_journal"):
+			_panel = "" if _panel == "JOURNAL" else "JOURNAL"
+		elif event.is_action_pressed("open_inventory"):
+			_panel = "" if _panel == "INVENTORY" else "INVENTORY"
+		elif event.is_action_pressed("open_spells"):
+			_panel = "" if _panel == "SPELLS" else "SPELLS"
+		_refresh_renderer()
+		return
+	if event.is_action_pressed("open_map") or event.is_action_pressed("open_journal") or event.is_action_pressed("open_inventory") or event.is_action_pressed("open_spells"):
+		_panel = "MAP" if event.is_action_pressed("open_map") else "JOURNAL" if event.is_action_pressed("open_journal") else "INVENTORY" if event.is_action_pressed("open_inventory") else "SPELLS"
+		_refresh_renderer()
+		return
+	if _client_state == ClientState.DUNGEON and event.is_action_pressed("interact"):
+		_send_intent({"type": "interact"})
+	elif _client_state == ClientState.DUNGEON and event.is_action_pressed("combat_attack"):
+		_send_intent({"type": "combat_action", "action": "Attack"})
+	elif _client_state == ClientState.DUNGEON and event.is_action_pressed("combat_defend"):
+		_send_intent({"type": "combat_action", "action": "Defend"})
+	elif _client_state == ClientState.DUNGEON and event.is_action_pressed("combat_flee"):
+		_send_intent({"type": "combat_action", "action": "Flee"})
+	elif _client_state == ClientState.DUNGEON and event.is_action_pressed("combat_spell"):
+		_send_intent({"type": "combat_action", "action": "CastSpell"})
+	elif _client_state == ClientState.DUNGEON and event.is_action_pressed("combat_item"):
+		_send_intent({"type": "combat_action", "action": "UseItem"})
 	if _client_state == ClientState.DEATH:
 		if event.is_action_pressed("ui_accept"):
 			_client_state = ClientState.TITLE
@@ -108,6 +138,16 @@ func _register_input_actions() -> void:
 	_register_key("move_west", KEY_A)
 	_register_key("enter_dungeon", KEY_E)
 	_register_key("toggle_pause", KEY_ESCAPE)
+	_register_key("open_map", KEY_M)
+	_register_key("open_journal", KEY_J)
+	_register_key("open_inventory", KEY_I)
+	_register_key("open_spells", KEY_K)
+	_register_key("interact", KEY_F)
+	_register_key("combat_attack", KEY_1)
+	_register_key("combat_defend", KEY_2)
+	_register_key("combat_flee", KEY_3)
+	_register_key("combat_spell", KEY_4)
+	_register_key("combat_item", KEY_5)
 	_register_key("new_game", KEY_N)
 	_register_key("load_game", KEY_L)
 	_register_key("ui_up", KEY_UP)
@@ -124,6 +164,14 @@ func _register_input_actions() -> void:
 	_register_joy_button("ui_down", JOY_BUTTON_DPAD_DOWN)
 	_register_joy_button("enter_dungeon", JOY_BUTTON_A)
 	_register_joy_button("toggle_pause", JOY_BUTTON_START)
+	_register_joy_button("interact", JOY_BUTTON_X)
+	_register_joy_button("combat_attack", JOY_BUTTON_A)
+	_register_joy_button("combat_defend", JOY_BUTTON_B)
+	_register_joy_button("combat_flee", JOY_BUTTON_Y)
+	_register_joy_button("open_map", JOY_BUTTON_DPAD_UP)
+	_register_joy_button("open_journal", JOY_BUTTON_DPAD_RIGHT)
+	_register_joy_button("open_inventory", JOY_BUTTON_DPAD_DOWN)
+	_register_joy_button("open_spells", JOY_BUTTON_DPAD_LEFT)
 
 func _register_key(action: StringName, keycode: Key) -> void:
 	if not InputMap.has_action(action):
@@ -215,6 +263,7 @@ func _authoritative_state() -> int:
 func _refresh_renderer() -> void:
 	renderer.set_client_state(ClientState.keys()[_client_state], _feedback)
 	renderer.set_title_selection(ClientState.keys()[_title_selection])
+	renderer.set_panel(_panel)
 
 func _quit_client() -> void:
 	_stop_host()
