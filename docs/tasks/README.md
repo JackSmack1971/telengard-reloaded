@@ -169,24 +169,25 @@ features.
 ### Playable Godot client extensions (project-local)
 
 These remain the broader production-shaped client track. Status below has been
-reconciled against the ticket evidence and current `main` implementation rather
-than older umbrella-plan snapshots.
+reconciled against ticket acceptance criteria and current implementation evidence
+rather than older umbrella-plan snapshots.
 
 - [TEL-120.md](TEL-120.md) — Build playable Godot application host and bootstrap — Implemented and verified
 - [TEL-121.md](TEL-121.md) — Implement Godot input-to-command and simulation-clock bridge — In progress
 - [TEL-122.md](TEL-122.md) — Implement Godot client session and scene flow — In progress
 - [TEL-123.md](TEL-123.md) — Expand production presentation contract and asset registry — Implemented and verified
-- [TEL-124.md](TEL-124.md) — Build first-slice dungeon and content graybox presentation — Implemented and verified
+- [TEL-124.md](TEL-124.md) — Build first-slice dungeon and content graybox presentation — In progress
 - [TEL-125.md](TEL-125.md) — Build playable HUD and first-slice interaction flows — In progress
 - [TEL-126.md](TEL-126.md) — Integrate Godot save, suspend, resume, and session lifecycle — Not started
 - [TEL-127.md](TEL-127.md) — Verify playable Godot vertical slice — Not started
 - [TEL-128.md](TEL-128.md) — Verify Art Production Ready gate — Not started
 
-TEL-121 and TEL-122 have substantial implemented/headless/runtime-probe evidence
-but retain `In progress` status because their broader manual/interactive
-acceptance is still outstanding. TEL-124's own verification record states that
-it is implemented and verified and is therefore no longer treated as an active
-blocker.
+TEL-121, TEL-122, and TEL-124 all have substantial implemented automated/runtime
+evidence but retain `In progress` status because their required broader
+manual/interactive acceptance has not been fully recorded. Their implemented
+pieces are available to the MVP; finishing that broader acceptance must not
+pre-empt TEL-129–TEL-132 unless integration exposes a concrete defect. TEL-125
+likewise remains in progress for its broader HUD/interaction acceptance.
 
 ### Five-Floor MVP Demo extensions (project-local, current priority)
 
@@ -208,10 +209,12 @@ they create a smaller product checkpoint that must pass first.
 ## Current milestone dependency view
 
 The project no longer needs additional foundational simulation or representative
-content work before pursuing the MVP. The critical path is integration:
+content work before pursuing the MVP. Existing client implementations whose
+broader manual acceptance is still open may be consumed by the MVP without
+making those older tickets the scheduling priority. The critical path is:
 
 ```text
-implemented Core + content + Godot graybox foundations
+implemented Core + content + usable Godot graybox foundations
                     │
                     ▼
                TEL-129
