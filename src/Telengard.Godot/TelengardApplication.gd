@@ -87,6 +87,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if _client_state == ClientState.DUNGEON and event.is_action_pressed("interact"):
 		_send_intent({"type": "interact"})
+	elif _client_state == ClientState.DUNGEON and event.is_action_pressed("stairs_down"):
+		_send_intent({"type": "change_floor", "direction": "Down"})
+	elif _client_state == ClientState.DUNGEON and event.is_action_pressed("stairs_up"):
+		_send_intent({"type": "change_floor", "direction": "Up"})
 	elif _client_state == ClientState.DUNGEON and event.is_action_pressed("combat_attack"):
 		_send_combat_action("Attack")
 	elif _client_state == ClientState.DUNGEON and event.is_action_pressed("combat_defend"):
@@ -144,6 +148,8 @@ func _register_input_actions() -> void:
 	_register_key("open_inventory", KEY_I)
 	_register_key("open_spells", KEY_K)
 	_register_key("interact", KEY_F)
+	_register_key("stairs_down", KEY_R)
+	_register_key("stairs_up", KEY_T)
 	_register_key("combat_attack", KEY_1)
 	_register_key("combat_defend", KEY_2)
 	_register_key("combat_flee", KEY_3)
@@ -166,6 +172,8 @@ func _register_input_actions() -> void:
 	_register_joy_button("enter_dungeon", JOY_BUTTON_A)
 	_register_joy_button("toggle_pause", JOY_BUTTON_START)
 	_register_joy_button("interact", JOY_BUTTON_X)
+	_register_joy_button("stairs_down", JOY_BUTTON_RIGHT_SHOULDER)
+	_register_joy_button("stairs_up", JOY_BUTTON_LEFT_SHOULDER)
 	_register_joy_button("combat_attack", JOY_BUTTON_A)
 	_register_joy_button("combat_defend", JOY_BUTTON_B)
 	_register_joy_button("combat_flee", JOY_BUTTON_Y)

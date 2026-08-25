@@ -2868,3 +2868,19 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
   errors.
 - Full gate: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File
   ./eng/verify.ps1 -Mode Full` passed; 447 Release tests passed.
+
+## TEL-129 verification
+
+- 2026-08-25 — Implemented deterministic floor-aware Godot host composition.
+  The host now caches layouts by world seed, generator version, and floor,
+  routes movement against the authoritative current floor, dispatches Core
+  stair transitions and floor-1 leave, and bounds the MVP client to floors 1–5.
+- Save impact: none; the cache is transient host state and Core remains the
+  authority for position, legality, floor history, and events.
+- Focused evidence: 4 `GodotHostCompositionTests` passed, including repeated
+  deterministic lookup, the floor-6 boundary, and authoritative destination
+  floor selection. Godot 4.7.2 headless editor/runtime smoke checks passed.
+- Full gate: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File
+  ./eng/verify.ps1 -Mode Full` passed; 452 Release tests passed.
+- Pending acceptance: a real interactive Godot run exercising up/down stair
+  input and movement after the transition.

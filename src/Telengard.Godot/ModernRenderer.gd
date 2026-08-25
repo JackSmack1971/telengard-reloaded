@@ -148,7 +148,7 @@ func _draw_hud() -> void:
 		draw_string(font, Vector2(916, 438), str(combat.get("phase", "contact")), HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("b4c3d9"))
 		draw_string(font, Vector2(916, 466), "Threat   %s" % combat.get("threat_level", "unknown"), HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("d9ad62"))
 	if _client_state == "INN" or _client_state == "DUNGEON":
-		draw_string(font, Vector2(916, 522), "F  Interact   M  Map   J  Journal", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("8295b5"))
+		draw_string(font, Vector2(916, 522), "F  Interact   R/T  Stairs down/up   M  Map", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("8295b5"))
 		draw_string(font, Vector2(916, 544), "I  Inventory   K  Spells   Esc  Pause", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("8295b5"))
 		if not combat.is_empty():
 			draw_string(font, Vector2(916, 590), "1 Attack  2 Defend  3 Flee", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("d9ad62"))
