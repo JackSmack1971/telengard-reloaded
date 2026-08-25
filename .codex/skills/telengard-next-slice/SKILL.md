@@ -17,8 +17,10 @@ The current convergence is the **Five-Floor MVP Demo** in `docs/MVP_DEMO.md`.
 The intended critical path is TEL-129 → TEL-130 → TEL-131 → TEL-132. TEL-126,
 TEL-127, and TEL-128 are post-MVP work and must not pre-empt that sequence unless
 current evidence proves a hard prerequisite, the MVP chain is blocked, or the
-user explicitly changes priority. Do not create systematic final-asset batches
-before TEL-128 passes.
+user explicitly changes priority. The generated task index retains `core-alpha`
+as a compatibility identifier; current product priority comes from this document,
+`docs/MVP_DEMO.md`, the ledger, and ticket completion state. Do not create
+systematic final-asset batches before TEL-128 passes.
 
 When delegation is needed, follow `docs/CODEX_MODEL_POLICY.md` and use the
 lowest role-appropriate effort.
@@ -28,9 +30,10 @@ lowest role-appropriate effort.
 From repository root:
 
 1. Read `AGENTS.md` and this skill.
-2. Read generated `docs/tasks/index.json` for milestone, status, dependencies,
-   risk, decision state, context, review, and verification metadata.
-3. If the milestone is `five-floor-mvp-demo`, read `docs/MVP_DEMO.md`.
+2. Read generated `docs/tasks/index.json` for status, dependencies, risk,
+   decision state, context, review, and verification metadata.
+3. While TEL-132 is unfinished, read `docs/MVP_DEMO.md` and treat the Five-Floor
+   MVP Demo as the active product checkpoint.
 4. Inspect current branch/worktree, remote `main`, recent commits, open PRs, and
    CI; detect overlapping/stale work.
 5. If a candidate requires manual Godot verification, run
@@ -49,10 +52,10 @@ Extract plausible `not_started` work from `docs/tasks/index.json` plus explicit
 active remediation. Narrow to at most two serious candidates before loading
 full ticket prose.
 
-While milestone `five-floor-mvp-demo` is active, TEL-129–TEL-132 are the
-preferred candidate family. A ticket outside that family may pre-empt only for a
-hard prerequisite, repository-health blocker, active overlap, or explicit user
-reprioritization.
+While TEL-132 is unfinished and the repository documents the Five-Floor MVP Demo
+as current, TEL-129–TEL-132 are the preferred candidate family. A ticket outside
+that family may pre-empt only for a hard prerequisite, repository-health blocker,
+active overlap, or explicit user reprioritization.
 
 Reject a candidate when:
 
