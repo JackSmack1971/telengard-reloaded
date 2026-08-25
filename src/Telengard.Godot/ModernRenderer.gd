@@ -75,7 +75,8 @@ func _draw_world() -> void:
 		draw_string(font, Vector2(72, 365), "Waiting for a PresentationState projection", HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color("b4c3d9"))
 		draw_string(font, Vector2(72, 394), "Call render_frame() from the presentation host.", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("8295b5"))
 		return
-	var current_floor := int(_frame.get("player_position", {}).get("floor", 1))
+	var current_position: Variant = _frame.get("player_position", {})
+	var current_floor := int(current_position.get("floor", 1)) if current_position is Dictionary else 1
 
 	for tile in _frame.get("tiles", []):
 		var position: Dictionary = tile.get("position", {})
@@ -144,7 +145,8 @@ func _draw_hud() -> void:
 	draw_string(font, Vector2(916, 264), "SP   %s / %s" % [hud.get("spell_power", 0), hud.get("max_spell_power", 0)], HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color("7cb9e8"))
 	draw_string(font, Vector2(916, 304), "Carried gold   %s" % hud.get("carried_gold", 0), HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("d9ad62"))
 	draw_string(font, Vector2(916, 330), "Secured gold   %s" % hud.get("secured_gold", 0), HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("d9ad62"))
-	var player_position: Dictionary = _frame.get("player_position", {})
+	var player_position_value: Variant = _frame.get("player_position", {})
+	var player_position: Dictionary = player_position_value if player_position_value is Dictionary else {}
 	draw_string(font, Vector2(916, 356), "Floor %s" % player_position.get("floor", "-"), HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("b4c3d9"))
 	draw_string(font, Vector2(916, 378), "Map: unknown / visited / visible", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("8295b5"))
 
