@@ -75,9 +75,12 @@ func _draw_world() -> void:
 		draw_string(font, Vector2(72, 365), "Waiting for a PresentationState projection", HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color("b4c3d9"))
 		draw_string(font, Vector2(72, 394), "Call render_frame() from the presentation host.", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("8295b5"))
 		return
+	var current_floor := int(_frame.get("player_position", {}).get("floor", 1))
 
 	for tile in _frame.get("tiles", []):
 		var position: Dictionary = tile.get("position", {})
+		if int(position.get("floor", -1)) != current_floor:
+			continue
 		var cell := MAP_ORIGIN + Vector2(float(position.get("x", 0)), float(position.get("y", 0))) * TILE_SIZE
 		var knowledge: String = str(tile.get("knowledge", "observed"))
 		var color := UNKNOWN_COLOR
@@ -93,6 +96,8 @@ func _draw_world() -> void:
 
 	for feature in _frame.get("features", []):
 		var position: Dictionary = feature.get("position", {})
+		if int(position.get("floor", -1)) != current_floor:
+			continue
 		var cell := MAP_ORIGIN + Vector2(float(position.get("x", 0)), float(position.get("y", 0))) * TILE_SIZE
 		var center := cell + Vector2(TILE_SIZE * 0.5 - 1.0, TILE_SIZE * 0.5 - 1.0)
 		var diamond := PackedVector2Array([
@@ -150,8 +155,11 @@ func _draw_hud() -> void:
 		draw_string(font, Vector2(916, 438), str(combat.get("phase", "contact")), HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("b4c3d9"))
 		draw_string(font, Vector2(916, 466), "Threat   %s" % combat.get("threat_level", "unknown"), HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("d9ad62"))
 	if _client_state == "INN" or _client_state == "DUNGEON":
-		draw_string(font, Vector2(916, 522), "F  Interact   R/T  Stairs down/up   L  Leave", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("8295b5"))
-		draw_string(font, Vector2(916, 544), "M  Map   I  Inventory   K  Spells   Esc  Pause", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("8295b5"))
+		if _client_state == "DUNGEON":
+			draw_string(font, Vector2(916, 522), "F  Interact   R/T  Stairs down/up   L  Leave", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("8295b5"))
+		else:
+			draw_string(font, Vector2(916, 522), "E  Enter dungeon   M  Map   Esc  Pause", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("8295b5"))
+		draw_string(font, Vector2(916, 544), "I  Inventory   K  Spells   Esc  Pause", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("8295b5"))
 		if not combat.is_empty():
 			draw_string(font, Vector2(916, 590), "1 Attack  2 Defend  3 Flee", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("d9ad62"))
 			draw_string(font, Vector2(916, 610), "4 Spell   5 Item", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("d9ad62"))
