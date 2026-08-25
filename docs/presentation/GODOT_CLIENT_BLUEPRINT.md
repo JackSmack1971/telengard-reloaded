@@ -38,6 +38,11 @@ The broader TEL-127 Playable Godot Vertical Slice and TEL-128 Art Production
 Ready gates remain valid, but they are post-MVP work and must not pull breadth
 or polish ahead of the five-floor integration proof.
 
+The generated task index retains `core-alpha` as its machine compatibility
+milestone identifier. Human-facing product priority is defined by the MVP docs,
+ledger, dependency graph, and completion state rather than by changing that
+legacy identifier.
+
 ## Current repository boundary — reconciled 2026-08-25
 
 The repository is no longer at the TEL-091 visual-only prototype stage.
@@ -400,8 +405,8 @@ integration and should not be frozen until TEL-128 passes.
 
 `$telengard-next-slice` must:
 
-1. read `docs/MVP_DEMO.md` when the generated milestone is
-   `five-floor-mvp-demo`;
+1. read `docs/MVP_DEMO.md` while TEL-132 is unfinished and the repository marks
+   the Five-Floor MVP Demo as the current product checkpoint;
 2. select TEL-129, then TEL-130, TEL-131, and TEL-132 as dependencies allow;
 3. require evidence before allowing post-MVP TEL-126–TEL-128 work to pre-empt an
    eligible MVP ticket;
