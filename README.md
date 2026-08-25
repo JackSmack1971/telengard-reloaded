@@ -19,27 +19,27 @@ That question guides the design of the project.
 ## Project Status
 
 > [!IMPORTANT]
-> **Telengard Reloaded is currently in pre-alpha development.**
+> **Telengard Reloaded is in pre-alpha development. The immediate product milestone is the Five-Floor MVP Demo.**
 >
-> The renderer-independent game simulation is actively being built and tested, but there is not yet a complete playable Terminal or Godot client.
+> The simulation, first-slice content, Godot host/session shell, graybox renderer, and basic HUD/input bridges exist. The remaining MVP work is primarily integration: compose those systems into one legitimate floor-1-through-floor-5 Godot playthrough.
 
-A significant portion of the underlying simulation already exists, including:
+A significant portion of the underlying game already exists, including:
 
-* deterministic dungeon generation and traversal;
+* deterministic dungeon generation, visibility, traversal, and floor-transition rules;
 * expedition state and carried vs. secured progress;
-* encounters and combat;
-* threat assessment;
+* encounters, combat actions, threat assessment, and death policies;
 * dungeon features such as fountains, altars, pits, and teleporters;
-* items, equipment, affixes, curses, and identification;
-* spells and progression primitives;
+* items, equipment, affixes, curses, identification, spells, and progression primitives;
 * player knowledge and persistent discoveries;
 * deterministic random-number streams;
 * explicit versioned save data and migrations;
-* headless simulation and acceptance testing.
+* headless simulation and acceptance testing;
+* a production content-pack boundary with representative floors 1–5 content; and
+* a hosted Godot graybox client path with renderer-safe projections.
 
-The current development goal is to turn these systems into a complete **Core Alpha vertical slice** that can be played from character creation through a full dungeon expedition and return to safety.
+What does **not** exist yet is the complete MVP composition: the current hosted client still needs floor-aware multi-floor session wiring, production runtime encounter/feature/treasure composition, a demo-ready combat/setup path, and a real fixed-seed five-floor acceptance run.
 
-Detailed implementation status is maintained in [`docs/BUILD_STATUS.md`](docs/BUILD_STATUS.md).
+The canonical MVP definition is [`docs/MVP_DEMO.md`](docs/MVP_DEMO.md). Current TEL status is maintained in [`docs/tasks/README.md`](docs/tasks/README.md); [`docs/BUILD_STATUS.md`](docs/BUILD_STATUS.md) is append-only verification history rather than the current scheduling ledger.
 
 ---
 
@@ -98,6 +98,27 @@ The project intentionally avoids turning into a generic fantasy roguelite filled
 
 ---
 
+## Current Milestone: Five-Floor MVP Demo
+
+The immediate goal is deliberately narrower than the full Playable Godot Vertical Slice gate.
+
+A successful MVP lets a player launch the Godot client, start a deterministic demo session, enter the real first-slice dungeon, legitimately traverse floors 1–5, encounter representative authored gameplay, and reach a clear floor-5 end-of-demo state without developer/debug commands.
+
+Fixed seed/demo character setup and graybox presentation are acceptable. Save/load UX, full controller parity, complete death/Legacy flow, production art, and the broader TEL-127 acceptance checklist are **post-MVP** work.
+
+The remaining implementation sequence is:
+
+1. **TEL-129** — compose deterministic floors 1–5 into the hosted Godot session;
+2. **TEL-130** — compose authored encounters, features, and treasure into normal hosted play;
+3. **TEL-131** — close the explicit demo-ready setup and combat playthrough path;
+4. **TEL-132** — perform and record the real fixed-seed five-floor Godot acceptance run.
+
+After TEL-132 passes, development returns to TEL-126 save/suspend/resume, TEL-127 full Playable Godot Vertical Slice acceptance, and TEL-128 Art Production Ready.
+
+See [`docs/gates/FIVE-FLOOR-MVP-DEMO.md`](docs/gates/FIVE-FLOOR-MVP-DEMO.md) and [`docs/exec-plans/active/FIVE-FLOOR-MVP-DEMO.md`](docs/exec-plans/active/FIVE-FLOOR-MVP-DEMO.md).
+
+---
+
 ## Architecture
 
 Telengard Reloaded separates the authoritative game simulation from its presentation.
@@ -124,16 +145,7 @@ The simulation validates and resolves that command, updates the authoritative `G
 
 Presentation code consumes those results but does not own gameplay rules.
 
-### Why?
-
-This keeps movement, combat, dungeon generation, knowledge, progression, saves, and other game systems independent of any particular user interface.
-
-The same simulation can eventually power:
-
-* a modern Godot presentation;
-* a retro-inspired presentation;
-* a Terminal interface;
-* deterministic tests and debugging tools.
+This keeps movement, combat, dungeon generation, knowledge, progression, saves, and other game systems independent of any particular user interface. The same simulation can power the Godot client, a retro-inspired presentation, the Terminal interface, and deterministic tests/debugging tools.
 
 ---
 
@@ -146,12 +158,13 @@ telengard-reloaded/
 │   ├── Telengard.Content/    # Content definitions and rules
 │   ├── Telengard.Save/       # Save DTOs and migrations
 │   ├── Telengard.Terminal/   # Terminal presentation boundary
-│   └── Telengard.Godot/      # Godot 4 .NET presentation
+│   └── Telengard.Godot/      # Godot presentation/application shell
 │
 ├── tests/
 │   └── Telengard.Architecture.Tests/
 │
 ├── tools/
+│   ├── Telengard.GodotHost/  # External authoritative host for Godot
 │   └── Telengard.TestHarness/
 │
 ├── content/
@@ -164,21 +177,22 @@ telengard-reloaded/
 │   ├── spells/
 │   └── talents/
 │
-├── docs/                     # Design, architecture, plans, and status
+├── docs/                     # Design, architecture, plans, status, gates
 ├── eng/                      # Build and verification tooling
 └── Telengard.sln
 ```
 
 ### Main Projects
 
-| Project                 | Responsibility                                                                                                               |
-| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `Telengard.Core`        | Renderer-independent game simulation, commands, events, deterministic RNG, world state, combat, exploration, and progression |
-| `Telengard.Content`     | Content definitions and content-driven behavior                                                                              |
-| `Telengard.Save`        | Explicit save DTOs, serialization, versioning, and migrations                                                                |
-| `Telengard.Terminal`    | Lightweight console presentation and eventual playable Terminal client                                                       |
-| `Telengard.Godot`       | Godot 4 .NET scenes, rendering, audio, and input                                                                             |
-| `Telengard.TestHarness` | Deterministic simulation and developer testing tools                                                                         |
+| Project | Responsibility |
+| --- | --- |
+| `Telengard.Core` | Renderer-independent game simulation, commands, events, deterministic RNG, world state, combat, exploration, and progression |
+| `Telengard.Content` | Content definitions and content-driven behavior |
+| `Telengard.Save` | Explicit save DTOs, serialization, versioning, and migrations |
+| `Telengard.Terminal` | Lightweight console presentation |
+| `Telengard.Godot` | Godot scenes, graybox rendering, client input, and presentation-only session state |
+| `Telengard.GodotHost` | External .NET composition/transport boundary between Godot intent and Core |
+| `Telengard.TestHarness` | Deterministic simulation and developer testing tools |
 
 ---
 
@@ -195,9 +209,7 @@ Telengard Reloaded uses:
 * explicit save-schema migrations
 * data-oriented content boundaries
 
-The authoritative simulation does **not** depend on Godot.
-
-This allows most game logic to build and run headlessly without launching a graphics engine.
+The authoritative simulation does **not** depend on Godot. Most game logic therefore builds and runs headlessly without launching the engine.
 
 ---
 
@@ -209,9 +221,7 @@ For the headless solution:
 
 * [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
 
-The repository pins .NET SDK `8.0.100` and permits compatible feature-band
-roll-forward. A fresh clone must provision the ignored repository-local SDK
-before running the checks; follow the [SDK provisioning instructions](docs/DEVELOPMENT.md#provisioning-the-repository-local-sdk).
+The repository pins .NET SDK `8.0.100` and permits compatible feature-band roll-forward. A fresh clone must provision the ignored repository-local SDK before running the checks; follow the [SDK provisioning instructions](docs/DEVELOPMENT.md#provisioning-the-repository-local-sdk).
 
 For graphical development:
 
@@ -252,21 +262,15 @@ cd telengard-reloaded
 
 ### Full Repository Verification
 
-From PowerShell:
-
 ```powershell
 ./eng/verify.ps1 -Mode Full
 ```
-
-The full verification path checks the repository's configured build, formatting, and test gates.
 
 ---
 
 ## Deterministic by Design
 
-Procedural generation is a core part of Telengard, but reproducibility matters just as much.
-
-Telengard Reloaded does not rely on one global random-number generator.
+Procedural generation is a core part of Telengard, but reproducibility matters just as much. Telengard Reloaded does not rely on one global random-number generator.
 
 Instead, systems derive independent deterministic streams from stable information such as:
 
@@ -290,78 +294,69 @@ feature      → world seed + feature + activation count
 loot         → world seed + location + context
 ```
 
-This means unrelated changes in one system should not unexpectedly regenerate another part of the world simply because an extra random number was consumed.
-
-Determinism is treated as part of the game's architecture rather than as a testing convenience.
+This means unrelated changes in one system should not unexpectedly regenerate another part of the world simply because an extra random number was consumed. Determinism is treated as part of the game's architecture rather than as a testing convenience.
 
 ---
 
 ## Saves and Compatibility
 
-Save files are explicit data contracts.
+Save files are explicit data contracts. Runtime objects are **not** serialized directly as an accidental save format.
 
-Runtime objects are **not** serialized directly as an accidental save format.
+The save system maintains dedicated DTOs and migrations so that changes to the runtime model can be handled deliberately. Saved state preserves version information for the save schema, simulation, dungeon generation, and content.
 
-The save system maintains dedicated DTOs and migrations so that changes to the game's runtime model can be handled deliberately.
-
-Saved state preserves version information for areas such as:
-
-* save schema;
-* simulation;
-* dungeon generation;
-* content.
-
-The intent is for old saves to have a defined migration path as development progresses.
+Godot save/suspend/resume integration remains valid work, but it is intentionally scheduled **after** the five-floor MVP is proven.
 
 ---
 
 ## Development Roadmap
 
-The immediate goal is **Core Alpha**: one complete, deterministic, end-to-end expedition.
+The immediate roadmap is product-first rather than subsystem-first:
 
-Near-term work includes:
+**Five-Floor MVP Demo**
 
-* character creation;
-* deterministic world-seed selection;
-* initial player setup;
-* treasure acquisition and unsecured loot;
-* completion of the expedition gameplay loop;
-* legacy knowledge handoff;
-* deterministic vertical-slice integration;
-* developer/debug command tooling;
-* a usable Terminal presentation;
-* the first playable Godot presentation.
+```text
+TEL-129 multi-floor hosted session
+        ↓
+TEL-130 encounters/features/treasure in normal play
+        ↓
+TEL-131 demo setup + combat closure
+        ↓
+TEL-132 real fixed-seed floor-1 → floor-5 acceptance
+```
 
-After the core loop is proven, development can increasingly shift toward:
+Then:
 
-* data-driven monsters, items, spells, and dungeon features;
-* dungeon ecology and depth bands;
-* balance and progression;
-* additional feature interactions;
-* presentation, sound, and atmosphere;
-* expanding the reasons to risk one more floor.
+```text
+TEL-126 Godot persistence lifecycle
+        ↓
+TEL-127 full Playable Godot Vertical Slice
+        ↓
+TEL-128 Art Production Ready
+        ↓
+production art/audio batches
+```
 
-See [`docs/BUILD_STATUS.md`](docs/BUILD_STATUS.md) for the current implementation state and [`docs/tasks/`](docs/tasks/) for scoped work items.
+The full design still includes deeper ecology, balance/progression, additional feature interactions, presentation atmosphere, and many more reasons to risk one more floor. Those are not allowed to displace the current MVP integration milestone unless the product priority is explicitly changed.
 
 ---
 
 ## Documentation
 
-The repository contains detailed design and engineering documentation.
+| Document | Purpose |
+| --- | --- |
+| [`MVP_DEMO.md`](docs/MVP_DEMO.md) | Current product milestone and scope |
+| [`tasks/README.md`](docs/tasks/README.md) | Current human-readable TEL status ledger |
+| [`tasks/index.json`](docs/tasks/index.json) | Generated compact next-slice scheduling view |
+| [`gates/FIVE-FLOOR-MVP-DEMO.md`](docs/gates/FIVE-FLOOR-MVP-DEMO.md) | MVP acceptance checklist |
+| [`exec-plans/active/FIVE-FLOOR-MVP-DEMO.md`](docs/exec-plans/active/FIVE-FLOOR-MVP-DEMO.md) | Living MVP coordination plan |
+| [`modern-telengard-spec.md`](docs/modern-telengard-spec.md) | Product and implementation specification |
+| [`ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Architectural boundaries and system organization |
+| [`INVARIANTS.md`](docs/INVARIANTS.md) | Cross-cutting rules that must remain true |
+| [`DEVELOPMENT.md`](docs/DEVELOPMENT.md) | Development workflow and implementation conventions |
+| [`BUILD_STATUS.md`](docs/BUILD_STATUS.md) | Append-only implementation/verification history |
+| [`PLANS.md`](docs/PLANS.md) | ExecPlan process for significant work |
 
-| Document                                                    | Purpose                                                   |
-| ----------------------------------------------------------- | --------------------------------------------------------- |
-| [`modern-telengard-spec.md`](docs/modern-telengard-spec.md) | Product and implementation specification                  |
-| [`ARCHITECTURE.md`](docs/ARCHITECTURE.md)                   | Architectural boundaries and system organization          |
-| [`INVARIANTS.md`](docs/INVARIANTS.md)                       | Rules that must remain true across implementation changes |
-| [`DEVELOPMENT.md`](docs/DEVELOPMENT.md)                     | Development workflow and implementation conventions       |
-| [`BUILD_STATUS.md`](docs/BUILD_STATUS.md)                   | Current implementation and verification status            |
-| [`PLANS.md`](docs/PLANS.md)                                 | ExecPlan process for significant work                     |
-| [`docs/adr/`](docs/adr/)                                    | Architecture Decision Records                             |
-| [`docs/tasks/`](docs/tasks/)                                | Scoped TEL implementation tasks                           |
-| [`docs/gates/`](docs/gates/)                                | Phase acceptance criteria and results                     |
-
-The design specification is intentionally more detailed than this README. The README is the project's front door; the `docs/` directory is the source for deeper technical and design information.
+The design specification remains the source for long-term product intent. The MVP documents are a project-local sequencing decision about **what to prove next**, not a reduction of the long-term design.
 
 ---
 
@@ -377,10 +372,10 @@ A few rules are intentionally treated as architectural contracts:
 * hidden information remains hidden until legitimately observed;
 * carried wealth and secured wealth are distinct concepts;
 * content definitions stay separate from runtime state;
-* saves use explicit DTOs and migrations;
+* saves use explicit DTOs and migrations; and
 * simulation behavior must remain testable without launching Godot.
 
-These constraints exist to protect the design as the project becomes larger.
+The MVP is an integration milestone, not permission to weaken these contracts.
 
 ---
 
@@ -388,7 +383,9 @@ These constraints exist to protect the design as the project becomes larger.
 
 Contributions, suggestions, and bug reports are welcome.
 
-Before making a significant gameplay or architecture change, please review:
+Before selecting new implementation work, read [`docs/MVP_DEMO.md`](docs/MVP_DEMO.md) and the current task ledger. Work outside the MVP sequence should not pre-empt TEL-129 through TEL-132 unless it is a demonstrated prerequisite, blocker, or explicit product-priority change.
+
+For significant gameplay or architecture changes, also review:
 
 * [`docs/modern-telengard-spec.md`](docs/modern-telengard-spec.md)
 * [`docs/INVARIANTS.md`](docs/INVARIANTS.md)
@@ -401,8 +398,6 @@ Before submitting code, run the full verification gate:
 ```powershell
 ./eng/verify.ps1 -Mode Full
 ```
-
-Keeping the simulation deterministic and renderer-independent is more important than preserving any particular implementation.
 
 ---
 

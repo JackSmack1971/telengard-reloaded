@@ -1,5 +1,10 @@
 # Art Production Ready gate
 
+> [!IMPORTANT]
+> **This is post-MVP work.** The Five-Floor MVP Demo (`TEL-132`) must pass before
+> the broader TEL-127 playable-slice gate, and TEL-127 must pass before this
+> gate. Do not use art-readiness work to pre-empt TEL-129–TEL-132.
+
 ## Owner
 
 TEL-128 — Verify Art Production Ready gate.
@@ -17,15 +22,18 @@ floors 1-5 vertical slice.
 The gate exists to prevent expensive assets from being created against unstable
 content identities, unresolved presentation contracts, or unproven UX flows.
 
-## Hard prerequisite
+## Hard prerequisites
 
-`docs/gates/GODOT-PLAYABLE-SLICE.md` must pass first through TEL-127.
+1. `docs/gates/FIVE-FLOOR-MVP-DEMO.md` must pass through TEL-132.
+2. `docs/gates/GODOT-PLAYABLE-SLICE.md` must then pass through TEL-127.
 
 Concept art, style studies, UI wireframes, placeholder assets, and technical
 visual experiments do not require this gate. Final production inventory does.
 
 ## Sources of truth
 
+- `docs/MVP_DEMO.md`
+- `docs/gates/FIVE-FLOOR-MVP-DEMO.md`
 - `docs/tasks/TEL-128.md`
 - `docs/presentation/GODOT_CLIENT_BLUEPRINT.md`
 - `docs/presentation/UX_INTERACTION_BLUEPRINT.md`
@@ -51,6 +59,7 @@ visual experiments do not require this gate. Final production inventory does.
 
 ### Playable placeholder client exists
 
+- [ ] TEL-132 / the Five-Floor MVP Demo gate passed.
 - [ ] TEL-127 / the Playable Godot Vertical Slice gate passed on current-enough
       client and content contracts.
 - [ ] Every required production asset category has a working placeholder in the
@@ -162,6 +171,7 @@ Passing this gate does not authorize:
 
 The gate fails if:
 
+- the Five-Floor MVP or TEL-127 prerequisite gate has not passed;
 - final asset requirements are still being guessed from prototype rectangles;
 - stable first-slice content IDs do not exist;
 - major required client flows still exist only in debug tooling;
@@ -179,6 +189,7 @@ When TEL-128 passes, record:
 
 - date;
 - commit/PR;
+- TEL-132 / Five-Floor MVP evidence used;
 - TEL-127 / Playable Godot Slice gate evidence used;
 - art-direction review references;
 - asset-pipeline/registry validation evidence;

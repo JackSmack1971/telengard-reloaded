@@ -28,10 +28,29 @@ matter; for those tickets, missing or contradictory context is a hard stop. Lega
 tickets use the generated index and existing ticket sections as a compatibility
 fallback until they are revised.
 
-The current human-facing milestone is the Playable Godot Vertical Slice: TEL-127
-proves the playable client and TEL-128 separately governs Art Production Ready.
-Detailed client methodology and gate evidence remain in the presentation
-blueprints and gate documents rather than in this workflow rationale.
+## Current milestone
+
+The current human-facing milestone is the **Five-Floor MVP Demo**. The goal is
+not to broaden the client indiscriminately; it is to prove one uninterrupted
+real Godot run from floor 1 through floor 5 using normal input and production
+first-slice content.
+
+The scheduler therefore prioritizes:
+
+```text
+TEL-129 → TEL-130 → TEL-131 → TEL-132
+```
+
+Read `docs/MVP_DEMO.md`, the active Five-Floor MVP ExecPlan, and the MVP gate for
+the exact scope. TEL-126 save/resume, TEL-127 full Playable Godot Vertical Slice
+acceptance, and TEL-128 Art Production Ready remain intentionally blocked behind
+TEL-132 in the scheduling metadata.
+
+This ordering is a project-local milestone decision, not a reduction of the
+long-term design specification. After TEL-132 passes, the broader playable-slice
+plan and gates become the active convergence again.
+
+## Generated task index
 
 The task index is generated from the human ledger plus the explicit scheduling
 metadata overlay in `docs/tasks/index-overrides.json` with:
@@ -62,6 +81,11 @@ $telengard-next-slice
 Advance Telengard Reloaded by exactly one safe logical implementation slice.
 ```
 
+For the current milestone, a normal healthy selection should resolve to TEL-129
+until it is complete, then TEL-130, TEL-131, and TEL-132 in turn. A different
+selection requires evidence that the stated MVP critical path is blocked or
+incorrect.
+
 The workflow may be run on a conservative recurring schedule. It must stop on
 overlapping work, unresolved product decisions, unavailable verification, or an
 ambiguous merge gate. It must never weaken repository gates to keep automation
@@ -71,5 +95,7 @@ moving.
 
 `docs/tasks/README.md` remains the human TEL status ledger. Ticket files define
 scope and acceptance. `docs/tasks/index.json` is the compact scheduling
-projection. `docs/BUILD_STATUS.md` remains append-only historical evidence.
-Generated projections are updated through repository tooling, never by hand.
+projection. `docs/MVP_DEMO.md` defines the immediate product checkpoint.
+`docs/BUILD_STATUS.md` remains append-only historical evidence. Generated
+projections are updated through repository tooling, never by hand during normal
+implementation runs.

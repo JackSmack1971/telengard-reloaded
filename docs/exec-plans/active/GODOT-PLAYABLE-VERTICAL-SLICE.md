@@ -1,75 +1,116 @@
 # Playable Godot Vertical Slice — umbrella ExecPlan
 
+## Status
+
+**Post-MVP continuation plan.**
+
+The broader Playable Godot Vertical Slice remains valid, but it is not the
+immediate scheduling target. The active highest-priority plan is
+[`FIVE-FLOOR-MVP-DEMO.md`](docs/exec-plans/active/FIVE-FLOOR-MVP-DEMO.md). Resume this plan as primary
+convergence only after the Five-Floor MVP Demo gate passes or the user explicitly
+changes priority.
+
 ## Purpose / user-visible outcome
 
-Coordinate the multi-ticket transition from the TEL-091 Modern renderer
-prototype to a complete playable Godot floors 1-5 vertical slice while the
-representative content pack is authored in parallel, then carry the project to
-an explicit Art Production Ready handoff.
+Coordinate the transition from the hosted/grayboxed Godot client into a complete
+production-shaped playable first slice with explicit save/resume, full required
+interaction coverage, death/Legacy flow, keyboard/controller acceptance, and the
+separate Art Production Ready handoff.
 
-When this plan is complete, a player can launch Godot and complete the
-representative Telengard loop using normal keyboard/controller interaction,
-real first-slice content, explicit save/resume, and renderer-safe presentation
+When this broader plan is complete, a player can launch Godot and complete the
+representative Telengard loop using normal keyboard/controller interaction, real
+first-slice content, explicit save/resume, and renderer-safe presentation
 boundaries. The repository will also have passed the separate readiness gate
 required before systematic final production-art/audio batches are authored.
 
+## Relationship to the Five-Floor MVP Demo
+
+The MVP is a deliberately smaller product checkpoint that comes first. It proves
+legitimate floors 1–5 traversal, representative production runtime ecology, a
+usable combat path, and a clear fixed-seed end-of-demo state.
+
+This plan owns the broader client/readiness work after that checkpoint:
+
+- remaining input/session manual acceptance;
+- broad HUD/interaction acceptance;
+- Godot save/suspend/resume lifecycle;
+- full required keyboard/controller coverage;
+- load/recovery/error flows;
+- death/Legacy replacement and second-expedition acceptance;
+- the full Playable Godot Vertical Slice gate; and
+- Art Production Ready evidence.
+
+The MVP milestone does not weaken any architecture, determinism, save,
+hidden-information, or content-separation contract in this plan.
+
 ## Scope and non-goals
 
-In scope:
+In scope after MVP completion:
 
-- Godot client/readiness tickets TEL-120 through TEL-128;
-- coordination with TEL-110 through TEL-116 first-slice content dependencies;
-- host/bootstrap, input/clock, scene/session, presentation/asset contracts,
-  graybox rendering, UX, persistence, and full playable integration;
-- acceptance evidence for `docs/gates/GODOT-PLAYABLE-SLICE.md` owned by TEL-127;
-- readiness evidence for `docs/gates/ART-PRODUCTION-READY.md` owned by TEL-128.
+- remaining TEL-121/TEL-122 manual acceptance evidence where still outstanding;
+- remaining TEL-125 HUD/interaction acceptance breadth;
+- TEL-126 save/suspend/resume and application lifecycle integration;
+- TEL-127 full `GODOT-PLAYABLE-SLICE.md` acceptance;
+- TEL-128 `ART-PRODUCTION-READY.md` acceptance; and
+- coordination of production-art readiness only after client behavior is stable.
 
 Non-goals:
 
-- final production art batches before the readiness gate;
+- final production art batches before TEL-128;
 - all 50 floors or broad content expansion;
 - redesigning authoritative simulation systems without a demonstrated missing
   client-facing boundary;
-- moving gameplay logic into Godot;
+- moving gameplay logic into Godot; and
 - combining multiple TEL implementation slices into one autonomous run/PR.
 
 ## Sources of truth
 
-- `AGENTS.md`
-- `.codex/skills/telengard-next-slice/SKILL.md`
-- `docs/tasks/README.md`
-- individual TEL-110–TEL-128 ticket files
-- `docs/presentation/GODOT_CLIENT_BLUEPRINT.md`
-- `docs/presentation/UX_INTERACTION_BLUEPRINT.md`
-- `docs/presentation/ART_DIRECTION_BLUEPRINT.md`
-- `docs/presentation/ASSET_PIPELINE_BLUEPRINT.md`
-- `docs/gates/GODOT-PLAYABLE-SLICE.md`
-- `docs/gates/ART-PRODUCTION-READY.md`
-- `docs/modern-telengard-spec.md` §3, §12, §34, §36–§39, §43–§48, §51–§52
-- `docs/INVARIANTS.md`
-- current Core presentation types and `src/Telengard.Godot/`
+- `docs/MVP_DEMO.md` for the preceding product checkpoint;
+- `docs/gates/FIVE-FLOOR-MVP-DEMO.md` for its prerequisite acceptance;
+- `docs/tasks/README.md` and generated `docs/tasks/index.json` for current status/scheduling;
+- individual TEL-110 through TEL-128 ticket files;
+- `docs/presentation/GODOT_CLIENT_BLUEPRINT.md`;
+- `docs/presentation/UX_INTERACTION_BLUEPRINT.md`;
+- `docs/presentation/ART_DIRECTION_BLUEPRINT.md`;
+- `docs/presentation/ASSET_PIPELINE_BLUEPRINT.md`;
+- `docs/gates/GODOT-PLAYABLE-SLICE.md`;
+- `docs/gates/ART-PRODUCTION-READY.md`;
+- `docs/modern-telengard-spec.md`;
+- `docs/INVARIANTS.md`; and
+- current implementation/tests.
 
-## Current state
+## Current state — reconciled 2026-08-25
 
-At plan creation:
+The previous version of this plan had status drift relative to current ticket and
+implementation evidence. The reconciled state is:
 
-- TEL-090–TEL-093 are implemented and verified; presentation separation and
-  renderer-independent save compatibility are proven.
-- TEL-107 provides a deterministic headless Core Alpha integration proof.
-- TEL-109 provides the external versioned content-pack loader.
-- TEL-110–TEL-116 remain the authored floors 1-5 content work.
-- `src/Telengard.Godot/ModernRenderer.tscn` remains a visual-only renderer
-  prototype that expects an externally supplied render frame.
-- no complete Godot application host, command-input loop, production
-  presentation contract, asset registry, UX/session flow, or client
-  persistence flow exists.
+- TEL-110–TEL-116 — representative first-slice content: implemented and verified.
+- TEL-120 — application host/bootstrap: implemented and verified.
+- TEL-121 — input/clock bridge: implementation/headless verification exists;
+  broader interactive/manual observation remains pending, so ledger status is
+  `In progress`.
+- TEL-122 — session/scene flow: implementation and runtime probe exist; broader
+  visual/manual observation remains pending, so ledger status is `In progress`.
+- TEL-123 — production presentation/asset contract: implemented and verified.
+- TEL-124 — content-aware dungeon graybox: implemented and verified; the former
+  `In progress` line in this plan was stale.
+- TEL-125 — HUD/interaction flows: in progress; HUD and combat-intent bridging
+  exist, but full interaction acceptance is outstanding.
+- TEL-126 — save/suspend/resume lifecycle: not started and intentionally
+  post-MVP.
+- TEL-127 — full playable-slice acceptance: not started and intentionally
+  post-MVP.
+- TEL-128 — Art Production Ready: not started and intentionally post-MVP.
+
+The separate Five-Floor MVP plan owns the current prerequisite integration work;
+this plan deliberately does not duplicate those TEL owners.
 
 ## Invariant impact
 
 ### Simulation authority
 
-All Godot gameplay intent crosses the simulation command/application boundary.
-Godot may own transient presentation state only.
+All Godot gameplay intent crosses simulation/application boundaries. Godot owns
+transient presentation state only.
 
 ### Command/event ordering
 
@@ -79,19 +120,18 @@ responds to committed state/events and never fabricates authoritative outcomes.
 ### Determinism/RNG
 
 The client introduces no authoritative ambient RNG. Simulation timing remains
-independent of rendering FPS. Visual-only randomness, if later introduced, must
-not affect authoritative replay.
+independent of rendering FPS. Visual-only randomness must not affect replay.
 
 ### Hidden information
 
 Production projections expose only legitimately observable information. Missing
-visual data is solved by renderer-safe projection changes, not direct access to
-hidden Core/content internals.
+visual data is solved through renderer-safe projection changes, not direct
+access to hidden Core/content internals.
 
 ### Content separation
 
-TEL-110–TEL-116 authored data remains in the content boundary. Presentation
-asset mappings remain presentation-side and do not become simulation rules.
+Authored first-slice data remains in the content boundary. Presentation asset
+mappings remain presentation-side and do not become simulation rules.
 
 ### Wealth/knowledge/death
 
@@ -105,55 +145,36 @@ not change authoritative behavior or save meaning.
 
 ## Save/version impact
 
-The umbrella plan does not presume a save-version change. Each selected ticket
+This umbrella plan does not presume a save-version change. Each selected ticket
 must state its own impact. Presentation-only/client-shell state should not enter
-GameState saves unless it becomes authoritative domain state, in which case the
-owning ticket must explicitly use DTO/migration/version discipline.
+`GameState` saves unless it becomes authoritative domain state, in which case
+the owning ticket must explicitly use DTO/migration/version discipline.
 
-## Implementation plan
+## Implementation plan after MVP
 
-### Milestone A — Parallel foundations
+### Milestone A — finish interaction/manual acceptance gaps
 
-Complete content-independent client foundation while TEL-110–TEL-116 may
-continue in parallel:
+Close remaining TEL-121/TEL-122/TEL-125 acceptance evidence required by the
+broader client gate and intentionally not required by the MVP.
 
-1. TEL-120 — playable Godot application host/bootstrap.
-2. TEL-121 — input-to-command and simulation-clock bridge.
-3. TEL-122 — client session/scene flow.
-4. TEL-123 — production presentation contract and presentation asset registry.
+### Milestone B — TEL-126 persistence/application lifecycle
 
-Each remains a separate one-slice transaction.
+Expose existing save/suspension boundaries through Godot, verify fixed-seed
+authoritative equivalence across save/resume, and rebuild presentation from
+loaded authoritative state.
 
-### Milestone B — Content-aware graybox client
+### Milestone C — TEL-127 Playable Godot Vertical Slice
 
-After explicit content dependencies are satisfied:
+Complete the full checklist in `docs/gates/GODOT-PLAYABLE-SLICE.md`, including
+startup/new/load, required input coverage, representative loop breadth,
+persistence, death/Legacy behavior, second expedition, and required manual
+Godot observations.
 
-5. TEL-124 — dungeon/biome/monster/feature graybox presentation.
-6. TEL-125 — HUD, combat, inventory, spell, journal and interaction flows.
+### Milestone D — TEL-128 Art Production Ready
 
-### Milestone C — Playable integration
-
-7. TEL-126 — save/suspend/resume and application lifecycle integration.
-8. TEL-127 — full fixed-seed Playable Godot Vertical Slice gate acceptance.
-
-A passed TEL-127 means the client is genuinely playable with production-shaped
-placeholder/graybox presentation. It does not by itself authorize final asset
-batches.
-
-### Milestone D — Art-production handoff
-
-9. TEL-128 — complete the separate Art Production Ready gate, including stable
-   art-direction constraints, asset registry/pipeline/inventory evidence, UX
-   stability, and binary policy.
-
-Only after TEL-128 passes:
-
-- author focused production-asset TEL tickets;
-- keep them scoped to the representative first-slice inventory;
-- preserve presentation registry and simulation boundaries.
-
-Production-art tickets are intentionally not pre-created by this plan because
-their inventory and batching should be derived from the passed readiness gate.
+Only after TEL-127 passes, complete the separate art-direction, asset-pipeline,
+UX stability, and repository-policy readiness gate. Systematic final art/audio
+TEL batches remain prohibited until this gate passes.
 
 ## Validation
 
@@ -161,85 +182,52 @@ Every code ticket uses focused checks plus the canonical repository gate:
 
 `./eng/verify.ps1 -Mode Full`
 
-Presentation-visible tickets must also exercise the required Godot surface.
+Presentation-visible tickets must also exercise their required Godot surface.
 TEL-127 requires a real Godot acceptance run; headless tests alone cannot pass
-the playable gate. TEL-128 is separately blocked if required art-direction or
-repository policy decisions remain unresolved.
-
-The final plan validation includes:
-
-- `docs/gates/GODOT-PLAYABLE-SLICE.md` completed with evidence via TEL-127;
-- `docs/gates/ART-PRODUCTION-READY.md` completed with evidence via TEL-128;
-- first-slice content from TEL-110–TEL-116 loaded through the production content
-  pack rather than test-only fixtures;
-- fixed-seed authoritative equivalence through save/resume;
-- keyboard and controller client acceptance;
-- validated first-slice production asset inventory and pipeline/readiness
-  evidence.
+the playable gate. TEL-128 remains separately blocked if required art-direction
+or repository policy decisions are unresolved.
 
 ## Progress
 
-- [x] 2026-08-23 — repository-evidence audit identified TEL-091 as a visual
-  prototype rather than a playable client and established the two-track
-  development methodology.
-- [x] 2026-08-23 — durable Godot/UX/art/asset blueprints and acceptance gates
-  authored; TEL-120–TEL-128 client/readiness slices added to the task system.
-- [x] 2026-08-23 — TEL-114 loot table data, references, validation, and
-  deterministic carried-wealth acceptance evidence completed; save impact none.
-- [x] 2026-08-23 — TEL-116 fountain, altar, pit, and teleporter definitions,
-  complete-pack validation, deterministic loading, and resolver acceptance
-  evidence completed; save impact none.
-- [x] TEL-120 — application host/bootstrap (Godot 4.7.2 smoke-verified; authoritative bootstrap remains in the external .NET host).
-- [x] TEL-121 — input/clock bridge (headless verification passed; interactive Godot observation pending).
-- [ ] TEL-122 — session/scene flow.
-- [x] TEL-123 — production presentation/asset contract (projection identity,
-  observed geometry, and placeholder-capable presentation registry verified).
-- [x] TEL-124 — content-aware dungeon graybox (renderer-safe tile states,
-  connections, combat identity, and registry-backed feature placeholders).
-- [ ] TEL-125 — HUD and interaction flows.
+### Completed foundation/client/content work
+
+- [x] TEL-110–TEL-116 — first-slice production content.
+- [x] TEL-120 — Godot application host/bootstrap.
+- [x] TEL-123 — production presentation/asset contract.
+- [x] TEL-124 — content-aware dungeon graybox.
+
+### Partially accepted existing work
+
+- [ ] TEL-121 — implementation/headless evidence exists; broader manual
+  observation remains.
+- [ ] TEL-122 — implementation/runtime probe exists; broader visual/manual
+  observation remains.
+- [ ] TEL-125 — HUD/combat-intent bridge exists; full interaction acceptance
+  remains.
+
+### Post-MVP continuation
+
 - [ ] TEL-126 — persistence/application lifecycle.
-- [ ] TEL-127 — playable Godot vertical-slice acceptance.
+- [ ] TEL-127 — full playable Godot vertical-slice acceptance.
 - [ ] TEL-128 — Art Production Ready acceptance.
-
-TEL-110–TEL-116 progress is tracked by the canonical task ledger and should not
-be duplicated as authoritative status here.
-
-## Surprises / discoveries
-
-- The original Phase 9 presentation work intentionally proved separation before
-  expensive presentation, but did not define the subsequent production-client
-  phase.
-- The Godot README explicitly leaves host adaptation and command submission to
-  an external host, confirming the missing application layer.
-- The current Modern projection is sufficient for prototype markers but should
-  be audited before production scenes seek additional observable geometry/theme
-  information.
-- Feature definitions already have a presentation key while monster/item/spell
-  definitions do not share one standardized presentation-key contract; the
-  presentation-side registry avoids prematurely coupling engine resources to
-  authoritative content schemas.
-- Playable-client acceptance and production-art readiness are intentionally
-  separate so unresolved visual direction cannot make TEL-127 ambiguously
-  complete.
 
 ## Decision log
 
-- **Two-track execution:** authored content and client foundation may progress in
-  parallel; dependency graph controls convergence.
-- **Placeholder first:** the playable client gate explicitly does not require
-  final art.
-- **Separate readiness ticket:** TEL-127 proves playability; TEL-128 alone
+- **Five-floor MVP first:** integration proof precedes persistence/polish breadth.
+- **Placeholder first:** neither the MVP nor TEL-127 requires final art.
+- **Separate readiness ticket:** TEL-127 proves broad playability; TEL-128 alone
   authorizes production-art ticket creation.
-- **Production-art hard gate:** systematic final asset batches wait for
-  Art Production Ready evidence.
+- **Production-art hard gate:** systematic final asset batches wait for Art
+  Production Ready evidence.
 - **Presentation-side registry:** stable IDs map to Godot resources outside
-  authoritative GameState/save state.
-- **One ticket per run:** this umbrella plan coordinates work but does not weaken
-  the repository's transactional autonomous workflow.
+  authoritative `GameState`/save state.
+- **One ticket per run:** umbrella plans coordinate work but do not weaken the
+  transactional autonomous workflow.
 
 ## Results / remaining work
 
-The plan remains active until TEL-120–TEL-128 are complete and both presentation
-gates have recorded passing evidence. At that point move this plan to
-`docs/exec-plans/completed/` and author the first production-art batch tickets
-from the validated first-slice asset inventory.
+This plan remains active as a post-MVP continuation record. Its implementation
+queue becomes primary again after the separate MVP gate passes. At that point
+finish TEL-126, TEL-127, and TEL-128, then move this plan to
+`docs/exec-plans/completed/` only when both broader presentation gates have
+passing evidence.
