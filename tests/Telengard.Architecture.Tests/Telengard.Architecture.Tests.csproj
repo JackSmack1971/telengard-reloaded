@@ -16,5 +16,6 @@
     <ProjectReference Include="../../src/Telengard.Save/Telengard.Save.csproj" />
     <ProjectReference Include="../../src/Telengard.Terminal/Telengard.Terminal.csproj" />
     <ProjectReference Include="../../tools/Telengard.TestHarness/Telengard.TestHarness.csproj" />
+    <ProjectReference Include="../../tools/Telengard.GodotHost/Telengard.GodotHost.csproj" />
   </ItemGroup>
 </Project>

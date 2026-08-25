@@ -6,6 +6,8 @@ using Telengard.Core.Presentation;
 using Telengard.Core.Simulation;
 using Telengard.Core.Events;
 using Telengard.Core.Combat;
+using Telengard.Core.Items;
+using Telengard.Core.Magic;
 using Telengard.Core.World.Generation;
 using Telengard.Core.World.Features;
 
@@ -20,26 +22,26 @@ internal static class Program
             var contentRoot = ReadContentRoot(args);
             if (args.Contains("--serve", StringComparer.Ordinal))
             {
-                return RunServer(contentRoot, ReadPort(args));
+                return RunServer(contentRoot, ReadPort(args), args);
             }
 
-            var session = CreateSession(contentRoot);
+            var session = CreateSession(contentRoot, ReadGameplayConfiguration(args));
             WriteJson(session.Frame());
             return 0;
         }
-        catch (Exception exception) when (exception is ArgumentException or IOException or InvalidDataException)
+        catch (Exception exception) when (exception is ArgumentException or IOException or InvalidDataException or KeyNotFoundException or FormatException)
         {
             Console.Error.WriteLine(exception.Message);
             return 1;
         }
     }
 
-    private static int RunServer(string contentRoot, int port)
+    private static int RunServer(string contentRoot, int port, string[] args)
     {
         using var listener = new HttpListener();
         listener.Prefixes.Add($"http://127.0.0.1:{port}/");
         listener.Start();
-        var session = CreateSession(contentRoot);
+        var session = CreateSession(contentRoot, ReadGameplayConfiguration(args));
         while (true)
         {
             var context = listener.GetContext();
@@ -50,14 +52,14 @@ internal static class Program
                     : session.Frame();
                 WriteResponse(context.Response, response);
             }
-            catch (Exception exception) when (exception is ArgumentException or InvalidOperationException or JsonException or OverflowException)
+            catch (Exception exception) when (exception is ArgumentException or InvalidOperationException or JsonException or OverflowException or KeyNotFoundException or FormatException)
             {
                 WriteResponse(context.Response, new { accepted = false, error = exception.Message, frame = session.Frame().frame });
             }
         }
     }
 
-    private static GodotSession CreateSession(string contentRoot)
+    private static GodotSession CreateSession(string contentRoot, GodotGameplayConfiguration? gameplayConfiguration)
     {
         var pack = ContentPackLoader.Load(contentRoot);
         var playerId = Guid.Parse("00000000-0000-0000-0000-000000000120");
@@ -73,7 +75,12 @@ internal static class Program
         eventBus.Subscribe<IDomainEvent>(committedEvents.Add);
         var dispatcher = new CommandDispatcher(result.State, eventBus);
         eventBus.Publish(result.Events);
-        return new GodotSession(dispatcher, new FloorLayoutGenerator().Generate(120, GameVersions.Current.GeneratorVersion, 1), committedEvents);
+        return new GodotSession(
+            dispatcher,
+            new FloorLayoutGenerator().Generate(120, GameVersions.Current.GeneratorVersion, 1),
+            committedEvents,
+            pack,
+            gameplayConfiguration);
     }
 
     private static int ReadPort(string[] args)
@@ -98,6 +105,24 @@ internal static class Program
         var index = Array.IndexOf(args, "--content-root");
         if (index < 0 || index + 1 >= args.Length) throw new ArgumentException("Usage: --content-root <path>.");
         return Path.GetFullPath(args[index + 1]);
+    }
+
+    private static GodotGameplayConfiguration? ReadGameplayConfiguration(string[] args)
+    {
+        var index = Array.IndexOf(args, "--gameplay-config");
+        if (index < 0) return null;
+        if (index + 1 >= args.Length) throw new ArgumentException("Usage: --gameplay-config <path>.");
+
+        var path = Path.GetFullPath(args[index + 1]);
+        using var document = JsonDocument.Parse(File.ReadAllText(path));
+        var root = document.RootElement;
+        return new GodotGameplayConfiguration(
+            new AttackConfiguration(root.GetProperty("attack_damage").GetInt32()),
+            new FleeConfiguration(root.GetProperty("flee_success_chance").GetDouble()),
+            new ThreatClassificationConfiguration(
+                root.GetProperty("trivial_maximum_level_difference").GetInt32(),
+                root.GetProperty("deadly_minimum_level_difference").GetInt32(),
+                root.GetProperty("known_monster_definition_ids").EnumerateArray().Select(value => value.GetString()!)));
     }
 
     internal static object FrameJson(ModernRenderFrame frame) => new
@@ -131,24 +156,51 @@ internal static class Program
     private static object Position(DungeonPosition position) => new { floor = position.Floor, x = position.X, y = position.Y };
 }
 
-internal sealed class GodotSession
+public sealed class GodotSession
 {
     private readonly CommandDispatcher _dispatcher;
     private readonly FloorLayout _layout;
     private readonly List<IDomainEvent> _events;
+    private readonly ContentPack _contentPack;
+    private readonly GodotGameplayConfiguration? _gameplayConfiguration;
     private readonly SimulationClock _clock = new(10, 0.2);
 
-    public GodotSession(CommandDispatcher dispatcher, FloorLayout layout, List<IDomainEvent> events)
+    public GodotSession(
+        CommandDispatcher dispatcher,
+        FloorLayout layout,
+        List<IDomainEvent> events,
+        ContentPack contentPack,
+        GodotGameplayConfiguration? gameplayConfiguration = null)
     {
         _dispatcher = dispatcher;
         _layout = layout;
         _events = events;
+        _contentPack = contentPack;
+        _gameplayConfiguration = gameplayConfiguration;
         _dispatcher.Register<AdvanceSimulationCommand>(SimulationTimeResolver.Advance);
         _dispatcher.Register<EnterDungeonCommand>((state, command) => DungeonWalkingResolver.Enter(state, command, _layout));
         _dispatcher.Register<MoveCommand>((state, command) => DungeonWalkingResolver.Move(state, command, _layout));
         _dispatcher.Register<SelectCombatActionCommand>(CombatStateResolver.SelectAction);
+        _dispatcher.Register<AdvanceCombatCommand>(CombatStateResolver.Advance);
+        _dispatcher.Register<AssessThreatCommand>(ResolveThreat);
+        _dispatcher.Register<DefendCommand>(DefendResolver.Resolve);
+        _dispatcher.Register<CastSpellCommand>((state, command) =>
+            SpellCastResolver.Resolve(state, command, _contentPack.Spells.GetRequired(command.SpellId)));
+        _dispatcher.Register<EquipItemCommand>(EquipmentResolver.Equip);
+        _dispatcher.Register<UnequipItemCommand>(EquipmentResolver.Unequip);
+        if (_gameplayConfiguration is not null)
+        {
+            _dispatcher.Register<AttackCommand>((state, command) =>
+                AttackResolver.Resolve(state, command, _gameplayConfiguration.Attack));
+            _dispatcher.Register<FleeCommand>((state, command) =>
+                FleeResolver.Resolve(state, command, _gameplayConfiguration.Flee));
+        }
         _dispatcher.Register<ActivateFeatureCommand>(FeatureActivationResolver.Activate);
     }
+
+    public GameState CurrentState => _dispatcher.CurrentState;
+
+    public ContentPack ContentPack => _contentPack;
 
     public object Dispatch(JsonElement request)
     {
@@ -158,6 +210,16 @@ internal sealed class GodotSession
             case "enter_dungeon": _dispatcher.Dispatch(new EnterDungeonCommand()); break;
             case "move": _dispatcher.Dispatch(new MoveCommand(Enum.Parse<MovementDirection>(request.GetProperty("direction").GetString()!, true))); break;
             case "combat_action": _dispatcher.Dispatch(new SelectCombatActionCommand(Enum.Parse<CombatAction>(request.GetProperty("action").GetString()!, true))); break;
+            case "advance_combat": _dispatcher.Dispatch(new AdvanceCombatCommand()); break;
+            case "assess_threat": _dispatcher.Dispatch(new AssessThreatCommand()); break;
+            case "resolve_combat_action": ResolveCombatAction(request); break;
+            case "cast_spell": _dispatcher.Dispatch(new CastSpellCommand(request.GetProperty("spell_id").GetString()!)); break;
+            case "equip_item":
+                _dispatcher.Dispatch(new EquipItemCommand(
+                    request.GetProperty("slot_id").GetString()!,
+                    Guid.Parse(request.GetProperty("item_instance_id").GetString()!)));
+                break;
+            case "unequip_item": _dispatcher.Dispatch(new UnequipItemCommand(request.GetProperty("slot_id").GetString()!)); break;
             case "interact":
                 var position = _dispatcher.CurrentState.Player.Position;
                 var feature = _dispatcher.CurrentState.Dungeon.Features.SingleOrDefault(candidate => candidate.Discovered && candidate.Position == position)
@@ -174,6 +236,31 @@ internal sealed class GodotSession
         return new { accepted = true, frame = Frame().frame };
     }
 
+    private CommandResult ResolveThreat(GameState state, AssessThreatCommand command)
+    {
+        return ThreatAssessmentResolver.Resolve(
+            state,
+            command,
+            _gameplayConfiguration?.Threat
+                ?? throw new InvalidOperationException("Combat gameplay configuration is required for threat assessment."));
+    }
+
+    private void ResolveCombatAction(JsonElement request)
+    {
+        var action = _dispatcher.CurrentState.Combat?.SelectedAction
+            ?? throw new InvalidOperationException("No combat action is selected.");
+        switch (action)
+        {
+            case CombatAction.Attack: _dispatcher.Dispatch(new AttackCommand()); break;
+            case CombatAction.Defend: _dispatcher.Dispatch(new DefendCommand()); break;
+            case CombatAction.Flee: _dispatcher.Dispatch(new FleeCommand()); break;
+            case CombatAction.CastSpell:
+                _dispatcher.Dispatch(new CastSpellCommand(request.GetProperty("spell_id").GetString()!));
+                break;
+            default: throw new InvalidOperationException($"Combat action '{action}' has no Core resolver.");
+        }
+    }
+
     public SessionFrame Frame()
     {
         var projection = PresentationStateAdapter.Create(_dispatcher.CurrentState);
@@ -182,4 +269,21 @@ internal sealed class GodotSession
     }
 }
 
-internal sealed record SessionFrame(object frame, long tick);
+public sealed record GodotGameplayConfiguration
+{
+    public GodotGameplayConfiguration(
+        AttackConfiguration attack,
+        FleeConfiguration flee,
+        ThreatClassificationConfiguration threat)
+    {
+        Attack = attack ?? throw new ArgumentNullException(nameof(attack));
+        Flee = flee ?? throw new ArgumentNullException(nameof(flee));
+        Threat = threat ?? throw new ArgumentNullException(nameof(threat));
+    }
+
+    public AttackConfiguration Attack { get; }
+    public FleeConfiguration Flee { get; }
+    public ThreatClassificationConfiguration Threat { get; }
+}
+
+public sealed record SessionFrame(object frame, long tick);

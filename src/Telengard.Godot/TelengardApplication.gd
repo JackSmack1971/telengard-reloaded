@@ -16,6 +16,7 @@ var _clock_accumulator := 0.0
 var _request_pending := false
 var _queued_intents: Array[Dictionary] = []
 var _initial_frame_attempts := 0
+var _current_frame: Dictionary = {}
 const DOTNET_EXECUTABLE := "../../.dotnet/dotnet.exe"
 const HOST_ASSEMBLY := "../../tools/Telengard.GodotHost/bin/Debug/net8.0/Telengard.GodotHost.dll"
 const CONTENT_ROOT := "../../content"
@@ -87,13 +88,13 @@ func _unhandled_input(event: InputEvent) -> void:
 	if _client_state == ClientState.DUNGEON and event.is_action_pressed("interact"):
 		_send_intent({"type": "interact"})
 	elif _client_state == ClientState.DUNGEON and event.is_action_pressed("combat_attack"):
-		_send_intent({"type": "combat_action", "action": "Attack"})
+		_send_combat_action("Attack")
 	elif _client_state == ClientState.DUNGEON and event.is_action_pressed("combat_defend"):
-		_send_intent({"type": "combat_action", "action": "Defend"})
+		_send_combat_action("Defend")
 	elif _client_state == ClientState.DUNGEON and event.is_action_pressed("combat_flee"):
-		_send_intent({"type": "combat_action", "action": "Flee"})
+		_send_combat_action("Flee")
 	elif _client_state == ClientState.DUNGEON and event.is_action_pressed("combat_spell"):
-		_send_intent({"type": "combat_action", "action": "CastSpell"})
+		_send_combat_action("CastSpell")
 	elif _client_state == ClientState.DUNGEON and event.is_action_pressed("combat_item"):
 		_send_intent({"type": "combat_action", "action": "UseItem"})
 	if _client_state == ClientState.DEATH:
@@ -214,6 +215,22 @@ func _send_intent(intent: Dictionary) -> void:
 		_request_pending = false
 		_show_error("Unable to submit authoritative intent (%s)." % request_result)
 
+func _send_combat_action(action: String) -> void:
+	if action == "UseItem":
+		_feedback = "Item actions are not available in this slice."
+		_refresh_renderer()
+		return
+	var resolution := {"type": "resolve_combat_action"}
+	if action == "CastSpell":
+		var spells: Array = _current_frame.get("spells", [])
+		if spells.is_empty():
+			_feedback = "No known spell is available."
+			_refresh_renderer()
+			return
+		resolution["spell_id"] = str(spells[0])
+	_send_intent({"type": "combat_action", "action": action})
+	_queued_intents.append(resolution)
+
 func _on_request_completed(result: int, response_code: int, _headers: PackedStringArray, body: PackedByteArray) -> void:
 	_request_pending = false
 	if result != HTTPRequest.RESULT_SUCCESS:
@@ -225,6 +242,7 @@ func _on_request_completed(result: int, response_code: int, _headers: PackedStri
 		_show_error("Authoritative session returned invalid JSON.")
 		return
 	if parsed.has("frame"):
+		_current_frame = parsed["frame"].duplicate(true)
 		renderer.render_frame(parsed["frame"])
 		_feedback = str(parsed.get("error", ""))
 		if not _feedback.is_empty():
