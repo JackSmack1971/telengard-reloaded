@@ -6,7 +6,7 @@
 
 The broader Playable Godot Vertical Slice remains valid, but it is not the
 immediate scheduling target. The active highest-priority plan is
-[`FIVE-FLOOR-MVP-DEMO.md`](FIVE-FLOOR-MVP-DEMO.md). Resume this plan as primary
+[`FIVE-FLOOR-MVP-DEMO.md`](docs/exec-plans/active/FIVE-FLOOR-MVP-DEMO.md). Resume this plan as primary
 convergence only after the Five-Floor MVP Demo gate passes or the user explicitly
 changes priority.
 
