@@ -4,20 +4,18 @@
 
 **Post-MVP continuation plan.**
 
-The broader Playable Godot Vertical Slice remains a valid product milestone, but
-it is no longer the immediate scheduling target. The active highest-priority
-plan is [`FIVE-FLOOR-MVP-DEMO.md`](FIVE-FLOOR-MVP-DEMO.md). TEL-126, TEL-127,
-and TEL-128 remain blocked behind TEL-132 in the generated task metadata.
-
-Resume this plan as the primary convergence only after the Five-Floor MVP Demo
-gate passes or the user explicitly changes priority.
+The broader Playable Godot Vertical Slice remains valid, but it is not the
+immediate scheduling target. The active highest-priority plan is
+[`FIVE-FLOOR-MVP-DEMO.md`](FIVE-FLOOR-MVP-DEMO.md). Resume this plan as primary
+convergence only after the Five-Floor MVP Demo gate passes or the user explicitly
+changes priority.
 
 ## Purpose / user-visible outcome
 
-Coordinate the transition from the already-hosted/grayboxed Godot client into a
-complete production-shaped playable first slice with explicit save/resume,
-full required interaction coverage, death/Legacy flow, keyboard/controller
-acceptance, and the separate Art Production Ready handoff.
+Coordinate the transition from the hosted/grayboxed Godot client into a complete
+production-shaped playable first slice with explicit save/resume, full required
+interaction coverage, death/Legacy flow, keyboard/controller acceptance, and the
+separate Art Production Ready handoff.
 
 When this broader plan is complete, a player can launch Godot and complete the
 representative Telengard loop using normal keyboard/controller interaction, real
@@ -27,24 +25,19 @@ required before systematic final production-art/audio batches are authored.
 
 ## Relationship to the Five-Floor MVP Demo
 
-The MVP is a deliberately smaller product checkpoint that comes first.
+The MVP is a deliberately smaller product checkpoint that comes first. It proves
+legitimate floors 1–5 traversal, representative production runtime ecology, a
+usable combat path, and a clear fixed-seed end-of-demo state.
 
-The MVP proves:
+This plan owns the broader client/readiness work after that checkpoint:
 
-- a real hosted Godot session can legitimately traverse floors 1–5;
-- production first-slice encounters/features/treasure are composed into normal
-  play;
-- a demo-ready combat path works; and
-- a fixed-seed floor-1-through-floor-5 run reaches a clear end state.
-
-This plan then adds the breadth intentionally deferred by the MVP:
-
+- remaining input/session manual acceptance;
+- broad HUD/interaction acceptance;
 - Godot save/suspend/resume lifecycle;
-- complete TEL-125/TEL-127 interaction acceptance;
 - full required keyboard/controller coverage;
 - load/recovery/error flows;
 - death/Legacy replacement and second-expedition acceptance;
-- full Playable Godot Vertical Slice gate evidence; and
+- the full Playable Godot Vertical Slice gate; and
 - Art Production Ready evidence.
 
 The MVP milestone does not weaken any architecture, determinism, save,
@@ -59,8 +52,7 @@ In scope after MVP completion:
 - TEL-126 save/suspend/resume and application lifecycle integration;
 - TEL-127 full `GODOT-PLAYABLE-SLICE.md` acceptance;
 - TEL-128 `ART-PRODUCTION-READY.md` acceptance; and
-- coordination of production-art readiness only after the client behavior is
-  stable.
+- coordination of production-art readiness only after client behavior is stable.
 
 Non-goals:
 
@@ -73,10 +65,10 @@ Non-goals:
 
 ## Sources of truth
 
-- `docs/MVP_DEMO.md` for the preceding milestone;
-- `docs/gates/FIVE-FLOOR-MVP-DEMO.md` and TEL-132 for the prerequisite gate;
+- `docs/MVP_DEMO.md` for the preceding product checkpoint;
+- `docs/gates/FIVE-FLOOR-MVP-DEMO.md` for its prerequisite acceptance;
 - `docs/tasks/README.md` and generated `docs/tasks/index.json` for current status/scheduling;
-- individual TEL-120–TEL-132 ticket files;
+- individual TEL-110 through TEL-128 ticket files;
 - `docs/presentation/GODOT_CLIENT_BLUEPRINT.md`;
 - `docs/presentation/UX_INTERACTION_BLUEPRINT.md`;
 - `docs/presentation/ART_DIRECTION_BLUEPRINT.md`;
@@ -98,8 +90,7 @@ implementation evidence. The reconciled state is:
   broader interactive/manual observation remains pending, so ledger status is
   `In progress`.
 - TEL-122 — session/scene flow: implementation and runtime probe exist; broader
-  visual/manual observation remains pending, so ledger status is `In progress`
-  rather than the stale `Not started` state formerly shown here.
+  visual/manual observation remains pending, so ledger status is `In progress`.
 - TEL-123 — production presentation/asset contract: implemented and verified.
 - TEL-124 — content-aware dungeon graybox: implemented and verified; the former
   `In progress` line in this plan was stale.
@@ -110,7 +101,9 @@ implementation evidence. The reconciled state is:
 - TEL-127 — full playable-slice acceptance: not started and intentionally
   post-MVP.
 - TEL-128 — Art Production Ready: not started and intentionally post-MVP.
-- TEL-129–TEL-132 — Five-Floor MVP Demo critical path: current priority.
+
+The separate Five-Floor MVP plan owns the current prerequisite integration work;
+this plan deliberately does not duplicate those TEL owners.
 
 ## Invariant impact
 
@@ -159,19 +152,14 @@ the owning ticket must explicitly use DTO/migration/version discipline.
 
 ## Implementation plan after MVP
 
-### Milestone 0 — prerequisite: Five-Floor MVP Demo
-
-Complete TEL-129 → TEL-130 → TEL-131 → TEL-132 under the separate MVP ExecPlan.
-Do not select TEL-126–TEL-128 while this chain is healthy.
-
 ### Milestone A — finish interaction/manual acceptance gaps
 
-Close any remaining TEL-121/TEL-122/TEL-125 acceptance evidence that the broader
-TEL-127 gate requires and that was intentionally not required by the MVP.
+Close remaining TEL-121/TEL-122/TEL-125 acceptance evidence required by the
+broader client gate and intentionally not required by the MVP.
 
 ### Milestone B — TEL-126 persistence/application lifecycle
 
-Expose the existing save/suspension boundaries through Godot, verify fixed-seed
+Expose existing save/suspension boundaries through Godot, verify fixed-seed
 authoritative equivalence across save/resume, and rebuild presentation from
 loaded authoritative state.
 
@@ -217,13 +205,6 @@ or repository policy decisions are unresolved.
 - [ ] TEL-125 — HUD/combat-intent bridge exists; full interaction acceptance
   remains.
 
-### Current prerequisite MVP
-
-- [ ] TEL-129 — deterministic floors 1–5 hosted session.
-- [ ] TEL-130 — production encounter/feature/treasure composition.
-- [ ] TEL-131 — demo setup/combat closure.
-- [ ] TEL-132 — fixed-seed five-floor Godot acceptance.
-
 ### Post-MVP continuation
 
 - [ ] TEL-126 — persistence/application lifecycle.
@@ -233,7 +214,7 @@ or repository policy decisions are unresolved.
 ## Decision log
 
 - **Five-floor MVP first:** integration proof precedes persistence/polish breadth.
-- **Placeholder first:** neither MVP nor TEL-127 requires final art.
+- **Placeholder first:** neither the MVP nor TEL-127 requires final art.
 - **Separate readiness ticket:** TEL-127 proves broad playability; TEL-128 alone
   authorizes production-art ticket creation.
 - **Production-art hard gate:** systematic final asset batches wait for Art
@@ -246,6 +227,7 @@ or repository policy decisions are unresolved.
 ## Results / remaining work
 
 This plan remains active as a post-MVP continuation record. Its implementation
-queue becomes primary again after TEL-132 passes. At that point finish TEL-126,
-TEL-127, and TEL-128, then move this plan to `docs/exec-plans/completed/` only
-when both broader presentation gates have passing evidence.
+queue becomes primary again after the separate MVP gate passes. At that point
+finish TEL-126, TEL-127, and TEL-128, then move this plan to
+`docs/exec-plans/completed/` only when both broader presentation gates have
+passing evidence.
