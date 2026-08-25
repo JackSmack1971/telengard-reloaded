@@ -1,6 +1,6 @@
 ---
 name: telengard-next-slice
-description: Select and execute the next safe, logical Telengard Reloaded implementation slice end to end. Use when asked to continue the project, determine what to build next, implement the next TEL ticket, advance Core Alpha, or run the repository's autonomous Codex development loop through planning, implementation, testing, review, documentation, PR, and gated merge.
+description: Select and execute the next safe, logical Telengard Reloaded implementation slice end to end. Use when asked to continue the project, determine what to build next, implement the next TEL ticket, advance the Five-Floor MVP Demo, or run the repository's autonomous Codex development loop through planning, implementation, testing, review, documentation, PR, and gated merge.
 ---
 
 # Telengard Next Slice
@@ -20,10 +20,12 @@ Advance the nearest project milestone by selecting the best **eligible** next sl
 
 Never continue into a second implementation slice in the same run.
 
-The current convergence is representative floors 1–5 content plus a
-production-shaped Godot placeholder/graybox client, followed by TEL-127
-Playable Godot Vertical Slice acceptance and TEL-128 Art Production Ready.
-Do not create systematic final-asset batches before TEL-128 passes.
+The current convergence is the **Five-Floor MVP Demo** defined in
+`docs/MVP_DEMO.md`. The intended critical path is TEL-129 → TEL-130 → TEL-131 →
+TEL-132. TEL-126, TEL-127, and TEL-128 are post-MVP work and must not pre-empt
+that sequence unless current repository evidence proves a hard prerequisite,
+the MVP chain is blocked, or the user explicitly changes the milestone. Do not
+create systematic final-asset batches before TEL-128 passes.
 
 When delegation is needed, follow `docs/CODEX_MODEL_POLICY.md`. Use the
 lowest role-appropriate effort, keep `high` for demonstrated ambiguity or
@@ -35,13 +37,15 @@ default.
 From repository root, keep the pre-selection context deliberately small:
 
 1. Read `AGENTS.md` and this skill.
-2. Read generated `docs/tasks/index.json` and query its ticket status, track,
-   dependencies, risk tags, decision state, context, review, and verification
-   fields.
-3. Inspect current branch/worktree, remote `main`, recent commits, open PRs,
+2. Read generated `docs/tasks/index.json` and query its milestone, ticket status,
+   track, dependencies, risk tags, decision state, context, review, and
+   verification fields.
+3. If the index milestone is `five-floor-mvp-demo`, read `docs/MVP_DEMO.md`
+   before ranking candidates.
+4. Inspect current branch/worktree, remote `main`, recent commits, open PRs,
    and CI state.
-4. Detect overlapping/stale work before choosing a ticket.
-5. When any candidate has `verification.godot_manual: true`, run
+5. Detect overlapping/stale work before choosing a ticket.
+6. When any candidate has `verification.godot_manual: true`, run
    `powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./eng/godot-doctor.ps1`.
    Treat its discovered executable path and reported version as the authoritative
    local availability evidence. This check includes WinGet-installed Godot
@@ -63,6 +67,11 @@ explicit active remediation work. Rank from the compact metadata before opening
 ticket prose. Narrow to at most two serious candidates, then inspect their
 ticket files, declared dependencies, and active PR ownership.
 
+When the generated milestone is `five-floor-mvp-demo`, treat TEL-129–TEL-132 as
+the preferred candidate family. A not-started ticket outside that family must
+have a concise evidence-based reason to pre-empt the MVP chain, such as a hard
+prerequisite, a repository-health blocker, or explicit user reprioritization.
+
 Reject a candidate when:
 
 - dependencies are incomplete;
@@ -70,15 +79,16 @@ Reject a candidate when:
 - acceptance criteria require an undefined product/tuning decision;
 - the slice is too broad to review coherently;
 - another prerequisite is visibly more fundamental;
-- current repository health prevents trustworthy validation.
+- current repository health prevents trustworthy validation;
 - required Godot/manual observation cannot be performed and no approved
   substitute exists;
+- it is post-MVP breadth while an eligible Five-Floor MVP ticket is ready; or
 - it is a final-asset batch before TEL-128 / `ART-PRODUCTION-READY` passes.
 
 Rank remaining candidates by:
 
-1. continuity with the most recently completed coherent feature chain;
-2. Core Alpha blocker value;
+1. continuity with the active milestone's critical path;
+2. Five-Floor MVP blocker value while that milestone is active;
 3. dependency leverage;
 4. ability to prove the behavior with focused tests;
 5. small/reviewable scope;
@@ -130,10 +140,11 @@ verification:
 ```
 
 The manifest is required for new or materially revised tickets. Legacy tickets
-without it use the generated index and existing sections as a compatibility
-fallback; absent context is never permission to skip relevant evidence.
+without it use the generated index and existing ticket sections as a
+compatibility fallback; absent context is never permission to skip relevant
+evidence.
 
-Determine whether `docs/PLANS.md` requires an ExecPlan. Create/resume one before implementation if required.
+Determine whether `docs/PLANS.md` requires an ExecPlan. Create/resume one before implementation if required. For TEL-129–TEL-132, use the existing `docs/exec-plans/active/FIVE-FLOOR-MVP-DEMO.md` rather than creating a competing umbrella plan.
 
 ## 4. Plan the transaction
 
@@ -175,6 +186,10 @@ Preserve all root `AGENTS.md` contracts. In particular:
 - carried versus secured progress;
 - configurable unresolved tuning rather than invented permanent policy.
 
+For the Five-Floor MVP, fixed seed/demo setup and explicit temporary tuning are
+allowed only where the MVP docs/ticket permit them. They must remain visible and
+replaceable rather than becoming hidden permanent balance policy.
+
 Do not bundle adjacent TEL tickets because they are convenient.
 
 ## 7. Test in narrowing-to-broadening order
@@ -201,6 +216,9 @@ manual observation; record the discovered executable path, runtime version, and
 input path when the ticket or gate requires it. If `godot-doctor.ps1` reports an
 installed runtime, use it before reporting an environment blocker.
 
+TEL-132 cannot pass from headless evidence alone: it must exercise the real
+fixed-seed floor-1-through-floor-5 Godot route defined by the MVP gate.
+
 ## 9. Self-review the full diff
 
 Review the complete branch diff against `main`. Check scope, correctness, invariants, determinism, save/versioning, API changes, tests, docs, generated output, secrets, and accidental artifacts.
@@ -226,6 +244,8 @@ Resolve every actionable finding. If fixes materially change behavior, re-run fo
 ## 11. Update durable repository knowledge
 
 Update the selected ticket and task ledger only after implementation evidence exists. Update BUILD_STATUS/ExecPlan/ADRs/README/DEVELOPMENT/INVARIANTS/generated status only when their documented role requires it.
+
+For TEL-129–TEL-132, update the Five-Floor MVP ExecPlan/gate as required by the selected ticket. Do not mark the broader TEL-127 gate or TEL-128 readiness complete merely because the MVP passes.
 
 Status must match reality. Never mark a ticket implemented because only its plan or docs exist.
 
@@ -255,7 +275,7 @@ PR body must contain:
 - <independent review summary and disposition>
 ```
 
-Prefer a concise ticket-oriented title such as `TEL-101: implement rolled character creation`.
+Prefer a concise ticket-oriented title such as `TEL-129: compose five-floor Godot session`.
 
 ## 13. Gate the merge
 
@@ -278,6 +298,10 @@ If repository settings, CI visibility, permissions, or protection make the merge
 ## 14. Handoff and stop
 
 After merge, inspect the new `main` only enough to identify likely next candidates and repository health. Do not implement another ticket.
+
+While the Five-Floor MVP milestone is active, `next_candidates` should normally
+advance to the next unfinished TEL-129–TEL-132 ticket. Only after TEL-132 passes
+should TEL-126/TEL-127/TEL-128 return to the normal candidate set.
 
 End with exactly one handoff block:
 
@@ -303,7 +327,7 @@ Start example: `python <skill-root>/scripts/skill_telemetry.py start --ticket no
 Start one session at the beginning of the transaction, before candidate selection; use ticket `none` until a slice is selected. Record normalized workflow facts rather than private selection reasoning:
 
 - `candidate_set` with the compact candidate count;
-- `candidate_rejected` with TEL id and one normalized reason: `dependency_incomplete`, `active_pr`, `undefined_product_decision`, `scope_too_broad`, `prerequisite_more_fundamental`, `repository_health`, `manual_observation_unavailable`, or `pre_tel128_final_asset`;
+- `candidate_rejected` with TEL id and one normalized reason: `dependency_incomplete`, `active_pr`, `undefined_product_decision`, `scope_too_broad`, `prerequisite_more_fundamental`, `repository_health`, `manual_observation_unavailable`, `post_mvp_preemption`, or `pre_tel128_final_asset`;
 - `candidate_selected` for the initial choice and `candidate_selection_changed` if deeper evidence forces a different selection;
 - `context_required_missing`, `unexpected_context_needed`, `context_conflict`, `legacy_ticket_fallback`, and `unmapped_risk` when those branches occur;
 - `godot_runtime_resolved`, `godot_runtime_unavailable`, and `godot_manual_blocked` for Godot/manual-observation decisions;
