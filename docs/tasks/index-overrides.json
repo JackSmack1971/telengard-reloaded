@@ -161,7 +161,7 @@
     },
     "TEL-129": {
       "track": "presentation",
-      "dependencies": ["TEL-120", "TEL-123", "TEL-124"],
+      "dependencies": ["TEL-120", "TEL-123"],
       "risk_tags": ["renderer-boundary", "determinism", "simulation-contract"],
       "context": {
         "required": ["docs/MVP_DEMO.md", "docs/gates/FIVE-FLOOR-MVP-DEMO.md", "docs/exec-plans/active/FIVE-FLOOR-MVP-DEMO.md", "docs/presentation/GODOT_CLIENT_BLUEPRINT.md", "docs/tasks/TEL-129.md"],
