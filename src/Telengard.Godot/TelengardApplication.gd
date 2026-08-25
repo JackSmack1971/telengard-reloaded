@@ -87,6 +87,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if _client_state == ClientState.DUNGEON and event.is_action_pressed("interact"):
 		_send_intent({"type": "interact"})
+	elif _client_state == ClientState.DUNGEON and event.is_action_pressed("leave_dungeon"):
+		_send_intent({"type": "leave_dungeon"})
 	elif _client_state == ClientState.DUNGEON and event.is_action_pressed("stairs_down"):
 		_send_intent({"type": "change_floor", "direction": "Down"})
 	elif _client_state == ClientState.DUNGEON and event.is_action_pressed("stairs_up"):
@@ -148,6 +150,7 @@ func _register_input_actions() -> void:
 	_register_key("open_inventory", KEY_I)
 	_register_key("open_spells", KEY_K)
 	_register_key("interact", KEY_F)
+	_register_key("leave_dungeon", KEY_L)
 	_register_key("stairs_down", KEY_R)
 	_register_key("stairs_up", KEY_T)
 	_register_key("combat_attack", KEY_1)

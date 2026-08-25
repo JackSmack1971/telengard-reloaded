@@ -139,7 +139,9 @@ func _draw_hud() -> void:
 	draw_string(font, Vector2(916, 264), "SP   %s / %s" % [hud.get("spell_power", 0), hud.get("max_spell_power", 0)], HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color("7cb9e8"))
 	draw_string(font, Vector2(916, 304), "Carried gold   %s" % hud.get("carried_gold", 0), HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("d9ad62"))
 	draw_string(font, Vector2(916, 330), "Secured gold   %s" % hud.get("secured_gold", 0), HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("d9ad62"))
-	draw_string(font, Vector2(916, 356), "Map: unknown / visited / visible", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("8295b5"))
+	var player_position: Dictionary = _frame.get("player_position", {})
+	draw_string(font, Vector2(916, 356), "Floor %s" % player_position.get("floor", "-"), HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("b4c3d9"))
+	draw_string(font, Vector2(916, 378), "Map: unknown / visited / visible", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("8295b5"))
 
 	var combat: Dictionary = _frame.get("combat", {})
 	if not combat.is_empty():
@@ -148,8 +150,8 @@ func _draw_hud() -> void:
 		draw_string(font, Vector2(916, 438), str(combat.get("phase", "contact")), HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("b4c3d9"))
 		draw_string(font, Vector2(916, 466), "Threat   %s" % combat.get("threat_level", "unknown"), HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("d9ad62"))
 	if _client_state == "INN" or _client_state == "DUNGEON":
-		draw_string(font, Vector2(916, 522), "F  Interact   R/T  Stairs down/up   M  Map", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("8295b5"))
-		draw_string(font, Vector2(916, 544), "I  Inventory   K  Spells   Esc  Pause", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("8295b5"))
+		draw_string(font, Vector2(916, 522), "F  Interact   R/T  Stairs down/up   L  Leave", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("8295b5"))
+		draw_string(font, Vector2(916, 544), "M  Map   I  Inventory   K  Spells   Esc  Pause", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("8295b5"))
 		if not combat.is_empty():
 			draw_string(font, Vector2(916, 590), "1 Attack  2 Defend  3 Flee", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("d9ad62"))
 			draw_string(font, Vector2(916, 610), "4 Spell   5 Item", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("d9ad62"))

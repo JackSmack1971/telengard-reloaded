@@ -45,6 +45,43 @@ public sealed class GodotHostCompositionTests
     }
 
     [Fact]
+    public void Host_rejects_mvp_boundary_transition_before_loading_an_out_of_range_layout()
+    {
+        var layouts = new FloorLayoutCache(1234, "generator-1");
+        var floorFive = layouts.Get(5);
+        var initial = GameState.Create(1234) with
+        {
+            Inn = new InnState { IsAtInn = false },
+            Expedition = new ExpeditionState { Active = true, FloorsVisited = [1, 5] },
+            Player = new PlayerState { Alive = true, Position = floorFive.StairsDown }
+        };
+        var session = CreateSession(initial, layouts);
+
+        Assert.Throws<InvalidOperationException>(() => session.Dispatch(Request("{\"type\":\"change_floor\",\"direction\":\"Down\"}")));
+        Assert.Equal(initial, session.CurrentState);
+    }
+
+    [Fact]
+    public void Host_composes_floor_one_leave_boundary()
+    {
+        var layouts = new FloorLayoutCache(1234, "generator-1");
+        var floorOne = layouts.Get(1);
+        var initial = GameState.Create(1234) with
+        {
+            Inn = new InnState { IsAtInn = false },
+            Expedition = new ExpeditionState { Active = true, FloorsVisited = [1], CarriedGold = 7 },
+            Player = new PlayerState { Alive = true, Position = floorOne.StairsDown, CarriedGold = 7 }
+        };
+        var session = CreateSession(initial, layouts);
+
+        session.Dispatch(Request("{\"type\":\"leave_dungeon\"}"));
+
+        Assert.True(session.CurrentState.Inn.IsAtInn);
+        Assert.False(session.CurrentState.Expedition.Active);
+        Assert.Equal(7, session.CurrentState.SecuredProgress.SecuredGold);
+    }
+
+    [Fact]
     public void Host_composition_delegates_attack_spell_and_equipment_to_core()
     {
         var attackState = ActiveCombat(CombatAction.Attack, hitPoints: 5);
