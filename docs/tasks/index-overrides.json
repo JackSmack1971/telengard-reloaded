@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "milestone": "five-floor-mvp-demo",
+  "milestone": "core-alpha",
   "tickets": {
     "TEL-093": {
       "track": "persistence",
