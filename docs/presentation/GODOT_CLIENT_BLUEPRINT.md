@@ -2,141 +2,175 @@
 
 ## Purpose
 
-This document defines the durable development methodology for moving from the
-TEL-091 Modern renderer prototype to a complete playable Godot client without
-undoing Telengard Reloaded's renderer-independent simulation architecture.
+This document defines the durable development methodology for building a
+playable Godot client without undoing Telengard Reloaded's renderer-independent
+simulation architecture.
 
 It is a project-local extension of `docs/modern-telengard-spec.md`, not a change
-to the source specification. The source specification deliberately stops at a
-presentation-separation proof before presentation becomes expensive. This
-blueprint defines the next repository milestone and the gates that must precede
-large-scale production art.
+to the source specification. The blueprint defines how the repository moves from
+presentation separation through a demonstrable MVP, a complete first-slice
+client, and finally gated production art.
 
-## Current repository boundary
+## Current product sequence
 
-TEL-090 through TEL-093 proved the presentation boundary:
+The presentation roadmap is now explicitly staged:
 
 ```text
-authoritative GameState
-        |
-        v
-PresentationStateAdapter
-        |
-        v
-ModernRenderFrame
-        |
-        v
-visual-only Godot prototype
+Five-Floor MVP Demo
+TEL-129 -> TEL-130 -> TEL-131 -> TEL-132
+                |
+                v
+Broader Playable Godot Vertical Slice
+TEL-126 -> TEL-127
+                |
+                v
+Art Production Ready
+TEL-128
+                |
+                v
+production art/audio batches
 ```
 
-`src/Telengard.Godot/ModernRenderer.tscn` is therefore a renderer prototype,
-not a complete game client. It does not currently own the application/session
-lifecycle, simulation hosting, input-to-command bridge, simulation clock,
-content bootstrap, save/resume flow, menu/navigation flow, or production asset
-pipeline.
+The immediate product milestone is the **Five-Floor MVP Demo** defined by
+`docs/MVP_DEMO.md` and `docs/gates/FIVE-FLOOR-MVP-DEMO.md`.
 
-TEL-107 proves that the representative gameplay systems compose headlessly.
-TEL-109 establishes the external content-pack boundary. TEL-110 through TEL-116
-remain the authored first-slice content track.
+The broader TEL-127 Playable Godot Vertical Slice and TEL-128 Art Production
+Ready gates remain valid, but they are post-MVP work and must not pull breadth
+or polish ahead of the five-floor integration proof.
 
-## New milestone: Playable Godot Vertical Slice
+## Current repository boundary — reconciled 2026-08-25
 
-The next presentation milestone is **Playable Godot Vertical Slice**.
+The repository is no longer at the TEL-091 visual-only prototype stage.
+
+Implemented or substantially implemented presentation foundations now include:
+
+- TEL-090–TEL-093: renderer-safe presentation separation and compatibility;
+- TEL-107: headless representative gameplay integration proof;
+- TEL-109–TEL-116: external production first-slice content pack for floors 1–5;
+- TEL-120: external authoritative Godot host/bootstrap;
+- TEL-121: input/simulation-clock bridge implemented and headlessly verified,
+  with broader manual observation still pending;
+- TEL-122: session/scene-flow implementation and runtime probe, with broader
+  visual/manual observation still pending;
+- TEL-123: production presentation identity and asset registry;
+- TEL-124: content-aware dungeon graybox, implemented and verified; and
+- TEL-125: in-progress HUD/interaction work, including combat-intent bridging.
+
+The current architecture is therefore closer to:
+
+```text
+authoritative Core + production ContentPack
+        |
+        v
+external Telengard.GodotHost
+        |
+        v
+renderer-safe Modern projection
+        |
+        v
+Godot application/session/input shell
+        |
+        v
+graybox world + HUD/panels
+```
+
+The remaining MVP gap is not another renderer prototype. It is production-host
+composition: legitimate floors 1–5 traversal, authored runtime ecology,
+treasure/feature integration, reliable demo setup/combat flow, and a real
+five-floor acceptance run.
+
+## Immediate milestone: Five-Floor MVP Demo
 
 Definition of done:
 
-> A player can launch the Godot client and complete the representative floors
-> 1-5 Telengard loop using ordinary keyboard/controller interaction and real
-> authored slice content, while every authoritative state change remains owned
-> by the renderer-independent simulation.
+> A player can launch Godot, start a deterministic demo-ready authoritative
+> session, enter the real Upper Ruins, legitimately traverse floors 1–5, engage
+> representative authored gameplay, and reach a clear floor-5 end-of-demo state
+> without developer/debug commands.
 
-The client must support, with placeholder/graybox visuals where appropriate:
+The MVP may use:
+
+- a fixed world seed;
+- a fixed/demo character policy;
+- explicit replaceable demo tuning;
+- placeholder/graybox presentation; and
+- keyboard-first acceptance.
+
+The MVP does **not** require save/load breadth, all character-creation modes,
+full controller parity, complete inventory/death/Legacy UX, or production art.
+Those belong to later gates.
+
+### MVP integration sequence
+
+#### TEL-129 — floor-aware hosted session
+
+Compose deterministic layouts for floors 1–5 behind the Godot host boundary,
+use the player's current floor layout for movement, expose legitimate Core stair
+transitions, and refresh the projection after floor changes.
+
+#### TEL-130 — production runtime ecology
+
+Connect the production encounter tables, authored features/outcomes, and
+loot/treasure boundaries to normal hosted exploration. Do not reimplement these
+rules in Godot.
+
+#### TEL-131 — demo setup and combat closure
+
+Supply explicit demo-ready authoritative setup/configuration and ensure a
+naturally triggered encounter progresses through the existing Core combat phases
+to a usable player action and continuation.
+
+#### TEL-132 — real five-floor acceptance
+
+Run the actual fixed-seed Godot route through floor 5 and record evidence against
+`docs/gates/FIVE-FLOOR-MVP-DEMO.md`.
+
+## Post-MVP milestone: Playable Godot Vertical Slice
+
+After TEL-132 passes, the project resumes the broader production-shaped client
+milestone governed by `docs/gates/GODOT-PLAYABLE-SLICE.md` and TEL-127.
+
+That later gate adds the breadth deliberately deferred by the MVP, including:
 
 ```text
-launch
-  -> create/select hero
-  -> deterministic world setup
+startup / new / load
+  -> complete required hero/setup flows
   -> inn/preparation
-  -> enter dungeon
-  -> move/explore/map
-  -> interact with features
-  -> encounter monster
-  -> fight or flee
-  -> acquire treasure
-  -> descend or retreat
-  -> die or reach safety
-  -> bank progress / retain knowledge as applicable
+  -> full first-slice exploration/interaction breadth
+  -> fight + flee + features + treasure
+  -> death/Legacy outcomes
+  -> return/banking/knowledge
   -> save/suspend/resume
+  -> keyboard + controller acceptance
   -> begin another expedition
 ```
 
-Passing this milestone is governed by
-`docs/gates/GODOT-PLAYABLE-SLICE.md` and owned by TEL-127.
+TEL-126 owns Godot persistence/application lifecycle integration before TEL-127
+can pass.
 
-A separate **Art Production Ready** transition follows the playable milestone.
-TEL-128 owns that gate so the project can be fully playable while still
-explicitly blocked from final asset production by unresolved art-direction or
-pipeline decisions.
+A separate **Art Production Ready** transition follows TEL-127. TEL-128 owns that
+gate so the project can be fully playable while still explicitly blocked from
+systematic final asset production by unresolved art-direction or pipeline
+choices.
 
 ## Development tracks
 
-Development proceeds as two coordinated tracks rather than one strictly serial
-queue.
+The earlier content/client parallel-development strategy has converged: the
+representative TEL-110–TEL-116 content pack is now implemented. The immediate
+queue is therefore integration-first rather than two-track content authoring.
 
-### Track A — Representative authored content
+Current scheduling priority:
 
-TEL-110 through TEL-116 author the §48 floors 1-5 content pack:
+1. TEL-129 — multi-floor host composition;
+2. TEL-130 — encounters/features/treasure composition;
+3. TEL-131 — demo setup/combat closure;
+4. TEL-132 — Five-Floor MVP acceptance;
+5. TEL-126 — persistence breadth;
+6. TEL-127 — full playable-client acceptance;
+7. TEL-128 — Art Production Ready.
 
-- biome/band data;
-- monster roster;
-- encounter ecology;
-- item roster;
-- loot tables;
-- spell roster;
-- fountain/altar/pit/teleporter definitions.
-
-### Track B — Playable Godot client and handoff
-
-TEL-120 onward owns the production-client transition. Foundation slices that do
-not depend on final content identities may proceed while TEL-110 through
-TEL-116 are still being authored. Content-dependent graybox/integration slices
-must declare and respect their explicit TEL-110–TEL-116 dependencies.
-
-TEL-127 proves the playable client. TEL-128 separately proves that the
-presentation/content/UX/art pipeline is stable enough to start systematic final
-asset batches.
-
-The autonomous next-slice workflow must compare eligible work across both
-tracks. It must not rigidly choose the lowest TEL number, and it must not starve
-one track when a small dependency-critical slice on the other track would
-unlock the convergence milestone.
-
-## Convergence rule
-
-The tracks converge before broad presentation production:
-
-```text
-TEL-110..116 real slice content -------+
-                                       |
-Godot host/input/session foundation ---+--> graybox playable client
-                                       |
-presentation + asset contracts --------+
-                                              |
-                                              v
-                               TEL-127 / GODOT-PLAYABLE-SLICE
-                                              |
-                                              v
-                               TEL-128 / ART-PRODUCTION-READY
-                                              |
-                                              v
-                                  production asset batches
-```
-
-No final/expensive production-art batch should be introduced before TEL-128
-passes `ART-PRODUCTION-READY`. Concept exploration, style studies, UI
-wireframes, placeholder assets, debug graphics, and graybox presentation are
-allowed before that gate because they exist to validate the client and visual
-language rather than lock production inventory.
+Status and dependency eligibility remain canonical in `docs/tasks/README.md` and
+the generated `docs/tasks/index.json`.
 
 ## Client architecture contract
 
@@ -147,6 +181,9 @@ PLAYER INPUT
     |
     v
 Godot input adapter
+    |
+    v
+host/application request boundary
     |
     v
 simulation command
@@ -182,7 +219,7 @@ Godot scenes / UI / animation / audio
 ### Godot must not own
 
 - authoritative player position;
-- movement legality;
+- movement or stair legality;
 - encounter resolution;
 - combat damage/outcomes;
 - item ownership or equipment truth;
@@ -194,48 +231,82 @@ Godot scenes / UI / animation / audio
 - save-domain state;
 - any second copy of a gameplay rule.
 
-Animation signals and UI callbacks may request simulation commands. They may
-not apply authoritative results themselves.
+Animation signals and UI callbacks may request simulation commands. They may not
+apply authoritative results themselves.
 
 ## Required host responsibilities
 
-The playable host boundary must explicitly cover:
+The production host/application boundary must explicitly cover:
 
-1. **Bootstrap** — load content, create or load authoritative state, initialize
-   command/event services, and establish the current presentation scene.
-2. **Input bridge** — translate keyboard/controller/UI intent to existing
+1. **Bootstrap** — load production content, create/load authoritative state, and
+   establish a renderer-safe initial frame.
+2. **Floor composition** — obtain deterministic layouts for the authoritative
+   current floor and adjacent transition destinations without storing geography
+   authority in Godot.
+3. **Input bridge** — translate keyboard/controller/UI intent to existing
    simulation commands.
-3. **Command dispatch** — submit commands through the simulation boundary and
+4. **Command dispatch** — submit commands through the simulation boundary and
    report validation failures without local state mutation.
-4. **Event collection** — capture committed domain events in order for
+5. **Runtime ecology composition** — supply authored encounter/feature/loot
+   configuration to the existing Core resolvers rather than implementing rules
+   in the host or renderer.
+6. **Event collection** — capture committed domain events in order for
    presentation/audio/VFX cues.
-5. **Projection refresh** — rebuild renderer-safe presentation state after
+7. **Projection refresh** — rebuild renderer-safe presentation state after
    committed changes rather than reading hidden runtime internals from Godot.
-6. **Simulation clock** — drive normal/slowed/paused simulation semantics
-   independently of render FPS.
-7. **Scene/session flow** — transition among setup, inn, dungeon, menus, death,
-   and Legacy replacement as a presentation of simulation state.
-8. **Persistence flow** — invoke explicit save/suspend/load boundaries and
-   surface version/format errors safely.
-9. **Content/resource binding** — resolve stable content/presentation identities
-   to Godot assets without placing Godot resource paths in authoritative state.
+8. **Simulation clock** — drive normal/slowed/paused semantics independently of
+   render FPS.
+9. **Scene/session flow** — present setup, inn, dungeon, menus, death, return,
+   and later load/resume states as views of simulation/application truth.
+10. **Persistence flow** — after MVP, invoke explicit save/suspend/load
+    boundaries and surface version/format errors safely.
+11. **Content/resource binding** — resolve stable content/presentation identities
+    to Godot assets without putting Godot resource paths in authoritative state.
+
+## Floor-aware session rule
+
+A hosted session must never assume one `FloorLayout` represents the whole
+dungeon. The authoritative player floor determines which deterministic layout is
+used for movement/render projection. A stair transition uses the current layout
+and the adjacent destination layout through the existing Core transition
+resolver.
+
+For the MVP, the client deliberately stops at the first-slice floor-5 endpoint
+even though Core supports deeper floors.
+
+This rule is an application-composition requirement, not a new simulation rule.
+
+## Runtime ecology rule
+
+Authored first-slice content must reach normal play through existing content/Core
+boundaries:
+
+- encounter tables produce floor-appropriate `EncounterTriggerConfiguration`;
+- first-slice feature definitions produce deterministic runtime feature state and
+  use existing fountain/altar/pit/teleporter resolvers;
+- loot tables feed the existing treasure acquisition boundary;
+- carried/unsecured and secured progress remain distinct.
+
+Do not introduce renderer-owned encounter rolls, feature outcomes, drop rolls,
+or wealth mutation to make the MVP easier.
 
 ## Presentation-contract rule
 
-The current `ModernRenderFrame` is a prototype contract, not automatically the
-final production visual contract. Before a Godot scene reaches into
-`GameState`, content internals, or save DTOs to obtain missing drawing data,
-expand the renderer-safe projection instead.
+The `ModernRenderFrame`/presentation projection is a renderer-safe contract, not
+permission for Godot to reach into `GameState`, content internals, or save DTOs.
+When the client needs new observable drawing/UI data, extend the renderer-safe
+projection at the appropriate boundary.
 
 Production presentation should receive only information legitimately observable
-by the player. Examples of likely required presentation identity include:
+by the player, including when applicable:
 
 - visible tile/connection geometry;
-- stair/door/feature markers;
+- current floor/player position;
+- stair/door/observed-feature markers;
 - biome/environment theme identity;
-- monster presentation identity for an observed encounter;
+- observed monster presentation identity;
 - item/spell presentation identity once legitimately known;
-- safe UI state and command availability;
+- safe HUD state and command availability;
 - presentation cues derived from committed events.
 
 A projection must not expose hidden feature outcomes, raw danger values,
@@ -244,8 +315,12 @@ simulation intentionally withholds.
 
 ## Presentation asset identity
 
-Presentation resources should be mapped from stable content/presentation IDs by
-a presentation-side registry. Prefer a manifest/resource registry such as:
+Presentation resources map from stable content/presentation IDs through the
+presentation-side registry. Do not scatter direct ID-to-resource-path
+conditionals throughout Godot scenes and do not put Godot resource paths into
+authoritative simulation/save state.
+
+Representative identity shape:
 
 ```text
 monster: crypt_stalker
@@ -272,11 +347,9 @@ feature: azure_fountain
   audio
 ```
 
-Do not scatter direct content-id-to-resource-path conditionals throughout Godot
-scenes. Do not put Godot resource paths into authoritative simulation state.
 Whether presentation keys become standardized fields in additional content
-schemas requires an explicit architecture decision; until then, keep the
-mapping presentation-side.
+schemas requires an explicit architecture decision; until then, keep mapping
+presentation-side.
 
 ## Placeholder-first rule
 
@@ -287,26 +360,28 @@ placeholders. A placeholder should prove:
 - visibility/fog readability;
 - interaction affordance;
 - state transitions;
-- controller/keyboard navigation;
+- controller/keyboard navigation where required by the current gate;
 - combat readability;
 - asset-state requirements;
 - deterministic replay compatibility.
 
-After the placeholder path works, TEL-127 proves the complete playable client.
-Final production assets still wait for TEL-128 to pass the separate readiness
-gate.
+Placeholder quality is enough for TEL-132 and TEL-127. Final production assets
+still wait for TEL-128.
 
 ## UX contract
 
 Use `docs/presentation/UX_INTERACTION_BLUEPRINT.md` for user-flow and input
-rules. Required design principles remain:
+rules. Durable principles remain:
 
 - keyboard-first;
-- controller-first;
+- controller-capable;
 - configurable;
 - contextual;
 - low clutter;
 - distinguish deliberate mystery from missing/bad UI information.
+
+For the Five-Floor MVP, keyboard-first normal input is sufficient; complete
+controller parity remains a TEL-127 requirement.
 
 ## Art and asset pipeline contract
 
@@ -315,56 +390,34 @@ Use:
 - `docs/presentation/ART_DIRECTION_BLUEPRINT.md` for visual-language decisions;
 - `docs/presentation/ASSET_PIPELINE_BLUEPRINT.md` for resource organization,
   import, validation, and content-ID mapping;
-- `docs/gates/ART-PRODUCTION-READY.md` for TEL-128 acceptance before production
-  asset batches.
+- `docs/gates/ART-PRODUCTION-READY.md` for TEL-128 acceptance before systematic
+  production asset batches.
 
-Art direction can be explored early. Production inventory should not be frozen
-until the corresponding authored content identity and placeholder states are
-stable.
-
-## Ticket sequence
-
-The canonical Godot client/readiness tickets live in `docs/tasks/README.md` and
-individual `docs/tasks/TEL-120.md` onward files. Their dependency graph, not
-numeric order across the content/client tracks, controls eligibility.
-
-At a high level the sequence is:
-
-```text
-host/bootstrap
-  -> input + simulation clock
-  -> session/scene flow
-  -> production presentation + asset contract
-  -> content-aware dungeon graybox
-  -> HUD/interaction graybox
-  -> persistence
-  -> TEL-127 playable-client acceptance
-  -> TEL-128 art-production readiness
-  -> production asset batches
-```
+Art direction can be explored early. Production inventory must not displace MVP
+integration and should not be frozen until TEL-128 passes.
 
 ## Autonomous selection policy
 
 `$telengard-next-slice` must:
 
-1. read this blueprint when any TEL-110–TEL-128 work is a serious candidate;
-2. inspect both content and Godot tracks;
-3. use explicit ticket dependencies to determine eligibility;
-4. prefer dependency-unblocking work and convergence toward the playable slice;
+1. read `docs/MVP_DEMO.md` when the generated milestone is
+   `five-floor-mvp-demo`;
+2. select TEL-129, then TEL-130, TEL-131, and TEL-132 as dependencies allow;
+3. require evidence before allowing post-MVP TEL-126–TEL-128 work to pre-empt an
+   eligible MVP ticket;
+4. use explicit ticket dependencies rather than numeric order alone;
 5. keep production-art work blocked until TEL-128 passes;
-6. require presentation observation for Godot-visible changes when the ticket
-   acceptance criteria call for it;
-7. if the current environment cannot perform required Godot observation,
-   select another eligible non-Godot slice when one exists; otherwise stop with
-   a concrete environment blocker rather than weakening acceptance criteria;
-8. if TEL-128 depends on unresolved human/product visual direction, report the
-   smallest explicit decision needed rather than inventing an art policy.
+6. require presentation observation for Godot-visible changes when the selected
+   ticket requires it;
+7. use `godot-doctor.ps1` before claiming the runtime is unavailable; and
+8. stop on unresolved tuning/visual/repository policy rather than inventing a
+   permanent policy to keep automation moving.
 
 ## Art-production transition
 
-The project has three distinct presentation stages:
+The project has four distinct presentation stages:
 
-### 1. Visual development — allowed now
+### 1. Visual development — allowed
 
 - styleframes;
 - tile/camera studies;
@@ -374,15 +427,21 @@ The project has three distinct presentation stages:
 - atmosphere studies;
 - placeholder/icon language experiments.
 
-### 2. Graybox playable production — TEL-120 through TEL-127
+### 2. Five-Floor MVP integration — TEL-129 through TEL-132
 
-- actual Godot host and input path;
-- placeholder dungeon rendering;
-- placeholder monster/feature/item/spell representations;
-- complete interactive UX;
-- deterministic full-loop acceptance.
+- real multi-floor hosted session;
+- production encounters/features/treasure in normal play;
+- reliable demo combat/setup path;
+- fixed-seed five-floor acceptance.
 
-### 3. Production art — TEL-128 gated
+### 3. Broad graybox playable production — TEL-126/TEL-127
+
+- save/load lifecycle;
+- complete required first-slice UX breadth;
+- keyboard/controller acceptance;
+- full representative loop acceptance.
+
+### 4. Production art — TEL-128 gated
 
 Final tiles, sprites, animation sets, VFX, UI art, icons, and production audio
 begin as systematic content batches only after TEL-128 records passing evidence
@@ -395,10 +454,10 @@ This blueprint does not:
 - choose the final visual style;
 - define permanent gameplay balance;
 - authorize broad fifty-floor content production;
-- replace the TEL-110–TEL-116 first-slice content work;
 - move gameplay rules into Godot;
+- require save/load or full controller breadth before the five-floor MVP;
 - require final art before the game is playable;
 - require one giant "build the client" pull request.
 
-The one-slice transaction rule remains in force. Each Godot ticket must be
-small enough to implement, observe, review, verify, and merge independently.
+The one-slice transaction rule remains in force. Each TEL ticket must be small
+enough to implement, observe, review, verify, and merge independently.
