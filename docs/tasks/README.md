@@ -1,16 +1,46 @@
 # Modern Telengard implementation task ledger
 
-This ledger is derived from the ordered TEL tickets in `docs/modern-telengard-spec.md` §49. The Core Alpha, first-vertical-slice content, and playable-Godot-client extension tickets below are project-local implementation tasks, not additions or changes to the source specification. Numeric gaps in the specification-defined series remain intentional.
+This ledger is the current human-readable authority for TEL ticket status. It is
+derived from the ordered TEL tickets in `docs/modern-telengard-spec.md` plus
+project-local extension tickets for Core Alpha, representative content, the
+Godot client, repository engineering, and the Five-Floor MVP Demo.
 
-## Rules
+## Current product priority
 
-- The specification and repository `AGENTS.md` are authoritative.
-- These are implementation tasks, not gameplay decisions. Undefined formulas, balancing, and policies remain `CONFIGURATION/TUNING DECISION REQUIRED`.
-- Every task preserves renderer-independent authoritative simulation, deterministic replay, explicit save DTOs/migrations, content separation, and documented non-goals.
-- Status is `Not started` until implementation and verification evidence exist.
-- This ledger is the current authority for TEL-ticket status. `docs/BUILD_STATUS.md` is append-only verification history; it does not override this ledger when historical evidence and current status differ.
-- For TEL-110–TEL-128 selection, also follow `docs/presentation/GODOT_CLIENT_BLUEPRINT.md`; the content and Godot-client tracks may progress in parallel when explicit dependencies are satisfied.
-- Production-art tickets must not be introduced or selected until `docs/gates/ART-PRODUCTION-READY.md` has passing evidence.
+The immediate milestone is the **Five-Floor MVP Demo** defined in
+[`../MVP_DEMO.md`](../MVP_DEMO.md).
+
+The next implementation sequence is intentionally:
+
+```text
+TEL-129 → TEL-130 → TEL-131 → TEL-132
+```
+
+That sequence composes the already-built simulation/content/client foundations
+into one legitimate fixed-seed floor-1-through-floor-5 Godot playthrough.
+
+Until TEL-132 passes, TEL-126 save/resume breadth, TEL-127 full Playable Godot
+Vertical Slice acceptance, TEL-128 Art Production Ready, and production asset
+work are **post-MVP**. They remain valid tickets but must not pre-empt the MVP
+sequence unless repository evidence proves one is a hard prerequisite or the
+user explicitly changes the milestone.
+
+## Status/provenance rules
+
+- The specification and repository `AGENTS.md` are authoritative for long-term
+  product intent and repository contracts.
+- This file is authoritative for TEL IDs, titles, and status.
+- `docs/tasks/index.json` is the generated compact scheduling projection of this
+  ledger plus `index-overrides.json`.
+- `docs/BUILD_STATUS.md` is append-only verification history and does not
+  override this ledger or current implementation evidence.
+- Ticket status must describe reality; planning/documentation alone never marks
+  behavior implemented.
+- Undefined formulas, balance, tuning, and policies remain
+  `CONFIGURATION/TUNING DECISION REQUIRED` unless intentionally supplied as
+  explicit replaceable demo configuration.
+- Production-art tickets remain blocked until `docs/gates/ART-PRODUCTION-READY.md`
+  passes.
 
 ## Ordered ledger
 
@@ -105,12 +135,10 @@ This ledger is derived from the ordered TEL tickets in `docs/modern-telengard-sp
 - [TEL-092.md](TEL-092.md) — Build Terminal renderer prototype — Implemented and verified
 - [TEL-093.md](TEL-093.md) — Verify renderer-independent save compatibility — Implemented and verified
 
-## Core Alpha extensions (project-local)
+### Core Alpha extensions (project-local)
 
-These tickets close requirements that are necessary for the §51 Core Alpha
-checklist but are not owned by an existing §49 ticket. They are intentionally
-narrow implementation extensions and remain `Not started` until implemented
-and verified.
+These tickets close requirements needed by the original Core Alpha checklist
+without changing the source specification.
 
 - [TEL-100.md](TEL-100.md) — Define character creation command boundary — Implemented and verified
 - [TEL-101.md](TEL-101.md) — Implement rolled character creation — Implemented and verified
@@ -122,93 +150,94 @@ and verified.
 - [TEL-107.md](TEL-107.md) — Add the Core Alpha vertical-slice integration proof — Implemented and verified
 - [TEL-108.md](TEL-108.md) — Add deterministic developer debug commands — Implemented and verified
 
-## Recommended First Vertical Slice content extensions (project-local)
+### Recommended First Vertical Slice content extensions (project-local)
 
-These tickets populate only the §48 representative slice: floors 1–5, one
-dungeon biome, 8–12 monsters, 10–15 items, 6–8 spells, and the four named
-features. They author data against the existing `Telengard.Content` schemas;
-they do not add fifty-floor content, move rules into renderers, or reimplement
-the already-owned feature, journal, wealth, inn, or death mechanics.
+The representative production content pack is complete for the current MVP:
+one Upper Ruins band covering floors 1–5, eight monsters, first-slice encounter
+and loot tables, representative items/spells, and the four named dungeon
+features.
 
 - TEL-109 — Establish the data-driven vertical-slice content pack — Implemented and verified
-  - Define the external content files, catalog/loader boundary, validation, and content-version handling for the slice.
-  - Keep authored definitions separate from simulation logic and presentation; do not add renderer-owned content rules.
 - [TEL-110.md](TEL-110.md) — Author the floors 1–5 dungeon biome and band data — Implemented and verified
-  - Provide one biome covering only floors 1–5, with data references for its encounter, feature, and loot ecology.
-  - Keep unresolved pacing, weights, and balance as `CONFIGURATION/TUNING DECISION REQUIRED`.
 - TEL-111 — Author the first-slice monster roster — Implemented and verified
-  - Provide 8–12 distinct monster definitions using families, traits, behaviors, actions, resistances, vulnerabilities, spawn rules, and loot references.
-  - Require ecological differences; do not fill the roster with stat-scaled variations of one monster.
 - TEL-112 — Author first-slice encounter ecology tables — Implemented and verified
-  - Provide deterministic, data-driven floor-band encounter tables for floors 1–5 that reference the TEL-111 monster IDs.
-  - Keep encounter selection and validation in the existing simulation/content boundary, not in renderer code.
 - TEL-113 — Author the first-slice item roster — Implemented and verified
-  - Provide 10–15 item definitions using the existing categories, properties, identification, affix, curse, and depth-rule fields.
-  - Keep item-instance creation and treasure resolution in the existing item/expedition tickets.
 - TEL-114 — Author first-slice loot tables — Implemented and verified
-  - Provide data-driven loot tables that reference TEL-113 item IDs and the existing carried-wealth/treasure boundary.
-  - Do not invent a permanent drop-rate, value, or loss formula where the specification is silent.
 - TEL-115 — Author the first-slice spell roster — Implemented and verified
-  - Provide 6–8 spell definitions with targeting, effects, interactions, costs, and discovery descriptions for the existing spell system.
-  - Leave balance and undefined spell formulas configurable.
 - TEL-116 — Author the four first-slice dungeon feature definitions — Implemented and verified
-  - Provide data definitions and outcomes for exactly fountain, altar, pit, and teleporter using the existing generic feature and knowledge contracts.
-  - Do not duplicate the already-implemented feature resolvers or encode feature behavior in a renderer.
 
-## Playable Godot client extensions (project-local)
+### Playable Godot client extensions (project-local)
 
-TEL-091 is the visual Modern renderer prototype and TEL-093 proves renderer
-separation/save compatibility. The tickets below own the separate transition to
-a complete playable Godot application and the later art-production handoff.
-Follow `docs/presentation/GODOT_CLIENT_BLUEPRINT.md` and the active umbrella
-ExecPlan.
-
-The client track intentionally overlaps the content track: TEL-120–TEL-123 may
-proceed when their dependencies are satisfied while TEL-110–TEL-116 are still
-being authored. TEL-124 onward declares the content dependencies needed for
-real first-slice integration. Numerical order alone does not determine next
-slice eligibility.
+These remain the broader production-shaped client track. Status below has been
+reconciled against the ticket evidence and current `main` implementation rather
+than older umbrella-plan snapshots.
 
 - [TEL-120.md](TEL-120.md) — Build playable Godot application host and bootstrap — Implemented and verified
 - [TEL-121.md](TEL-121.md) — Implement Godot input-to-command and simulation-clock bridge — In progress
-- [TEL-122.md](TEL-122.md) — Implement Godot client session and scene flow — Not started
+- [TEL-122.md](TEL-122.md) — Implement Godot client session and scene flow — In progress
 - [TEL-123.md](TEL-123.md) — Expand production presentation contract and asset registry — Implemented and verified
-- [TEL-124.md](TEL-124.md) — Build first-slice dungeon and content graybox presentation — In progress
+- [TEL-124.md](TEL-124.md) — Build first-slice dungeon and content graybox presentation — Implemented and verified
 - [TEL-125.md](TEL-125.md) — Build playable HUD and first-slice interaction flows — In progress
 - [TEL-126.md](TEL-126.md) — Integrate Godot save, suspend, resume, and session lifecycle — Not started
 - [TEL-127.md](TEL-127.md) — Verify playable Godot vertical slice — Not started
 - [TEL-128.md](TEL-128.md) — Verify Art Production Ready gate — Not started
 
-### Presentation production gates
+TEL-121 and TEL-122 have substantial implemented/headless/runtime-probe evidence
+but retain `In progress` status because their broader manual/interactive
+acceptance is still outstanding. TEL-124's own verification record states that
+it is implemented and verified and is therefore no longer treated as an active
+blocker.
 
-- `docs/gates/GODOT-PLAYABLE-SLICE.md` must pass using real first-slice content and placeholder/graybox presentation before the client is treated as a playable production-shaped vertical slice. TEL-127 owns this acceptance.
-- `docs/gates/ART-PRODUCTION-READY.md` must pass before systematic final tiles, sprites, animations, VFX, UI-art, icon, or production-audio TEL batches are created. TEL-128 owns this separate acceptance.
-- Concept art, style studies, UI wireframes, technical rendering tests, and explicit placeholders are allowed before Art Production Ready because they exist to validate the client and art direction rather than freeze production inventory.
+### Five-Floor MVP Demo extensions (project-local, current priority)
 
-## Repository engineering tickets
+These tickets close the integration gap between the implemented systems above
+and an actual five-floor playable Godot demo. They do not replace TEL-126–128;
+they create a smaller product checkpoint that must pass first.
+
+- [TEL-129.md](TEL-129.md) — Compose deterministic floors 1–5 Godot session — Not started
+- [TEL-130.md](TEL-130.md) — Compose first-slice encounters, features, and treasure into Godot demo — Not started
+- [TEL-131.md](TEL-131.md) — Close MVP demo setup and combat playthrough path — Not started
+- [TEL-132.md](TEL-132.md) — Verify fixed-seed five-floor MVP demo — Not started
+
+### Repository engineering tickets
 
 - [TEL-117.md](TEL-117.md) — Harden coverage and mutation tooling scope — Implemented and verified
 - [TEL-118.md](TEL-118.md) — Reconcile audit remediation status and documentation provenance — Implemented and verified
 - [TEL-119.md](TEL-119.md) — Generate audit status fields from the canonical ticket/exec-plan ledger — Implemented and verified
 
-## Core Alpha and playable-slice coverage audit
+## Current milestone dependency view
 
-The audit compares §26 Character Creation, §48 Recommended First Vertical
-Slice, §51 Definition of Core Alpha, and the post-Phase-9 presentation gap with
-the existing ledger and current implementation evidence:
+The project no longer needs additional foundational simulation or representative
+content work before pursuing the MVP. The critical path is integration:
 
-- **Character creation:** TEL-100 owns the common boundary, while TEL-101–TEL-103 own the three required modes; each mode has different validation and determinism decisions.
-- **Initial player setup and deterministic world-seed selection:** TEL-104 owns selecting/persisting the seed and creating a ready-at-inn game.
-- **Dungeon entry, generation, mapping, hidden geography, descent, return, carried/secured wealth, fight, flee, threat, features, suspend/resume, and renderer independence:** represented by TEL-010–TEL-016, TEL-020–TEL-025, TEL-030–TEL-045, TEL-050–TEL-056, and TEL-090–TEL-093.
-- **Treasure found underground:** TEL-105 owns loot resolution into unsecured expedition state.
-- **Knowledge between Legacy characters:** TEL-106 owns the death-to-new-character profile handoff required by §51.
-- **Core Alpha composition:** TEL-107 provides deterministic headless end-to-end evidence and explicitly leaves production content and renderer/client integration separate.
-- **First vertical-slice content:** TEL-109–TEL-116 own the data-driven pack and representative authored content.
-- **Playable Godot client:** TEL-090–TEL-093 prove renderer boundaries but do not provide an application host or full playable UI. TEL-120–TEL-127 own host/bootstrap, input/time, scene/session flow, production presentation identity, graybox world presentation, interaction UX, persistence, and playable-client acceptance.
-- **Production-art readiness:** TEL-128 separately owns the Art Production Ready gate so unresolved visual direction or asset-pipeline policy cannot make TEL-127 ambiguously complete.
-- **Production art:** intentionally not ticketed yet. Production batches are derived from the validated first-slice asset inventory only after TEL-128 passes.
-- **Depth ecology, broad content counts, and other post-alpha systems:** remain outside the representative slice until separately planned.
+```text
+implemented Core + content + Godot graybox foundations
+                    │
+                    ▼
+               TEL-129
+        floor-aware hosted session
+                    │
+                    ▼
+               TEL-130
+     encounters + features + treasure
+                    │
+                    ▼
+               TEL-131
+       demo setup + combat closure
+                    │
+                    ▼
+               TEL-132
+       real five-floor Godot gate
+                    │
+                    ▼
+          FIVE-FLOOR MVP COMPLETE
+                    │
+                    ▼
+       TEL-126 → TEL-127 → TEL-128
+```
 
 ## Definition of ledger completion
 
-The ledger is complete when every listed task has a focused implementation, tests proportional to its domain behavior, and evidence against its acceptance criteria. Creating these documents does not implement gameplay or a playable client.
+A ticket is complete only when its implementation and required verification
+evidence satisfy its acceptance criteria. Documentation that describes planned
+work does not implement that work.
