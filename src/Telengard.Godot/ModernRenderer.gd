@@ -22,6 +22,7 @@ var _asset_registry = ASSET_REGISTRY_SCRIPT.new()
 var _client_state := "STARTUP"
 var _feedback := ""
 var _title_selection := "NEW_GAME"
+var _panel := ""
 
 
 func render_frame(frame: Dictionary) -> void:
@@ -35,6 +36,10 @@ func set_client_state(client_state: String, feedback: String) -> void:
 
 func set_title_selection(title_selection: String) -> void:
 	_title_selection = title_selection
+	queue_redraw()
+
+func set_panel(panel: String) -> void:
+	_panel = panel
 	queue_redraw()
 
 func current_scene() -> String:
@@ -142,6 +147,14 @@ func _draw_hud() -> void:
 		draw_string(font, Vector2(916, 408), "ENCOUNTER", HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color("e5edf7"))
 		draw_string(font, Vector2(916, 438), str(combat.get("phase", "contact")), HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("b4c3d9"))
 		draw_string(font, Vector2(916, 466), "Threat   %s" % combat.get("threat_level", "unknown"), HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("d9ad62"))
+	if _client_state == "INN" or _client_state == "DUNGEON":
+		draw_string(font, Vector2(916, 522), "F  Interact   M  Map   J  Journal", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("8295b5"))
+		draw_string(font, Vector2(916, 544), "I  Inventory   K  Spells   Esc  Pause", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("8295b5"))
+		if not combat.is_empty():
+			draw_string(font, Vector2(916, 590), "1 Attack  2 Defend  3 Flee", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("d9ad62"))
+			draw_string(font, Vector2(916, 610), "4 Spell   5 Item", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("d9ad62"))
+	if _panel != "":
+		_draw_panel(font)
 
 	if _client_state != "INN" and _client_state != "DUNGEON":
 		_draw_overlay(font)
@@ -154,6 +167,21 @@ func _draw_overlay(font: Font) -> void:
 	draw_string(font, Vector2(230, 360), _overlay_prompt(), HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color("d9ad62"))
 	if not _feedback.is_empty():
 		draw_string(font, Vector2(230, 420), _feedback, HORIZONTAL_ALIGNMENT_LEFT, 660, 14, Color("d36f78"))
+
+func _draw_panel(font: Font) -> void:
+	draw_rect(Rect2(160, 150, 800, 430), Color(0.04, 0.06, 0.1, 0.98), true)
+	draw_rect(Rect2(160, 150, 800, 430), PANEL_EDGE, false, 2.0)
+	draw_string(font, Vector2(205, 205), _panel, HORIZONTAL_ALIGNMENT_LEFT, -1, 26, Color("e5edf7"))
+	draw_string(font, Vector2(205, 245), "Presentation view — authoritative state is unchanged", HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color("8295b5"))
+	var values: Array = _frame.get("inventory", []) if _panel == "INVENTORY" else _frame.get("spells", []) if _panel == "SPELLS" else _frame.get("journal", [])
+	if _panel == "MAP":
+		draw_string(font, Vector2(205, 290), "Map legend: dark unknown · blue observed · slate visited", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color("b4c3d9"))
+		draw_string(font, Vector2(205, 330), "Close with Esc. The map remains governed by the renderer-safe projection.", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("b4c3d9"))
+	else:
+		if values.is_empty():
+			draw_string(font, Vector2(205, 300), "No entries are currently known.", HORIZONTAL_ALIGNMENT_LEFT, -1, 17, Color("b4c3d9"))
+		for index in values.size():
+			draw_string(font, Vector2(205, 300 + index * 28), "• %s" % values[index], HORIZONTAL_ALIGNMENT_LEFT, -1, 17, Color("b4c3d9"))
 
 func _overlay_title() -> String:
 	return {

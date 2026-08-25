@@ -13,6 +13,35 @@ generated views described in [the audit-status engineering guide](engineering/au
 - Godot remains presentation-only; no save schema or authoritative state changed. The Godot shell does not resolve commands or own RNG.
 - Godot 4.7.2 startup smoke checks passed; the host emitted content version `0.2` with 8 monsters, 12 items, 6 spells, and 4 features; the full repository gate passed with 440 tests.
 
+## TEL-125 host composition verification
+
+- 2026-08-24 — Extended `Telengard.GodotHost` with an explicit composition
+  boundary that retains the production `ContentPack`, resolves spell IDs from
+  its spell catalog, injects validated attack/flee/threat configuration, and
+  dispatches combat phase, threat, attack, defend, flee, spell, and equipment
+  commands through `Telengard.Core`.
+- Host transport requests contain intent/action and stable IDs only; Core owns
+  validation, mutation, deterministic flee resolution, spell cost, equipment
+  changes, and committed events. Unknown/mis-phased spell requests were tested
+  to leave state unchanged. No save-version or save-schema change was made.
+- Focused host composition tests passed (2); the canonical Full gate passed
+  (format verification, Release build, 450 Release tests).
+- TEL-125 and TEL-127 remain unaccepted: broader HUD/UI/session/manual Godot
+  criteria are still outstanding. Combat tuning values remain explicit
+  `CONFIGURATION/TUNING DECISION REQUIRED` inputs rather than host defaults.
+
+## TEL-125 combat input resolution bridge
+
+- 2026-08-24 — Keyboard/controller attack, defend, flee, and spell intents now
+  queue the existing Core resolution command after action selection. The Godot
+  application retains only the latest renderer-safe frame to choose a known
+  quick-cast spell; item selection remains unresolved because Core has no
+  corresponding use-item command.
+- Godot 4.7.2 headless project execution passed; focused host composition tests
+  passed (2); canonical Full verification passed with 450 Release tests.
+- TEL-125 remains in progress because full HUD acceptance and interactive
+  keyboard/controller observation are still outstanding. Save impact: none.
+
 ## AUD-004 verification
 
 - Status: implemented; `.github/workflows/verification.yml` runs the

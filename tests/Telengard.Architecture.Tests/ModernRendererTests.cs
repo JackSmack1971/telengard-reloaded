@@ -301,4 +301,25 @@ public sealed class ModernRendererTests
         Assert.Equal(9, frame.Combat.Monster.CurrentHitPoints);
         Assert.Equal(position, frame.Combat.Monster.Position);
     }
+
+    [Fact]
+    public void Create_projects_known_inventory_spells_and_journal_subjects()
+    {
+        var state = GameState.Create(1234) with
+        {
+            Player = new PlayerState
+            {
+                Inventory = ["tarnished_sword"],
+                Spells = ["ember_bolt"]
+            },
+            Knowledge = new KnowledgeState(
+                [new KnowledgeEntry("crypt_stalker", ["observed"], sampleCount: 1)])
+        };
+
+        var frame = ModernRenderer.Create(PresentationStateAdapter.Create(state));
+
+        Assert.Equal(["tarnished_sword"], frame.Inventory);
+        Assert.Equal(["ember_bolt"], frame.Spells);
+        Assert.Equal(["crypt_stalker"], frame.Journal);
+    }
 }

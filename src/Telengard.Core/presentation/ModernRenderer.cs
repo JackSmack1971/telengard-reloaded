@@ -58,7 +58,10 @@ public static class ModernRenderer
                 state.SecuredGold,
                 state.Player.Alive),
             state.Combat is null ? null : new ModernCombatOverlay(state.Combat),
-            events.Select(CreateCue).Where(cue => cue is not null).Cast<ModernCue>().ToArray());
+            events.Select(CreateCue).Where(cue => cue is not null).Cast<ModernCue>().ToArray(),
+            state.Player.Inventory,
+            state.Player.Spells,
+            state.Knowledge.Select(entry => entry.SubjectId));
     }
 
     private static IReadOnlyList<ModernTileMarker> CreateTiles(PresentationState state)
@@ -279,7 +282,10 @@ public sealed record ModernRenderFrame
         IEnumerable<ModernFeatureMarker> features,
         ModernHud hud,
         ModernCombatOverlay? combat,
-        IEnumerable<ModernCue> cues)
+        IEnumerable<ModernCue> cues,
+        IEnumerable<string>? inventory = null,
+        IEnumerable<string>? spells = null,
+        IEnumerable<string>? journal = null)
     {
         ArgumentNullException.ThrowIfNull(environment);
         ArgumentNullException.ThrowIfNull(hud);
@@ -295,6 +301,9 @@ public sealed record ModernRenderFrame
         Hud = hud;
         Combat = combat;
         Cues = Copy(cues, nameof(cues));
+        Inventory = Copy(inventory ?? [], nameof(inventory));
+        Spells = Copy(spells ?? [], nameof(spells));
+        Journal = Copy(journal ?? [], nameof(journal));
     }
 
     public ModernScene Scene { get; }
@@ -305,6 +314,9 @@ public sealed record ModernRenderFrame
     public ModernHud Hud { get; }
     public ModernCombatOverlay? Combat { get; }
     public IReadOnlyList<ModernCue> Cues { get; }
+    public IReadOnlyList<string> Inventory { get; }
+    public IReadOnlyList<string> Spells { get; }
+    public IReadOnlyList<string> Journal { get; }
 
     private static IReadOnlyList<T> Copy<T>(IEnumerable<T> values, string parameterName)
     {
