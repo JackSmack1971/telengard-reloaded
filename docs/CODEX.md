@@ -26,24 +26,40 @@ Set environment variable `CODEX_SKIP_VERIFY_GUARD=1` for a session if you intent
 
 ## Skills
 
-- `$telengard-next-slice` — select and execute exactly one eligible TEL slice through repository preflight, planning, implementation, testing/observation, independent review, documentation, PR, CI gate, and handoff. During the current convergence it evaluates both TEL-110–TEL-116 content and TEL-120–TEL-128 Godot-client/readiness work.
+- `$telengard-next-slice` — select and execute exactly one eligible TEL slice through repository preflight, planning, implementation, testing/observation, independent review, documentation, PR, CI gate, and handoff. During the current convergence it must prioritize the Five-Floor MVP Demo critical path from `docs/tasks/index.json`.
 - `$telengard-review` — perform a high-signal independent Telengard-specific review with correctness, architecture/determinism/save, tests, documentation/provenance, and presentation/security lanes when relevant.
 
 ## Current milestone context
 
-The current convergence is the **Playable Godot Vertical Slice** followed by the separate **Art Production Ready** handoff.
+The current product milestone is the **Five-Floor MVP Demo**.
 
 Codex should use:
 
-- `docs/presentation/GODOT_CLIENT_BLUEPRINT.md` for the durable post-TEL-091 client methodology;
-- `docs/exec-plans/active/GODOT-PLAYABLE-VERTICAL-SLICE.md` for living multi-ticket coordination;
-- `docs/gates/GODOT-PLAYABLE-SLICE.md` for TEL-127 placeholder-playable acceptance;
+- `docs/MVP_DEMO.md` for the canonical immediate product scope and non-goals;
+- `docs/exec-plans/active/FIVE-FLOOR-MVP-DEMO.md` for living multi-ticket coordination;
+- `docs/gates/FIVE-FLOOR-MVP-DEMO.md` for TEL-132 acceptance;
+- `docs/tasks/index.json` for the generated scheduling surface; and
+- `docs/tasks/README.md` for the human-readable status ledger.
+
+The intended implementation order is TEL-129 → TEL-130 → TEL-131 → TEL-132.
+TEL-126, TEL-127, and TEL-128 remain valid but are **post-MVP** work and must not
+pre-empt this sequence unless they become a demonstrated prerequisite or the
+user explicitly changes the milestone.
+
+After TEL-132 passes, Codex returns to:
+
+- `docs/exec-plans/active/GODOT-PLAYABLE-VERTICAL-SLICE.md` for broader client completion;
+- `docs/gates/GODOT-PLAYABLE-SLICE.md` for TEL-127 full playable-slice acceptance; and
 - `docs/gates/ART-PRODUCTION-READY.md` for TEL-128 before systematic final art/audio asset batches.
 
-TEL-091 remains the renderer prototype/separation proof. It is not the complete playable Godot client.
+The repository already contains substantial Godot work: TEL-120 host/bootstrap,
+TEL-121 input/clock implementation, TEL-122 session/scene-flow implementation,
+TEL-123 presentation contract/asset registry, TEL-124 graybox presentation, and
+partial TEL-125 HUD/combat-intent work. The current gap is integration into one
+real five-floor session, not another foundational renderer prototype.
 
 ## Design references
 
 The control plane follows current official Codex guidance: keep `AGENTS.md` scoped and authoritative; use repository docs as the deeper system of record; use project `.codex/config.toml` for repo-specific behavior; use skills for repeatable workflows with progressive disclosure; use hooks for deterministic lifecycle enforcement; and use ExecPlans for long-running or multi-ticket implementation work.
 
-The presentation methodology deliberately separates exploratory visual work, placeholder/graybox client implementation, playable-client acceptance, and gated production asset work so Codex does not spend final-art effort before content identities, UX, presentation contracts, and asset mappings are stable.
+The presentation methodology deliberately separates the fixed-seed five-floor MVP, broader placeholder/graybox client acceptance, and gated production asset work so Codex does not spend effort on persistence breadth or final art before the core player-facing dungeon loop is demonstrably playable.

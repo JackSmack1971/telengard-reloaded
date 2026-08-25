@@ -10,7 +10,16 @@ A multi-ticket/umbrella ExecPlan may coordinate a milestone across many TEL tick
 
 When a selected ticket belongs to an active umbrella plan, update only the durable progress/decision/discovery state affected by that ticket. The canonical task ledger remains `docs/tasks/README.md`; an ExecPlan is coordination state, not an alternate status ledger.
 
-The current example is `docs/exec-plans/active/GODOT-PLAYABLE-VERTICAL-SLICE.md`, which coordinates the TEL-110–TEL-116 content track with TEL-120–TEL-127 playable-Godot work and TEL-128 Art Production Ready handoff. TEL-127 and TEL-128 are intentionally separate acceptance slices so a playable client can be complete while unresolved art-direction or production-pipeline policy still blocks final assets.
+The current highest-priority umbrella plan is
+`docs/exec-plans/active/FIVE-FLOOR-MVP-DEMO.md`, which coordinates TEL-129
+through TEL-132 toward the fixed-seed floor-1-through-floor-5 Godot MVP. The
+older `GODOT-PLAYABLE-VERTICAL-SLICE.md` plan remains active as a **post-MVP
+continuation** for TEL-126/TEL-127/TEL-128 and should not pre-empt an eligible
+MVP ticket.
+
+The separation is intentional: TEL-132 proves the narrow demonstrable dungeon
+loop, TEL-127 later proves the broader production-shaped first-slice client, and
+TEL-128 separately proves Art Production Ready before systematic final assets.
 
 ## Required properties
 

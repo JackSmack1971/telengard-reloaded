@@ -1,18 +1,11 @@
 ---
 name: telengard-next-slice
-description: Select and execute the next safe, logical Telengard Reloaded implementation slice end to end. Use when asked to continue the project, determine what to build next, implement the next TEL ticket, advance Core Alpha, or run the repository's autonomous Codex development loop through planning, implementation, testing, review, documentation, PR, and gated merge.
+description: Select and execute the next safe, logical Telengard Reloaded implementation slice end to end. Use when asked to continue the project, determine what to build next, implement the next TEL ticket, advance the Five-Floor MVP Demo, or run the repository's autonomous development loop.
 ---
 
 # Telengard Next Slice
 
-Execute exactly one repository slice as a fresh transaction. Follow the root `AGENTS.md` completely.
-
-## Contents
-
-- Establish compact current state and candidate set
-- Load selected-ticket context and plan one transaction
-- Implement, test, observe, review, document, and gate one slice
-- Emit the final handoff and stop
+Execute exactly one repository slice as a fresh transaction. Follow root `AGENTS.md` completely.
 
 ## Objective
 
@@ -20,96 +13,78 @@ Advance the nearest project milestone by selecting the best **eligible** next sl
 
 Never continue into a second implementation slice in the same run.
 
-The current convergence is representative floors 1–5 content plus a
-production-shaped Godot placeholder/graybox client, followed by TEL-127
-Playable Godot Vertical Slice acceptance and TEL-128 Art Production Ready.
-Do not create systematic final-asset batches before TEL-128 passes.
+The current convergence is the **Five-Floor MVP Demo** in `docs/MVP_DEMO.md`.
+The intended critical path is TEL-129 → TEL-130 → TEL-131 → TEL-132. TEL-126,
+TEL-127, and TEL-128 are post-MVP work and must not pre-empt that sequence unless
+current evidence proves a hard prerequisite, the MVP chain is blocked, or the
+user explicitly changes priority. The generated task index retains `core-alpha`
+as a compatibility identifier; current product priority comes from this document,
+`docs/MVP_DEMO.md`, the ledger, and ticket completion state. Do not create
+systematic final-asset batches before TEL-128 passes.
 
-When delegation is needed, follow `docs/CODEX_MODEL_POLICY.md`. Use the
-lowest role-appropriate effort, keep `high` for demonstrated ambiguity or
-high-impact boundaries, and do not inherit a parent's `high` setting by
-default.
+When delegation is needed, follow `docs/CODEX_MODEL_POLICY.md` and use the
+lowest role-appropriate effort.
 
 ## 1. Establish current state
 
-From repository root, keep the pre-selection context deliberately small:
+From repository root:
 
 1. Read `AGENTS.md` and this skill.
-2. Read generated `docs/tasks/index.json` and query its ticket status, track,
-   dependencies, risk tags, decision state, context, review, and verification
-   fields.
-3. Inspect current branch/worktree, remote `main`, recent commits, open PRs,
-   and CI state.
-4. Detect overlapping/stale work before choosing a ticket.
-5. When any candidate has `verification.godot_manual: true`, run
-   `powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./eng/godot-doctor.ps1`.
-   Treat its discovered executable path and reported version as the authoritative
-   local availability evidence. This check includes WinGet-installed Godot
-   locations; do not conclude that Godot is absent from a failed PATH lookup
-   alone.
+2. Read generated `docs/tasks/index.json` for status, dependencies, risk,
+   decision state, context, review, and verification metadata.
+3. While TEL-132 is unfinished, read `docs/MVP_DEMO.md` and treat the Five-Floor
+   MVP Demo as the active product checkpoint.
+4. Inspect current branch/worktree, remote `main`, recent commits, open PRs, and
+   CI; detect overlapping/stale work.
+5. If a candidate requires manual Godot verification, run
+   `powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./eng/godot-doctor.ps1`
+   and use its discovered executable/version as the availability evidence.
 
-Do not load the full human task ledger, invariants, development guide,
-architecture, blueprint, or ExecPlan merely to construct the initial candidate
-set. If the generated index is missing or stale, run
-`powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./eng/task-index.ps1 -Mode Check`;
-regenerate only when the source ledger is intentionally being updated.
+Do not load the full ledger, invariants, architecture, or umbrella plans merely
+to build the initial candidate set. If the generated index may be stale, run
+`powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./eng/task-index.ps1 -Mode Check`.
 
-If unrelated user changes are present, do not overwrite, reset, stash, or absorb them without explicit authorization. Prefer an isolated worktree/branch when available.
+Do not overwrite, reset, stash, or absorb unrelated user changes without explicit authorization.
 
 ## 2. Build the candidate set
 
-Extract plausible `not_started` work from `docs/tasks/index.json` plus any
-explicit active remediation work. Rank from the compact metadata before opening
-ticket prose. Narrow to at most two serious candidates, then inspect their
-ticket files, declared dependencies, and active PR ownership.
+Extract plausible `not_started` work from `docs/tasks/index.json` plus explicit
+active remediation. Narrow to at most two serious candidates before loading
+full ticket prose.
+
+While TEL-132 is unfinished and the repository documents the Five-Floor MVP Demo
+as current, TEL-129–TEL-132 are the preferred candidate family. A ticket outside
+that family may pre-empt only for a hard prerequisite, repository-health blocker,
+active overlap, or explicit user reprioritization.
 
 Reject a candidate when:
 
 - dependencies are incomplete;
 - an active PR already owns it;
-- acceptance criteria require an undefined product/tuning decision;
-- the slice is too broad to review coherently;
-- another prerequisite is visibly more fundamental;
-- current repository health prevents trustworthy validation.
-- required Godot/manual observation cannot be performed and no approved
-  substitute exists;
-- it is a final-asset batch before TEL-128 / `ART-PRODUCTION-READY` passes.
+- acceptance requires an undefined product/tuning decision;
+- scope is too broad for one reviewable transaction;
+- another prerequisite is more fundamental;
+- repository health prevents trustworthy validation;
+- required manual observation is unavailable with no approved substitute;
+- it is post-MVP breadth while an eligible MVP ticket is ready; or
+- it is a final-asset batch before TEL-128 passes.
 
-Rank remaining candidates by:
-
-1. continuity with the most recently completed coherent feature chain;
-2. Core Alpha blocker value;
-3. dependency leverage;
-4. ability to prove the behavior with focused tests;
-5. small/reviewable scope;
-6. architectural and save/version risk.
-
-Choose one. Record only a concise evidence-based selection rationale, not private reasoning.
+Rank remaining work by active-milestone continuity, MVP blocker value, dependency
+leverage, testability, reviewable size, then architecture/save risk. Record only
+a concise evidence-based selection rationale.
 
 ## 3. Read the selected slice deeply
 
-Read:
+Read the selected ticket, its YAML context manifest when present, all
+`context.required` paths, applicable conditional context from the generated
+risk mapping, directly relevant spec/ADR material, adjacent code/tests, and
+recent subsystem history when useful.
 
-- the selected ticket;
-- its machine-readable YAML context manifest, when present;
-- every `context.required` path declared by the ticket;
-- only applicable `context.conditional` paths for the selected risk domains,
-  using `docs/tasks/index.json`'s `conditional_context_by_risk` mapping;
-- directly referenced specification sections when needed;
-- relevant architecture/ADR material;
-- existing implementation and tests for adjacent behavior;
-- recent commits/PRs in the same subsystem when useful.
+For manifest-backed tickets, missing or contradictory required context is a hard
+stop. Legacy tickets use the index and existing ticket sections as fallback.
+Discover extra evidence just in time; do not return to a read-everything default.
 
-For tickets that declare a context manifest, treat missing or contradictory
-required context as a hard stop. Apply the index risk-to-context mapping before
-conditional loading; an unmapped risk tag requires just-in-time inspection.
-Legacy tickets without a manifest use the generated index and existing ticket
-sections as a compatibility fallback. Discover additional evidence just-in-time
-when the selected ticket or code requires it; do not restore the old
-read-everything default.
-
-New or materially revised tickets should put this manifest near the top of the
-ticket (after its title/status when those remain human-facing):
+New/materially revised tickets use this shape:
 
 ```yaml
 ---
@@ -129,157 +104,116 @@ verification:
 ---
 ```
 
-The manifest is required for new or materially revised tickets. Legacy tickets
-without it use the generated index and existing sections as a compatibility
-fallback; absent context is never permission to skip relevant evidence.
-
-Determine whether `docs/PLANS.md` requires an ExecPlan. Create/resume one before implementation if required.
+Use `docs/PLANS.md` to decide whether an ExecPlan is required. TEL-129–TEL-132
+use the existing `docs/exec-plans/active/FIVE-FLOOR-MVP-DEMO.md`.
 
 ## 4. Plan the transaction
 
-Create a short implementation plan with:
+Create a short plan covering selected TEL/outcome, scope/non-goals, current gap,
+likely modules/types/events, determinism/hidden-information impact, save/version
+impact, focused tests, final verification, and durable documentation updates.
 
-- selected TEL id and intended outcome;
-- scope/non-goals;
-- current gap or bug reproduction;
-- modules/types/events likely affected;
-- determinism and hidden-information considerations;
-- save/version impact, including `none` when truly none;
-- focused tests;
-- canonical final verification;
-- documentation/status updates.
-
-If evidence reveals that the ticket is not actually implementable without a new product decision, stop with `RUN_RESULT status: blocked`.
+If implementation requires a new unresolved product decision, stop as blocked.
 
 ## 5. Prove the gap
 
-For bugs, reproduce the current failure/behavior where practical.
-
-For net-new domain work, add or identify the smallest acceptance-level test that demonstrates the missing behavior. Run focused tests before implementation when that produces meaningful evidence.
-
-Do not force a red-test ritual for docs-only or tooling-only changes where it adds no information.
+For bugs, reproduce the failure where practical. For net-new domain work, add or
+identify the smallest acceptance-level proof. Do not force a red-test ritual for
+docs/tooling-only work when it adds no information.
 
 ## 6. Implement minimally
 
-Implement only the selected slice and required supporting changes.
-
-Preserve all root `AGENTS.md` contracts. In particular:
+Implement only the selected slice and required support. Preserve:
 
 - renderer-independent simulation authority;
-- validation before mutation;
-- event ordering after committed state changes;
+- validation before mutation and committed event ordering;
 - deterministic scoped RNG;
 - explicit save DTO/migration/version discipline;
 - content/runtime/presentation separation;
 - hidden-information boundaries;
-- carried versus secured progress;
-- configurable unresolved tuning rather than invented permanent policy.
+- carried versus secured progress; and
+- configurable unresolved tuning instead of invented permanent policy.
 
-Do not bundle adjacent TEL tickets because they are convenient.
+For the Five-Floor MVP, fixed seed/demo setup and explicit temporary tuning are
+allowed only where the MVP docs/ticket permit them; they must remain visible and
+replaceable.
 
-## 7. Test in narrowing-to-broadening order
+Do not bundle adjacent TEL tickets for convenience.
 
-Run:
+## 7. Test from narrow to broad
+
+Run, as applicable:
 
 1. directly affected tests;
-2. subsystem/project tests as warranted;
-3. formatter/build checks needed for rapid feedback;
-4. the ticket's specified validation;
-5. required Godot/manual observation for visible client changes;
-6. final `powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./eng/verify.ps1 -Mode Full` for code changes.
+2. subsystem/project tests;
+3. formatter/build checks;
+4. ticket-specific validation;
+5. required Godot/manual observation; and
+6. `powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./eng/verify.ps1 -Mode Full`
+   for code changes.
 
-If generated audit/status projections are affected, run the repository generator/check rather than hand-editing generated views.
-
+If generated status/audit views change, use their repository generator/check.
 Capture exact pass/fail evidence.
 
 ## 8. Observe relevant surfaces
 
-If the change affects Terminal/Godot/UI/CLI/integration behavior, exercise the observable surface and record concise evidence. Skip presentation observation for pure headless domain work unless the ticket requires it.
+Exercise Terminal/Godot/UI/CLI/integration behavior when the selected ticket
+changes it. Headless projection tests do not replace required manual Godot
+observation. Use `godot-doctor.ps1` before reporting the runtime unavailable.
 
-For Godot-visible work, headless projection tests do not replace required
-manual observation; record the discovered executable path, runtime version, and
-input path when the ticket or gate requires it. If `godot-doctor.ps1` reports an
-installed runtime, use it before reporting an environment blocker.
+TEL-132 requires the real fixed-seed floor-1-through-floor-5 Godot route; a
+headless-only proof cannot pass its gate.
 
-## 9. Self-review the full diff
+## 9. Review
 
-Review the complete branch diff against `main`. Check scope, correctness, invariants, determinism, save/versioning, API changes, tests, docs, generated output, secrets, and accidental artifacts.
+Self-review the full branch diff against `main` for scope, correctness,
+invariants, determinism, save/versioning, tests, docs, generated output, secrets,
+and accidental artifacts.
 
-Fix issues before independent review.
+Then invoke `$telengard-review` on the final candidate diff. Pass only the
+selected ticket's risk tags, changed paths, base/head refs, lane objective,
+required lane-specific docs, and finding schema. Resolve every actionable
+finding and rerun affected checks/review lanes after material fixes.
 
-## 10. Invoke independent review
+## 10. Update durable knowledge
 
-Invoke `$telengard-review` on the final candidate diff. Reviewers must inspect the repository/diff independently.
+Only after implementation evidence exists, update the selected ticket and human
+ledger. Update BUILD_STATUS/ExecPlan/ADR/README/DEVELOPMENT/INVARIANTS/generated
+status only when their documented role requires it.
 
-Pass the selected ticket's risk tags and the actual changed paths so the review
-skill can route only lanes with distinct falsification targets. For each lane,
-construct the compact reviewer contract required by `$telengard-review`:
-`base ref`, `head ref`, selected TEL id, lane objective, lane-specific required
-docs, and the finding schema. Do not forward the parent planning transcript,
-implementation narrative, unrelated blueprint/invariant material, prior test
-output, or other reviewers' conclusions unless that lane explicitly requires
-the material. The parent still self-reviews the complete diff. Do not
-instantiate every generic lane by default.
+For TEL-129–TEL-132, update the Five-Floor MVP ExecPlan/gate as applicable. Do
+not mark TEL-127 or TEL-128 complete merely because the MVP passes. Status must
+match reality; documentation alone never implements behavior.
 
-Resolve every actionable finding. If fixes materially change behavior, re-run focused tests, full verification, and the affected review lanes.
+## 11. Create and gate the PR
 
-## 11. Update durable repository knowledge
+Prefer branch `agent/<ticket>-<short-slug>`. PR body includes intent, changed
+scope, non-goals/deferred decisions, save/version impact, exact validation, and
+independent review disposition.
 
-Update the selected ticket and task ledger only after implementation evidence exists. Update BUILD_STATUS/ExecPlan/ADRs/README/DEVELOPMENT/INVARIANTS/generated status only when their documented role requires it.
+Before merge require:
 
-Status must match reality. Never mark a ticket implemented because only its plan or docs exist.
+- local final verification passed when required;
+- GitHub `Full verification` green for the reviewed head;
+- no required check pending/failing;
+- PR mergeable;
+- no unresolved actionable review finding;
+- docs/generated state consistent; and
+- no invented unresolved product/tuning policy.
 
-## 12. Create the PR
+If any gate is uncertain, leave the PR open and report `ready-for-human`. Never
+force/direct-merge around repository gates.
 
-Use branch `agent/<ticket>-<short-slug>` when practical.
+## 12. Handoff and stop
 
-PR body must contain:
+After merge inspect new `main` only enough to identify likely next candidates and
+repository health. Do not implement another slice.
 
-```markdown
-## Intent
-<TEL ticket and outcome>
+While the Five-Floor MVP is active, `next_candidates` should normally advance to
+the next unfinished TEL-129–TEL-132 ticket. Only after TEL-132 passes should
+TEL-126/TEL-127/TEL-128 return to the normal candidate set.
 
-## What changed
-- ...
-
-## Non-goals / deferred decisions
-- ...
-
-## Save/version impact
-<none or explicit details>
-
-## Validation
-- `<exact command>` — <result>
-
-## Review
-- <independent review summary and disposition>
-```
-
-Prefer a concise ticket-oriented title such as `TEL-101: implement rolled character creation`.
-
-## 13. Gate the merge
-
-Do not treat a successful local run as sufficient to merge.
-
-Confirm the PR head still matches the reviewed/verified commit and require:
-
-- local final verification passed;
-- GitHub `Full verification` is green for the PR head;
-- no required check is pending/failing;
-- PR is mergeable;
-- independent review has no unresolved actionable findings;
-- docs/generated state are consistent;
-- no unresolved product/tuning decision was invented.
-
-If all gates are true, squash merge and delete the branch when supported.
-
-If repository settings, CI visibility, permissions, or protection make the merge gate uncertain, leave the PR open and report `ready-for-human`. Never bypass the gate with force push/direct-to-main behavior.
-
-## 14. Handoff and stop
-
-After merge, inspect the new `main` only enough to identify likely next candidates and repository health. Do not implement another ticket.
-
-End with exactly one handoff block:
+End with exactly one block:
 
 ```text
 RUN_RESULT
@@ -292,27 +226,13 @@ next_candidates: <comma-separated TEL ids or none>
 blockers: <concise blockers or none>
 ```
 
-For an Automation, this handoff is the terminal result of the scheduled run. A later run starts again from fresh repository state.
-
 ## Skill-local telemetry
 
-Use `scripts/skill_telemetry.py` as best-effort, non-gating instrumentation. Resolve `<skill-root>` once as the directory containing this `SKILL.md`, then invoke an available Python 3 executable with `<skill-root>/scripts/skill_telemetry.py`; do not rediscover the helper path for each event. Runtime records stay under this skill's `telemetry/` directory. If Python or telemetry writes are unavailable, continue the slice workflow and mention the instrumentation failure in the final handoff; telemetry never relaxes selection, verification, review, or merge gates.
-
-Start example: `python <skill-root>/scripts/skill_telemetry.py start --ticket none`. Semantic events use `event <name> --field key=value`; end with `end --outcome <RUN_RESULT-status> --ticket TEL-###`.
-
-Start one session at the beginning of the transaction, before candidate selection; use ticket `none` until a slice is selected. Record normalized workflow facts rather than private selection reasoning:
-
-- `candidate_set` with the compact candidate count;
-- `candidate_rejected` with TEL id and one normalized reason: `dependency_incomplete`, `active_pr`, `undefined_product_decision`, `scope_too_broad`, `prerequisite_more_fundamental`, `repository_health`, `manual_observation_unavailable`, or `pre_tel128_final_asset`;
-- `candidate_selected` for the initial choice and `candidate_selection_changed` if deeper evidence forces a different selection;
-- `context_required_missing`, `unexpected_context_needed`, `context_conflict`, `legacy_ticket_fallback`, and `unmapped_risk` when those branches occur;
-- `godot_runtime_resolved`, `godot_runtime_unavailable`, and `godot_manual_blocked` for Godot/manual-observation decisions;
-- `review_requested`, `review_result`, and `review_rerun` at the independent-review boundary; record only verdict/severity counts, not finding prose;
-- `merge_gate_checked`, `merge_gate_blocked` with a normalized `reason`, `pr_created`, `merge_attempted`, `merge_succeeded`, and `ready_for_human` for external gate outcomes;
-- `second_slice_attempted` if the one-slice transaction boundary is ever violated, and `missing_terminal_result` if the run cannot emit the required handoff.
-
-Use `probe` for declared/expected required paths where first-attempt resolution matters. Use `run` only for consequential commands: task-index validation, Godot doctor, focused/subsystem tests, formatter/build gates, generators, ticket verification, and canonical final verification. Set the canonical full gate to `--kind full-verification --label verify-full`. Routine reads, searches, `git status`, metadata inspection, and diff review run normally. Reuse stable labels for retries; inspect the concrete failure and make a targeted correction before rerunning. Prefer repository PowerShell `-File` entry points and do not place complex inline PowerShell behind the Python wrapper.
-
-External GitHub/tool actions are logged semantically rather than forced through the command wrapper. Do not log prompts/private reasoning, diff or source contents, command stdout/stderr, environment variables, credentials, PR bodies, API payloads, or access tokens.
-
-End the telemetry session with the same terminal disposition as `RUN_RESULT`: `merged`, `ready-for-human`, `blocked`, or `no-work` (use `failed`/`inconclusive` only when that accurately describes an abnormal run). Generate an improvement report when requested with `scripts/skill_telemetry.py report --write`; compare fingerprint cohorts rather than overwriting historical evidence.
+Use `scripts/skill_telemetry.py` as best-effort, non-gating instrumentation.
+Start one session before candidate selection, record normalized workflow events
+(candidate set/rejection/selection, context or Godot blockers, review results,
+merge-gate outcomes, and any second-slice violation), and end with the same
+terminal disposition as `RUN_RESULT`. Never log prompts/private reasoning,
+source/diff contents, command output, credentials, environment variables, or API
+payloads. Use the helper's `run`/`probe` wrappers only for consequential checks;
+telemetry failure never relaxes verification, review, or merge gates.

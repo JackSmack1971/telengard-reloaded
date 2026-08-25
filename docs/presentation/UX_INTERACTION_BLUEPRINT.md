@@ -2,16 +2,29 @@
 
 ## Purpose
 
-Define the interaction and navigation contract for the playable Godot vertical
-slice before production UI art is created. This document describes behavior and
-state flow, not final styling.
+Define the interaction and navigation contract for the Godot client before
+production UI art is created. This document describes behavior and state flow,
+not final styling.
 
-## Principles
+The current project sequence matters:
 
-The client must remain:
+1. **Five-Floor MVP Demo** — prove the central dungeon loop through floor 5 with
+   normal keyboard input and representative authored interactions.
+2. **Playable Godot Vertical Slice** — complete the broader first-slice UX,
+   including full required keyboard/controller parity, persistence, death/Legacy
+   flow, and second-expedition coverage.
+3. **Art Production Ready** — freeze enough UX structure to justify systematic
+   production UI/art work.
+
+Do not pull stage-2 or stage-3 breadth ahead of TEL-129–TEL-132 unless it is a
+real blocker for the MVP.
+
+## Durable principles
+
+The complete client should remain:
 
 - keyboard-first;
-- controller-first;
+- controller-capable with full parity by TEL-127;
 - configurable;
 - contextual;
 - low-clutter;
@@ -21,9 +34,35 @@ The client must remain:
 Godot input produces intent. The simulation validates and resolves that intent.
 UI widgets never apply gameplay results directly.
 
-## Required client states
+## MVP interaction surface
 
-The first playable client must account for these user-visible states:
+For the Five-Floor MVP Demo, the required user-visible path is intentionally
+small:
+
+```text
+startup / demo start
+inn / demo-ready authoritative state
+enter dungeon
+explore / move
+use legitimate stairs through floors 1-5
+encounter / combat action
+feature interaction
+treasure feedback
+floor-5 end-of-demo state
+```
+
+The MVP must not require developer/debug commands. Keyboard input is sufficient
+for TEL-132 acceptance; complete controller parity remains a TEL-127 requirement.
+
+Fixed seed/demo character setup is allowed. Save/load, all character-creation
+modes, complete inventory/equipment UX, death/Legacy replacement, and a second
+expedition are post-MVP unless a specific one becomes necessary to unblock the
+mandated five-floor route.
+
+## Broader required client states
+
+The later Playable Godot Vertical Slice must account for these user-visible
+states:
 
 ```text
 startup/title
@@ -56,6 +95,7 @@ Examples:
 | User intent | Ownership |
 |---|---|
 | move north/south/east/west | simulation command |
+| use stairs / change floor | simulation command/application composition around Core transition |
 | attack/defend/flee/cast/use | simulation command |
 | interact with feature | simulation command |
 | equip/unequip | simulation command |
@@ -76,7 +116,7 @@ meaning without ambiguous command dispatch:
 
 - `GLOBAL` — pause, settings, accessibility;
 - `INN` — prepare, inventory, spells, enter dungeon;
-- `EXPLORATION` — movement, interact, map, journal, quick-cast;
+- `EXPLORATION` — movement, stairs, interact, map, journal, quick-cast;
 - `COMBAT` — attack, defend, flee, spell/item/context actions;
 - `MENU` — focus/navigation/confirm/cancel;
 - `DEATH` — review outcome, Legacy replacement flow where applicable.
@@ -87,19 +127,33 @@ validates commands.
 
 ## Controller and keyboard parity
 
-A slice is not complete if its required action is reachable only by mouse.
-Every required first-slice gameplay action must have keyboard and controller
-navigation.
+### MVP
+
+Every action required by `docs/gates/FIVE-FLOOR-MVP-DEMO.md` must be reachable by
+normal keyboard input. Mouse-only/debug-only paths fail the MVP.
+
+Controller support may exist and should not regress, but complete controller
+parity does not block TEL-132.
+
+### TEL-127 full playable slice
+
+A required first-slice action is not complete if it is reachable only by mouse
+or keyboard. Every required gameplay action in the broader gate must have
+keyboard and controller navigation.
 
 Mouse support is allowed but is not the sole required path.
 
 ## Focus and modal rules
 
-- Every modal has a deterministic initial focus target.
-- Cancel/back behavior is defined for every modal.
+- Every required modal has a deterministic initial focus target.
+- Cancel/back behavior is defined for every modal in the current milestone.
 - Gameplay input does not leak through a modal that intentionally captures it.
 - Closing a presentation-only modal must not alter authoritative state.
 - Commands that advance simulation must make that transition explicit.
+
+The MVP should avoid adding nonessential modal complexity. Build only the
+interaction surface needed to make the five-floor route understandable and
+playable.
 
 ## Information hierarchy
 
@@ -108,13 +162,16 @@ continue deeper or retreat:
 
 - HP / immediate survivability;
 - spell/resource capacity needed for immediate decisions;
-- carried versus secured wealth distinction;
+- carried versus secured wealth distinction where present;
 - threat classification during encounters;
 - current floor/location context;
 - contextual action availability;
 - deliberately qualitative danger/atmosphere cues rather than raw hidden danger.
 
-Secondary detail belongs in inventory, journal, map, or contextual panels.
+For TEL-132, current floor, survival state, encounter/action state, and carried
+progress must be sufficiently clear to complete the demo. Secondary detail
+belongs in inventory, journal, map, or contextual panels and may remain
+post-MVP.
 
 ## Mystery rule
 
@@ -135,7 +192,8 @@ legitimately known interaction instructions merely to manufacture mystery.
 
 ## Required wireframe coverage before production UI art
 
-Before the Art Production Ready gate, placeholder wireframes must cover:
+Before the Art Production Ready gate, placeholder wireframes must eventually
+cover:
 
 1. startup/new/load flow;
 2. all three character-creation modes;
@@ -151,9 +209,12 @@ Before the Art Production Ready gate, placeholder wireframes must cover:
 12. death/Legacy replacement;
 13. return-to-inn result/secured-progress feedback.
 
+This is a TEL-127/TEL-128 readiness list, not the TEL-132 MVP checklist. The MVP
+should not implement missing entries solely to make this list look complete.
+
 ## Accessibility baseline
 
-The first playable slice should preserve space for:
+The final first-slice client should preserve space for:
 
 - remappable controls;
 - readable text scaling;
@@ -161,8 +222,8 @@ The first playable slice should preserve space for:
 - clear focus indication;
 - alternatives to color-only information where practical.
 
-Specific accessibility settings may be split into later tickets, but the UI
-architecture must not make them structurally difficult.
+Specific accessibility settings may be split into later tickets, but MVP work
+must not choose a structure that makes them needlessly difficult later.
 
 ## Acceptance evidence for UX tickets
 
@@ -172,6 +233,9 @@ For Godot-visible interaction work, record:
 - command/application boundary invoked;
 - resulting authoritative state/event evidence;
 - keyboard path;
-- controller path when the ticket requires controller acceptance;
+- controller path when the selected ticket/gate requires controller acceptance;
 - screenshots or concise manual observations when practical;
 - confirmation that presentation-only navigation did not mutate GameState.
+
+For TEL-132 specifically, record the complete normal-input route from demo start
+through the designated floor-5 completion state.

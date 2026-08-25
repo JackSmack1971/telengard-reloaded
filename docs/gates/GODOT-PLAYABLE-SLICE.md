@@ -1,5 +1,11 @@
 # Playable Godot Vertical Slice gate
 
+> [!IMPORTANT]
+> **This is a post-MVP gate.** The immediate product milestone is the narrower
+> [`FIVE-FLOOR-MVP-DEMO.md`](docs/gates/FIVE-FLOOR-MVP-DEMO.md) gate owned by TEL-132.
+> Do not use this broader checklist to pull save/load, full controller parity,
+> death/Legacy breadth, or other TEL-127 requirements ahead of TEL-129–TEL-132.
+
 ## Owner
 
 TEL-127 — Verify playable Godot vertical slice.
@@ -9,27 +15,39 @@ owned by TEL-128.
 
 ## Purpose
 
-This gate determines whether the project has moved beyond the TEL-091 renderer
-prototype into a complete first-slice Godot client that exercises the real
-authoritative simulation end to end.
+This gate determines whether the project has moved beyond the MVP demonstration
+into a complete first-slice Godot client that exercises the real authoritative
+simulation end to end across the broader intended UX surface.
 
 Passing this gate does **not** require final production art. Placeholders and
 graybox visuals are preferred until the client and presentation contracts are
 stable.
 
+## Relationship to the Five-Floor MVP
+
+TEL-132 must pass first. The MVP proves a legitimate fixed-seed floor-1-through-
+floor-5 playthrough with representative encounter, combat, feature, and treasure
+integration. This gate then proves the additional breadth intentionally deferred
+by the MVP: save/load, fuller interaction coverage, death/Legacy flow, second
+expedition, keyboard/controller acceptance, and complete production-shaped
+client UX.
+
 ## Sources of truth
 
+- `docs/MVP_DEMO.md`
+- `docs/gates/FIVE-FLOOR-MVP-DEMO.md`
 - `docs/tasks/TEL-127.md`
 - `docs/presentation/GODOT_CLIENT_BLUEPRINT.md`
 - `docs/presentation/UX_INTERACTION_BLUEPRINT.md`
 - `docs/modern-telengard-spec.md` §3, §12, §36–§39, §47–§48, §51–§52
 - `docs/INVARIANTS.md`
-- TEL-110 through TEL-127 and their verification evidence
+- TEL-110 through TEL-132 and their verification evidence
 
 ## Preconditions
 
 The gate is not eligible to pass until:
 
+- TEL-132 / the Five-Floor MVP Demo gate has passed;
 - TEL-110 through TEL-116 are implemented and verified;
 - TEL-120 through TEL-126 are implemented and verified;
 - the current first-slice content pack loads through the production content
@@ -125,7 +143,7 @@ Using real first-slice content, a player can:
 
 ### Graybox presentation
 
-- [ ] Floors 1-5 can be rendered/read using placeholders or approved graybox
+- [ ] Floors 1–5 can be rendered/read using placeholders or approved graybox
       assets.
 - [ ] Player position and movement are visually understandable.
 - [ ] Fog/unknown/observed/visited/current states are distinguishable.
@@ -154,6 +172,7 @@ the subject of the gate.
 
 The gate fails if:
 
+- the Five-Floor MVP prerequisite has not passed;
 - the client only renders a supplied test/prototype frame and cannot host a real
   simulation session;
 - Godot owns authoritative gameplay state or outcomes;
