@@ -24,8 +24,8 @@ public sealed class GodotHostCompositionTests
         Assert.Equal(first.Get(3).StairsDown, second.Get(3).StairsDown);
         Assert.Equal(first.Get(3).Rooms, second.Get(3).Rooms);
         for (var x = 0; x < first.Get(3).Width; x++)
-        for (var y = 0; y < first.Get(3).Height; y++)
-            Assert.Equal(first.Get(3).GetTile(new DungeonPosition(3, x, y)), second.Get(3).GetTile(new DungeonPosition(3, x, y)));
+            for (var y = 0; y < first.Get(3).Height; y++)
+                Assert.Equal(first.Get(3).GetTile(new DungeonPosition(3, x, y)), second.Get(3).GetTile(new DungeonPosition(3, x, y)));
         Assert.Throws<InvalidOperationException>(() => first.Get(6));
     }
 
