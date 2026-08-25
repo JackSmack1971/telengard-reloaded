@@ -20,12 +20,11 @@ content, and reach a clear end-of-demo state without developer/debug commands.
 
 Repository evidence shows that the difficult domain systems already exist, but
 the production-shaped Godot host does not yet compose them into a five-floor
-session. The immediate risk is therefore integration drift: completed Core and
-content work can look closer to a playable product than the actual hosted client
-path is.
+session. The immediate risk is integration drift: completed Core/content/client
+foundations can look closer to a playable product than the actual hosted path is.
 
-The MVP plan prioritizes closing that composition gap before additional breadth
-such as persistence UX, complete controller parity, or art-production readiness.
+The MVP plan closes that composition gap before additional persistence, UX
+breadth, controller parity, or art-production readiness work.
 
 ## Scope
 
@@ -37,7 +36,7 @@ In scope:
 - content-driven encounters during normal movement;
 - production first-slice feature instantiation/activation;
 - production first-slice treasure/loot acquisition into unsecured progress;
-- an explicit demo-ready player and gameplay configuration using existing Core
+- an explicit demo-ready player and gameplay configuration through existing Core
   boundaries;
 - a coherent encounter-to-player-action combat path;
 - a clear floor-5 demo completion state; and
@@ -47,10 +46,9 @@ In scope:
 
 Out of scope until the MVP gate passes:
 
-- TEL-126 Godot persistence integration;
-- the complete TEL-127 Playable Godot Vertical Slice gate;
-- TEL-128 Art Production Ready;
-- systematic final art/audio production;
+- Godot save/suspend/resume breadth;
+- the complete broader Playable Godot Vertical Slice gate;
+- Art Production Ready work or systematic final art/audio production;
 - full client character-creation breadth;
 - comprehensive inventory/equipment UX;
 - combat item use;
@@ -58,12 +56,18 @@ Out of scope until the MVP gate passes:
 - final balance or enemy AI; and
 - all 50 floors.
 
+The separate `GODOT-PLAYABLE-VERTICAL-SLICE.md` ExecPlan owns that later
+continuation and remains intentionally distinct from this plan.
+
 ## Sources of truth
 
 - `docs/MVP_DEMO.md`
 - `docs/gates/FIVE-FLOOR-MVP-DEMO.md`
 - `docs/tasks/README.md`
-- `docs/tasks/TEL-129.md` through `TEL-132.md`
+- `docs/tasks/TEL-129.md`
+- `docs/tasks/TEL-130.md`
+- `docs/tasks/TEL-131.md`
+- `docs/tasks/TEL-132.md`
 - `docs/presentation/GODOT_CLIENT_BLUEPRINT.md`
 - `docs/presentation/UX_INTERACTION_BLUEPRINT.md`
 - `docs/INVARIANTS.md`
@@ -73,23 +77,20 @@ Out of scope until the MVP gate passes:
 
 ## Current state at plan creation — 2026-08-25
 
-Implemented foundations:
+Implemented foundations already available to this plan include:
 
-- Core supports deterministic dungeon generation, walking, floor transitions,
-  encounters/combat, features, treasure, expedition state, progression,
-  knowledge, death policies, and save contracts.
-- The external first-slice content pack covers floors 1–5 and contains the
-  representative monster, encounter, item, loot, spell, and feature data.
-- TEL-120 provides the external authoritative Godot host/bootstrap.
-- TEL-121's input/clock bridge is implemented and headlessly verified; broader
-  interactive observation remains pending.
-- TEL-122's session/scene-flow implementation is present and runtime-probed;
-  broader visual/manual observation remains pending.
-- TEL-123 provides the renderer-safe production presentation contract and asset
-  registry.
-- TEL-124 is implemented and verified for content-aware graybox presentation.
-- TEL-125 is in progress; HUD/combat-intent bridging exists but full interaction
-  acceptance remains incomplete.
+- deterministic dungeon generation, walking, visibility, and floor-transition
+  rules in Core;
+- encounters/combat, features, treasure, expedition state, progression,
+  knowledge, death policies, and explicit save contracts;
+- the external first-slice content pack covering floors 1–5 with representative
+  monsters, encounter tables, items, loot, spells, and features;
+- an external authoritative Godot host/bootstrap;
+- implemented input/clock and session/scene-flow bridges with broader manual
+  acceptance still pending elsewhere;
+- renderer-safe production presentation identity and asset-registry support;
+- implemented content-aware graybox dungeon presentation; and
+- partial HUD/combat-intent interaction work.
 
 Observed integration gaps that block the five-floor demo:
 
@@ -147,17 +148,12 @@ player-input route, focused checks, and canonical verification.
 
 Exit criterion: `docs/gates/FIVE-FLOOR-MVP-DEMO.md` passes.
 
-## Relationship to existing Godot vertical-slice plan
+## Relationship to the broader Godot plan
 
-`GODOT-PLAYABLE-VERTICAL-SLICE.md` remains valid but is now the **post-MVP
-continuation plan**. TEL-126, TEL-127, and TEL-128 should not be selected ahead
-of TEL-129–TEL-132 merely because their ticket numbers are lower.
-
-After TEL-132 passes, resume the broader sequence:
-
-1. TEL-126 — save/suspend/resume and session lifecycle;
-2. TEL-127 — full Playable Godot Vertical Slice acceptance;
-3. TEL-128 — Art Production Ready acceptance.
+`GODOT-PLAYABLE-VERTICAL-SLICE.md` remains the post-MVP continuation plan. It
+becomes the primary convergence again after this plan's acceptance gate passes.
+This plan intentionally does not own the later persistence, full-client, or
+art-readiness tickets.
 
 ## Validation policy
 
@@ -169,8 +165,7 @@ Godot acceptance run; a headless-only proof cannot pass the MVP gate.
 ## Progress
 
 - [x] 2026-08-25 — repository audit identified the production-host composition
-  gaps that prevent legitimate five-floor play despite completed Core/content
-  systems.
+  gaps that prevent legitimate five-floor play despite completed foundations.
 - [x] 2026-08-25 — Five-Floor MVP Demo milestone, gate, task sequence, and
   scheduling priority documented.
 - [ ] TEL-129 — deterministic floors 1–5 hosted session composition.
@@ -186,7 +181,7 @@ Godot acceptance run; a headless-only proof cannot pass the MVP gate.
   for the first demo.
 - **Demo tuning stays explicit:** temporary MVP configuration does not silently
   become permanent balance policy.
-- **Placeholder presentation is sufficient:** production art remains behind
-  TEL-128.
+- **Placeholder presentation is sufficient:** production art remains behind the
+  later readiness gate.
 - **No architecture shortcut:** Godot remains presentation/application intent;
   Core remains authoritative.
