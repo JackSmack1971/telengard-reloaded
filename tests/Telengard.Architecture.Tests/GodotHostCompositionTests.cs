@@ -126,7 +126,7 @@ public sealed class GodotHostCompositionTests
         var attackSession = CreateSession(attackState);
         attackSession.Dispatch(Request("{\"type\":\"resolve_combat_action\"}"));
         Assert.Equal(2, attackSession.CurrentState.Combat!.Monster.CurrentHitPoints);
-        Assert.Equal(CombatPhase.EnemyAction, attackSession.CurrentState.Combat.Phase);
+        Assert.Equal(CombatPhase.PlayerAction, attackSession.CurrentState.Combat.Phase);
 
         var spellState = ActiveCombat(CombatAction.CastSpell, hitPoints: 5) with
         {
@@ -140,7 +140,7 @@ public sealed class GodotHostCompositionTests
         var spellSession = CreateSession(spellState);
         spellSession.Dispatch(Request("{\"type\":\"cast_spell\",\"spell_id\":\"ember-bolt\"}"));
         Assert.Equal(2, spellSession.CurrentState.Player.SpellPower);
-        Assert.Equal(CombatPhase.EnemyAction, spellSession.CurrentState.Combat!.Phase);
+        Assert.Equal(CombatPhase.PlayerAction, spellSession.CurrentState.Combat!.Phase);
 
         var itemInstanceId = Guid.Parse("00000000-0000-0000-0000-000000000201");
         var equipmentState = GameState.Create(1234) with

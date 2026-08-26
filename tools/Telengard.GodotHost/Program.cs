@@ -76,7 +76,10 @@ internal static class Program
         var committedEvents = new List<IDomainEvent>();
         eventBus.Subscribe<IDomainEvent>(committedEvents.Add);
         var layouts = new FloorLayoutCache(120, GameVersions.Current.GeneratorVersion);
-        var composedState = ComposeFeatures(result.State, layouts, pack);
+        var configuredState = gameplayConfiguration?.ApplyBootstrap(result.State, pack, layouts.Get(1)) ?? result.State;
+        var composedState = gameplayConfiguration?.Bootstrap is not null
+            ? configuredState
+            : ComposeFeatures(result.State, layouts, pack);
         var dispatcher = new CommandDispatcher(composedState, eventBus);
         eventBus.Publish(result.Events);
         return new GodotSession(
@@ -145,7 +148,10 @@ internal static class Program
                 root.GetProperty("known_monster_definition_ids").EnumerateArray().Select(value => value.GetString()!)),
             root.TryGetProperty("encounter_trigger_chance", out var encounterChance)
                 ? encounterChance.GetDouble()
-                : 0);
+                : 0,
+            root.TryGetProperty("initial_hit_points", out _)
+                ? GodotBootstrapConfiguration.FromJson(root)
+                : null);
     }
 
     internal static object FrameJson(ModernRenderFrame frame) => new
@@ -155,7 +161,7 @@ internal static class Program
         environment = new { dynamic_lighting = frame.Environment.DynamicLighting, atmospheric_effects = frame.Environment.AtmosphericEffects, theme_id = frame.Environment.ThemeId },
         tiles = frame.Tiles.Select(tile => new { position = Position(tile.Position), knowledge = tile.Knowledge.ToString().ToLowerInvariant(), connections = tile.Connections.ToString() }),
         features = frame.Features.Select(feature => new { instance_id = feature.InstanceId, definition_id = feature.DefinitionId, presentation_key = feature.PresentationKey, position = Position(feature.Position), activation_count = feature.ActivationCount }),
-        cues = frame.Cues.Select(cue => new { kind = cue.Kind.ToString().ToLowerInvariant(), entity_id = cue.EntityId, value = cue.Value }),
+        cues = frame.Cues.Select(cue => new { kind = cue.Kind.ToString(), entity_id = cue.EntityId, value = cue.Value, details = cue.Details }),
         combat = frame.Combat is null ? null : new
         {
             encounter_id = frame.Combat.EncounterId,
@@ -167,14 +173,14 @@ internal static class Program
                 instance_id = frame.Combat.Monster.InstanceId,
                 definition_id = frame.Combat.Monster.DefinitionId,
                 presentation_key = frame.Combat.Monster.PresentationKey,
-                current_hit_points = frame.Combat.Monster.CurrentHitPoints,
                 position = Position(frame.Combat.Monster.Position)
             }
         },
         hud = new { player_id = frame.Hud.PlayerId, level = frame.Hud.Level, hit_points = frame.Hud.HitPoints, max_hit_points = frame.Hud.MaxHitPoints, spell_power = frame.Hud.SpellPower, max_spell_power = frame.Hud.MaxSpellPower, carried_gold = frame.Hud.CarriedGold, secured_gold = frame.Hud.SecuredGold, alive = frame.Hud.Alive },
         inventory = frame.Inventory,
         spells = frame.Spells,
-        journal = frame.Journal
+        journal = frame.Journal,
+        equipment = frame.Equipment.Select(slot => new { slot_id = slot.SlotId, equipped = slot.Equipped, item_instance_id = slot.ItemInstanceId })
     };
 
     private static object Position(DungeonPosition position) => new { floor = position.Floor, x = position.X, y = position.Y };
@@ -268,7 +274,21 @@ public sealed class GodotSession
                 break;
             default: throw new ArgumentException($"Unknown client intent '{type}'.");
         }
+        AdvanceCombatLifecycle();
         return new { accepted = true, frame = Frame().frame };
+    }
+
+    private void AdvanceCombatLifecycle()
+    {
+        while (_dispatcher.CurrentState.Combat?.Phase is
+               CombatPhase.Searching or CombatPhase.Contact or CombatPhase.ThreatAssessment or
+               CombatPhase.EnemyAction or CombatPhase.StateCheck)
+        {
+            if (_dispatcher.CurrentState.Combat.Phase == CombatPhase.ThreatAssessment)
+                _dispatcher.Dispatch(new AssessThreatCommand());
+            else
+                _dispatcher.Dispatch(new AdvanceCombatCommand());
+        }
     }
 
     private CommandResult MoveWithEcology(GameState state, MoveCommand command)
@@ -367,7 +387,8 @@ public sealed record GodotGameplayConfiguration
         AttackConfiguration attack,
         FleeConfiguration flee,
         ThreatClassificationConfiguration threat,
-        double encounterTriggerChance = 0)
+        double encounterTriggerChance = 0,
+        GodotBootstrapConfiguration? bootstrap = null)
     {
         Attack = attack ?? throw new ArgumentNullException(nameof(attack));
         Flee = flee ?? throw new ArgumentNullException(nameof(flee));
@@ -375,12 +396,75 @@ public sealed record GodotGameplayConfiguration
         if (double.IsNaN(encounterTriggerChance) || encounterTriggerChance is < 0 or > 1)
             throw new ArgumentOutOfRangeException(nameof(encounterTriggerChance));
         EncounterTriggerChance = encounterTriggerChance;
+        Bootstrap = bootstrap;
     }
 
     public AttackConfiguration Attack { get; }
     public FleeConfiguration Flee { get; }
     public ThreatClassificationConfiguration Threat { get; }
     public double EncounterTriggerChance { get; }
+    public GodotBootstrapConfiguration? Bootstrap { get; }
+
+    public GameState ApplyBootstrap(GameState state, ContentPack pack, FloorLayout layout)
+    {
+        if (Bootstrap is null) return state;
+        if (Bootstrap.InitialMaxHitPoints <= 0 || Bootstrap.InitialHitPoints <= 0 || Bootstrap.InitialHitPoints > Bootstrap.InitialMaxHitPoints)
+            throw new InvalidOperationException("The bootstrap hit-point values must be positive and within the configured maximum.");
+        if (Bootstrap.InitialMaxSpellPower < 0 || Bootstrap.InitialSpellPower < 0 || Bootstrap.InitialSpellPower > Bootstrap.InitialMaxSpellPower)
+            throw new InvalidOperationException("The bootstrap spell-power values must be non-negative and within the configured maximum.");
+        if (Bootstrap.EncounterTriggerChance is < 0 or > 1)
+            throw new InvalidOperationException("The bootstrap encounter chance must be between zero and one.");
+        foreach (var spell in Bootstrap.StartingSpells) _ = pack.Spells.GetRequired(spell);
+        foreach (var item in Bootstrap.StartingInventory) _ = pack.Items.GetRequired(item);
+        var player = state.Player with
+        {
+            HitPoints = Bootstrap.InitialHitPoints,
+            MaxHitPoints = Bootstrap.InitialMaxHitPoints,
+            SpellPower = Bootstrap.InitialSpellPower,
+            MaxSpellPower = Bootstrap.InitialMaxSpellPower,
+            Spells = Bootstrap.StartingSpells,
+            Inventory = Bootstrap.StartingInventory,
+            EquipmentSlots = Bootstrap.EquipmentSlots.Select(slot => new EquipmentSlotState(slot)).ToArray()
+        };
+        var features = Bootstrap.FeaturePlacements.Select((placement, index) =>
+        {
+            var room = layout.Rooms[placement.RoomIndex];
+            var position = new DungeonPosition(layout.Floor, room.X + room.Width / 2, room.Y + room.Height / 2);
+            var bytes = SHA256.HashData(Encoding.UTF8.GetBytes($"godot-feature:{state.WorldSeed}:{placement.DefinitionId}:{position}:{index}"));
+            return new FeatureInstance(new Guid(bytes[..16]), pack.Features.GetRequired(placement.DefinitionId).Id, position);
+        }).ToArray();
+        return state with { Player = player, Dungeon = new DungeonState { Features = features } };
+    }
 }
+
+public sealed record GodotBootstrapConfiguration
+{
+    public int InitialHitPoints { get; init; }
+    public int InitialMaxHitPoints { get; init; }
+    public int InitialSpellPower { get; init; }
+    public int InitialMaxSpellPower { get; init; }
+    public IReadOnlyList<string> StartingSpells { get; init; } = [];
+    public IReadOnlyList<string> StartingInventory { get; init; } = [];
+    public IReadOnlyList<string> EquipmentSlots { get; init; } = [];
+    public double EncounterTriggerChance { get; init; }
+    public IReadOnlyList<GodotFeaturePlacement> FeaturePlacements { get; init; } = [];
+
+    public static GodotBootstrapConfiguration FromJson(JsonElement root) => new()
+    {
+        InitialHitPoints = root.GetProperty("initial_hit_points").GetInt32(),
+        InitialMaxHitPoints = root.GetProperty("initial_max_hit_points").GetInt32(),
+        InitialSpellPower = root.GetProperty("initial_spell_power").GetInt32(),
+        InitialMaxSpellPower = root.GetProperty("initial_max_spell_power").GetInt32(),
+        StartingSpells = root.GetProperty("starting_spells").EnumerateArray().Select(value => value.GetString()!).ToArray(),
+        StartingInventory = root.GetProperty("starting_inventory").EnumerateArray().Select(value => value.GetString()!).ToArray(),
+        EquipmentSlots = root.GetProperty("equipment_slots").EnumerateArray().Select(value => value.GetString()!).ToArray(),
+        EncounterTriggerChance = root.GetProperty("encounter_trigger_chance").GetDouble(),
+        FeaturePlacements = root.GetProperty("feature_placements").EnumerateArray().Select(value => new GodotFeaturePlacement(
+            value.GetProperty("definition_id").GetString()!, value.GetProperty("room_index").GetInt32(),
+            value.TryGetProperty("destination_room_index", out var destination) ? destination.GetInt32() : null)).ToArray()
+    };
+}
+
+public sealed record GodotFeaturePlacement(string DefinitionId, int RoomIndex, int? DestinationRoomIndex = null);
 
 public sealed record SessionFrame(object frame, long tick);

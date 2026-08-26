@@ -1,0 +1,21 @@
+{
+  "attack_damage": 3,
+  "flee_success_chance": 1.0,
+  "trivial_maximum_level_difference": 0,
+  "deadly_minimum_level_difference": 2,
+  "known_monster_definition_ids": ["cave-rat"],
+  "initial_hit_points": 20,
+  "initial_max_hit_points": 20,
+  "initial_spell_power": 10,
+  "initial_max_spell_power": 10,
+  "starting_spells": ["ember-bolt", "mend"],
+  "starting_inventory": ["iron-pike"],
+  "equipment_slots": ["weapon", "armor"],
+  "encounter_trigger_chance": 1.0,
+  "feature_placements": [
+    { "definition_id": "azure-fountain", "room_index": 0 },
+    { "definition_id": "stone-altar", "room_index": 1 },
+    { "definition_id": "bottomless-pit", "room_index": 2 },
+    { "definition_id": "network-teleporter", "room_index": 3, "destination_room_index": 0 }
+  ]
+}

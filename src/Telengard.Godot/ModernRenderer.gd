@@ -23,6 +23,7 @@ var _client_state := "STARTUP"
 var _feedback := ""
 var _title_selection := "NEW_GAME"
 var _panel := ""
+var _panel_selection := 0
 
 
 func render_frame(frame: Dictionary) -> void:
@@ -38,8 +39,9 @@ func set_title_selection(title_selection: String) -> void:
 	_title_selection = title_selection
 	queue_redraw()
 
-func set_panel(panel: String) -> void:
+func set_panel(panel: String, selection: int = 0) -> void:
 	_panel = panel
+	_panel_selection = selection
 	queue_redraw()
 
 func current_scene() -> String:
@@ -75,13 +77,9 @@ func _draw_world() -> void:
 		draw_string(font, Vector2(72, 365), "Waiting for a PresentationState projection", HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color("b4c3d9"))
 		draw_string(font, Vector2(72, 394), "Call render_frame() from the presentation host.", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("8295b5"))
 		return
-	var current_position: Variant = _frame.get("player_position", {})
-	var current_floor := int(current_position.get("floor", 1)) if current_position is Dictionary else 1
 
 	for tile in _frame.get("tiles", []):
 		var position: Dictionary = tile.get("position", {})
-		if int(position.get("floor", -1)) != current_floor:
-			continue
 		var cell := MAP_ORIGIN + Vector2(float(position.get("x", 0)), float(position.get("y", 0))) * TILE_SIZE
 		var knowledge: String = str(tile.get("knowledge", "observed"))
 		var color := UNKNOWN_COLOR
@@ -97,8 +95,6 @@ func _draw_world() -> void:
 
 	for feature in _frame.get("features", []):
 		var position: Dictionary = feature.get("position", {})
-		if int(position.get("floor", -1)) != current_floor:
-			continue
 		var cell := MAP_ORIGIN + Vector2(float(position.get("x", 0)), float(position.get("y", 0))) * TILE_SIZE
 		var center := cell + Vector2(TILE_SIZE * 0.5 - 1.0, TILE_SIZE * 0.5 - 1.0)
 		var diamond := PackedVector2Array([
@@ -126,8 +122,7 @@ func _draw_world() -> void:
 		draw_string(ThemeDB.fallback_font, monster_cell + Vector2(2, -6), _short_identity(monster_key), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color("f0c674"))
 
 	if not _frame.is_empty():
-		var player_position_value: Variant = _frame.get("player_position", {})
-		var player_position: Dictionary = player_position_value if player_position_value is Dictionary else {}
+		var player_position: Dictionary = _frame.get("player_position", {})
 		var player_cell := MAP_ORIGIN + Vector2(float(player_position.get("x", 0)), float(player_position.get("y", 0))) * TILE_SIZE
 		var pulse := 1.0 + sin(_elapsed * 4.0) * 0.08
 		var player_center := player_cell + Vector2(TILE_SIZE * 0.5 - 1.0, TILE_SIZE * 0.5 - 1.0)
@@ -140,18 +135,15 @@ func _draw_hud() -> void:
 	draw_rect(Rect2(884, 120, 360, 540), PANEL_COLOR, true)
 	draw_rect(Rect2(884, 120, 360, 540), PANEL_EDGE, false, 1.0)
 	var font := ThemeDB.fallback_font
-	var hud_value: Variant = _frame.get("hud", {})
-	var hud: Dictionary = hud_value if hud_value is Dictionary else {}
+	var hud: Dictionary = _frame.get("hud", {})
 	draw_string(font, Vector2(916, 164), "ADVENTURER", HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color("e5edf7"))
 	draw_string(font, Vector2(916, 196), "Level %s" % hud.get("level", 1), HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color("b4c3d9"))
 	draw_string(font, Vector2(916, 236), "HP   %s / %s" % [hud.get("hit_points", 0), hud.get("max_hit_points", 0)], HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color("d36f78"))
 	draw_string(font, Vector2(916, 264), "SP   %s / %s" % [hud.get("spell_power", 0), hud.get("max_spell_power", 0)], HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color("7cb9e8"))
 	draw_string(font, Vector2(916, 304), "Carried gold   %s" % hud.get("carried_gold", 0), HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("d9ad62"))
 	draw_string(font, Vector2(916, 330), "Secured gold   %s" % hud.get("secured_gold", 0), HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("d9ad62"))
-	var player_position_value: Variant = _frame.get("player_position", {})
-	var player_position: Dictionary = player_position_value if player_position_value is Dictionary else {}
-	draw_string(font, Vector2(916, 356), "Floor %s" % player_position.get("floor", "-"), HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("b4c3d9"))
-	draw_string(font, Vector2(916, 378), "Map: unknown / visited / visible", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("8295b5"))
+	var position: Dictionary = _frame.get("player_position", {})
+	draw_string(font, Vector2(916, 356), "Location  Floor %s · %s,%s" % [position.get("floor", "?"), position.get("x", "?"), position.get("y", "?")], HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("8295b5"))
 
 	var combat_value: Variant = _frame.get("combat", {})
 	var combat: Dictionary = combat_value if combat_value is Dictionary else {}
@@ -161,14 +153,15 @@ func _draw_hud() -> void:
 		draw_string(font, Vector2(916, 438), str(combat.get("phase", "contact")), HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("b4c3d9"))
 		draw_string(font, Vector2(916, 466), "Threat   %s" % combat.get("threat_level", "unknown"), HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("d9ad62"))
 	if _client_state == "INN" or _client_state == "DUNGEON":
-		if _client_state == "DUNGEON":
-			draw_string(font, Vector2(916, 522), "F  Interact   G  Treasure   R/T  Stairs   L  Leave", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("8295b5"))
-		else:
-			draw_string(font, Vector2(916, 522), "E  Enter dungeon   M  Map   Esc  Pause", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("8295b5"))
+		draw_string(font, Vector2(916, 522), "F  Interact   G  Treasure   R/T  Stairs   L  Leave", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("8295b5"))
 		draw_string(font, Vector2(916, 544), "I  Inventory   K  Spells   Esc  Pause", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("8295b5"))
 		if not combat.is_empty():
 			draw_string(font, Vector2(916, 590), "1 Attack  2 Defend  3 Flee", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("d9ad62"))
-			draw_string(font, Vector2(916, 610), "4 Spell   5 Item", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("d9ad62"))
+			draw_string(font, Vector2(916, 610), "4 Spell", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("d9ad62"))
+	var cues: Array = _frame.get("cues", [])
+	if not cues.is_empty():
+		var cue: Dictionary = cues.back()
+		draw_string(font, Vector2(916, 635), "Last result  %s" % _cue_label(cue), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("b4c3d9"))
 	if _panel != "":
 		_draw_panel(font)
 
@@ -189,15 +182,29 @@ func _draw_panel(font: Font) -> void:
 	draw_rect(Rect2(160, 150, 800, 430), PANEL_EDGE, false, 2.0)
 	draw_string(font, Vector2(205, 205), _panel, HORIZONTAL_ALIGNMENT_LEFT, -1, 26, Color("e5edf7"))
 	draw_string(font, Vector2(205, 245), "Presentation view — authoritative state is unchanged", HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color("8295b5"))
-	var values: Array = _frame.get("inventory", []) if _panel == "INVENTORY" else _frame.get("spells", []) if _panel == "SPELLS" else _frame.get("journal", [])
+	var values: Array = _frame.get("inventory", []) if _panel == "INVENTORY" else _frame.get("spells", []) if _panel == "SPELLS" else _frame.get("journal", []) if _panel == "JOURNAL" else _frame.get("equipment", [])
 	if _panel == "MAP":
-		draw_string(font, Vector2(205, 290), "Map legend: dark unknown · blue observed · slate visited", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color("b4c3d9"))
-		draw_string(font, Vector2(205, 330), "Close with Esc. The map remains governed by the renderer-safe projection.", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("b4c3d9"))
+		draw_string(font, Vector2(205, 290), "Map legend: ■ unknown · □ observed · ▣ visited · ◆ current", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color("b4c3d9"))
+		draw_string(font, Vector2(205, 330), "Only observed and visited geography is shown. Close with Esc or controller B.", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("b4c3d9"))
 	else:
 		if values.is_empty():
 			draw_string(font, Vector2(205, 300), "No entries are currently known.", HORIZONTAL_ALIGNMENT_LEFT, -1, 17, Color("b4c3d9"))
 		for index in values.size():
-			draw_string(font, Vector2(205, 300 + index * 28), "• %s" % values[index], HORIZONTAL_ALIGNMENT_LEFT, -1, 17, Color("b4c3d9"))
+			var selected := index == _panel_selection
+			var value = values[index]
+			var label := str(value) if value is String else "%s: %s" % [value.get("slot_id", "slot"), "equipped" if value.get("equipped", false) else "empty"]
+			draw_string(font, Vector2(205, 300 + index * 28), ("> " if selected else "  ") + label, HORIZONTAL_ALIGNMENT_LEFT, -1, 17, Color("d9ad62") if selected else Color("b4c3d9"))
+		draw_string(font, Vector2(205, 510), "↑/↓ or D-pad Select   Enter/A Confirm   Esc/B Back", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("8295b5"))
+
+func _cue_label(cue: Dictionary) -> String:
+	var label := str(cue.get("kind", ""))
+	if cue.get("value", null) != null:
+		label += " (%s)" % str(cue.get("value"))
+	var details_value: Variant = cue.get("details", [])
+	var details: Array = details_value if details_value is Array else []
+	if not details.is_empty():
+		label += " — " + ", ".join(details)
+	return label
 
 func _overlay_title() -> String:
 	return {

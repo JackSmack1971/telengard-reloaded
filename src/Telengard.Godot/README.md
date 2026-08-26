@@ -47,8 +47,13 @@ explicit configuration required by Core resolvers.
 Combat gameplay configuration remains explicit. The config JSON currently uses
 `attack_damage`, `flee_success_chance`,
 `trivial_maximum_level_difference`, `deadly_minimum_level_difference`, and
-`known_monster_definition_ids`; no hidden host default should silently turn demo
-tuning into permanent balance policy.
+`known_monster_definition_ids`; no host default is supplied because those
+values remain `CONFIGURATION/TUNING DECISION REQUIRED` until product tuning is
+authored. The repository's interactive first-slice launch also supplies
+`tools/Telengard.GodotHost/first-slice.config.json`, which explicitly configures
+the development bootstrap player's capacities, known spell/item IDs, encounter
+chance, and deterministic authored-feature placements. Those values are
+application acceptance configuration, not Core formulas or Godot-owned state.
 
 ## MVP composition rules
 
