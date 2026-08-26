@@ -33,7 +33,7 @@ PresentationStateAdapter
         +---- Terminal projection -> Terminal client
 ```
 
-Commands are requests. The simulation validates commands and is the only owner of authoritative gameplay state. Domain events describe committed domain facts for presentation, knowledge, audio, telemetry, debugging, and legacy mechanics.
+Commands are requests. Consistent with the repository contract in [`AGENTS.md`](../AGENTS.md), the simulation validates commands and is the only owner of authoritative gameplay state. Domain events describe committed domain facts for presentation, knowledge, audio, telemetry, debugging, and legacy mechanics.
 
 ## Domain areas: implemented slices and planned boundaries
 

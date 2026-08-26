@@ -267,7 +267,7 @@ TEL-128 must not invent unresolved visual-direction, binary/LFS, or other produc
 
 ### Godot observation
 
-A Godot-visible ticket must perform the manual/interactive observation required by its acceptance criteria. Record the Godot/runtime version and fixed seed when useful. `./eng/verify.ps1 -Mode Full` remains mandatory for code changes but does not replace required presentation acceptance.
+A Godot-visible ticket must perform the manual/interactive observation required by its acceptance criteria. Record the Godot/runtime version and fixed seed when useful. The canonical Full verification command is defined in [`AGENTS.md`](../AGENTS.md); it remains mandatory for code changes but does not replace required presentation acceptance.
 
 TEL-132 specifically requires a real Godot fixed-seed route through floor 5; a
 headless-only proof cannot pass the MVP gate.
