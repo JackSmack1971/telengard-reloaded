@@ -170,7 +170,8 @@ Godot acceptance run; a headless-only proof cannot pass the MVP gate.
   scheduling priority documented.
 - [x] TEL-129 — deterministic floors 1–5 hosted session composition implemented;
   interactive Godot stair-transition observation remains pending.
-- [ ] TEL-130 — production encounter/feature/treasure composition.
+- [x] TEL-130 — production encounter/feature/treasure composition implemented;
+  interactive Godot observation remains pending.
 - [ ] TEL-131 — demo setup and combat playthrough closure.
 - [ ] TEL-132 — fixed-seed five-floor Godot acceptance.
 
