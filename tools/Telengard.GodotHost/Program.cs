@@ -205,7 +205,11 @@ public sealed class GodotSession
         _dispatcher.Register<EnterDungeonCommand>((state, command) => DungeonWalkingResolver.Enter(state, command, _layouts.Get(1)));
         _dispatcher.Register<MoveCommand>(MoveWithEcology);
         _dispatcher.Register<ChangeFloorCommand>((state, command) =>
-            FloorTransitionResolver.Apply(state, command, _layouts.Get(state.Player.Position.Floor), _layouts.Get(TargetFloor(state, command))));
+            FloorTransitionResolver.Apply(
+                state,
+                command,
+                _layouts.Get(state.Player.Position.Floor),
+                _layouts.Get(ValidateTargetFloor(state, command))));
         _dispatcher.Register<LeaveDungeonCommand>((state, command) => DungeonWalkingResolver.Leave(state, command, _layouts.Get(1)));
         _dispatcher.Register<SelectCombatActionCommand>(CombatStateResolver.SelectAction);
         _dispatcher.Register<AdvanceCombatCommand>(CombatStateResolver.Advance);
@@ -315,6 +319,14 @@ public sealed class GodotSession
 
     private static int TargetFloor(GameState state, ChangeFloorCommand command) =>
         state.Player.Position.Floor + (command.Direction is StairDirection.Down ? 1 : -1);
+
+    private static int ValidateTargetFloor(GameState state, ChangeFloorCommand command)
+    {
+        var targetFloor = TargetFloor(state, command);
+        if (targetFloor is < 1 or > 5)
+            throw new InvalidOperationException("The hosted MVP session supports floors 1 through 5.");
+        return targetFloor;
+    }
 
     private CommandResult ResolveThreat(GameState state, AssessThreatCommand command)
     {

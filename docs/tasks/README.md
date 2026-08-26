@@ -195,7 +195,7 @@ These tickets close the integration gap between the implemented systems above
 and an actual five-floor playable Godot demo. They do not replace TEL-126–128;
 they create a smaller product checkpoint that must pass first.
 
-- [TEL-129.md](TEL-129.md) — Compose deterministic floors 1–5 Godot session — In progress
+- [TEL-129.md](TEL-129.md) — Compose deterministic floors 1–5 Godot session — Implemented and verified
 - [TEL-130.md](TEL-130.md) — Compose first-slice encounters, features, and treasure into Godot demo — In progress
 - [TEL-131.md](TEL-131.md) — Close MVP demo setup and combat playthrough path — Not started
 - [TEL-132.md](TEL-132.md) — Verify fixed-seed five-floor MVP demo — Not started
