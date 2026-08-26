@@ -1,6 +1,8 @@
 using System.Text.Json;
 using System.Net;
 using System.Text;
+using System.Security.Cryptography;
+using Telengard.Core.Economy;
 using Telengard.Content;
 using Telengard.Core.Presentation;
 using Telengard.Core.Simulation;
@@ -73,14 +75,32 @@ internal static class Program
         var eventBus = new DomainEventBus();
         var committedEvents = new List<IDomainEvent>();
         eventBus.Subscribe<IDomainEvent>(committedEvents.Add);
-        var dispatcher = new CommandDispatcher(result.State, eventBus);
+        var layouts = new FloorLayoutCache(120, GameVersions.Current.GeneratorVersion);
+        var composedState = ComposeFeatures(result.State, layouts, pack);
+        var dispatcher = new CommandDispatcher(composedState, eventBus);
         eventBus.Publish(result.Events);
         return new GodotSession(
             dispatcher,
-            new FloorLayoutCache(120, GameVersions.Current.GeneratorVersion),
+            layouts,
             committedEvents,
             pack,
             gameplayConfiguration);
+    }
+
+    private static GameState ComposeFeatures(GameState state, FloorLayoutCache layouts, ContentPack pack)
+    {
+        var definitions = pack.Features.Definitions.Values.OrderBy(definition => definition.Id, StringComparer.Ordinal).ToArray();
+        var features = definitions.Select((definition, index) =>
+        {
+            var floor = index + 1;
+            var layout = layouts.Get(floor);
+            var position = Enumerable.Range(0, layout.Width * layout.Height)
+                .Select(offset => new DungeonPosition(floor, offset % layout.Width, offset / layout.Width))
+                .First(candidate => layout.IsWalkable(candidate) && candidate != layout.StairsUp && candidate != layout.StairsDown);
+            var bytes = SHA256.HashData(Encoding.UTF8.GetBytes($"godot-feature:{state.WorldSeed}:{definition.Id}:{floor}"));
+            return new FeatureInstance(new Guid(bytes[..16]), definition.Id, position);
+        }).ToArray();
+        return state with { Dungeon = state.Dungeon with { Features = features } };
     }
 
     private static int ReadPort(string[] args)
@@ -122,7 +142,10 @@ internal static class Program
             new ThreatClassificationConfiguration(
                 root.GetProperty("trivial_maximum_level_difference").GetInt32(),
                 root.GetProperty("deadly_minimum_level_difference").GetInt32(),
-                root.GetProperty("known_monster_definition_ids").EnumerateArray().Select(value => value.GetString()!)));
+                root.GetProperty("known_monster_definition_ids").EnumerateArray().Select(value => value.GetString()!)),
+            root.TryGetProperty("encounter_trigger_chance", out var encounterChance)
+                ? encounterChance.GetDouble()
+                : 0);
     }
 
     internal static object FrameJson(ModernRenderFrame frame) => new
@@ -132,6 +155,7 @@ internal static class Program
         environment = new { dynamic_lighting = frame.Environment.DynamicLighting, atmospheric_effects = frame.Environment.AtmosphericEffects, theme_id = frame.Environment.ThemeId },
         tiles = frame.Tiles.Select(tile => new { position = Position(tile.Position), knowledge = tile.Knowledge.ToString().ToLowerInvariant(), connections = tile.Connections.ToString() }),
         features = frame.Features.Select(feature => new { instance_id = feature.InstanceId, definition_id = feature.DefinitionId, presentation_key = feature.PresentationKey, position = Position(feature.Position), activation_count = feature.ActivationCount }),
+        cues = frame.Cues.Select(cue => new { kind = cue.Kind.ToString().ToLowerInvariant(), entity_id = cue.EntityId, value = cue.Value }),
         combat = frame.Combat is null ? null : new
         {
             encounter_id = frame.Combat.EncounterId,
@@ -179,7 +203,7 @@ public sealed class GodotSession
         _gameplayConfiguration = gameplayConfiguration;
         _dispatcher.Register<AdvanceSimulationCommand>(SimulationTimeResolver.Advance);
         _dispatcher.Register<EnterDungeonCommand>((state, command) => DungeonWalkingResolver.Enter(state, command, _layouts.Get(1)));
-        _dispatcher.Register<MoveCommand>((state, command) => DungeonWalkingResolver.Move(state, command, _layouts.Get(state.Player.Position.Floor)));
+        _dispatcher.Register<MoveCommand>(MoveWithEcology);
         _dispatcher.Register<ChangeFloorCommand>((state, command) =>
             FloorTransitionResolver.Apply(
                 state,
@@ -202,7 +226,8 @@ public sealed class GodotSession
             _dispatcher.Register<FleeCommand>((state, command) =>
                 FleeResolver.Resolve(state, command, _gameplayConfiguration.Flee));
         }
-        _dispatcher.Register<ActivateFeatureCommand>(FeatureActivationResolver.Activate);
+        _dispatcher.Register<ActivateFeatureCommand>(ActivateAuthoredFeature);
+        _dispatcher.Register<AcquireTreasureCommand>(TreasureAcquisitionResolver.Resolve);
     }
 
     public GameState CurrentState => _dispatcher.CurrentState;
@@ -231,10 +256,11 @@ public sealed class GodotSession
             case "unequip_item": _dispatcher.Dispatch(new UnequipItemCommand(request.GetProperty("slot_id").GetString()!)); break;
             case "interact":
                 var position = _dispatcher.CurrentState.Player.Position;
-                var feature = _dispatcher.CurrentState.Dungeon.Features.SingleOrDefault(candidate => candidate.Discovered && candidate.Position == position)
-                    ?? throw new InvalidOperationException("There is no discovered feature at the current position.");
+                var feature = _dispatcher.CurrentState.Dungeon.Features.SingleOrDefault(candidate => candidate.Position == position)
+                    ?? throw new InvalidOperationException("There is no feature at the current position.");
                 _dispatcher.Dispatch(new ActivateFeatureCommand(feature.InstanceId));
                 break;
+            case "collect_treasure": CollectTreasure(); break;
             case "time_mode": _clock.SetMode(Enum.Parse<SimulationTimeMode>(request.GetProperty("mode").GetString()!, true)); break;
             case "advance":
                 var ticks = _clock.Advance(request.GetProperty("elapsed_seconds").GetDouble());
@@ -243,6 +269,52 @@ public sealed class GodotSession
             default: throw new ArgumentException($"Unknown client intent '{type}'.");
         }
         return new { accepted = true, frame = Frame().frame };
+    }
+
+    private CommandResult MoveWithEcology(GameState state, MoveCommand command)
+    {
+        var moved = DungeonWalkingResolver.Move(state, command, _layouts.Get(state.Player.Position.Floor));
+        if (_gameplayConfiguration is null
+            || moved.State.Dungeon.Features.Any(feature => feature.Position == moved.State.Player.Position))
+        {
+            return moved;
+        }
+        var encounter = EncounterTriggerResolver.Evaluate(
+            moved.State,
+            moved.State.Player.Position,
+            _contentPack.CreateEncounterTriggerConfiguration(
+                moved.State.Player.Position.Floor,
+                _gameplayConfiguration.EncounterTriggerChance));
+        return new CommandResult(encounter.State, moved.Events.Concat(encounter.Events));
+    }
+
+    private CommandResult ActivateAuthoredFeature(GameState state, ActivateFeatureCommand command)
+    {
+        var feature = state.Dungeon.Features.Single(candidate => candidate.InstanceId == command.FeatureId);
+        var definition = _contentPack.Features.GetRequired(feature.DefinitionId);
+        return definition.Type switch
+        {
+            FeatureType.Fountain => FountainResolver.Resolve(state, command, definition),
+            FeatureType.Altar => AltarResolver.Resolve(state, command, definition),
+            FeatureType.Pit => PitResolver.Resolve(state, command, definition),
+            FeatureType.Teleporter => TeleporterResolver.Resolve(
+                state,
+                command,
+                definition,
+                _layouts.Get(Math.Min(5, state.Player.Position.Floor + 1)).StairsUp),
+            _ => throw new InvalidOperationException($"Unsupported hosted feature type '{definition.Type}'.")
+        };
+    }
+
+    private void CollectTreasure()
+    {
+        var state = _dispatcher.CurrentState;
+        if (!state.Expedition.Active) throw new InvalidOperationException("Treasure requires an active expedition.");
+        var band = _contentPack.Bands.Definitions.Values.SingleOrDefault(candidate => candidate.CoversFloor(state.Player.Position.Floor))
+            ?? throw new KeyNotFoundException($"No content band covers floor {state.Player.Position.Floor}.");
+        var table = _contentPack.LootTables.GetRequired(band.LootProfile!);
+        var item = LootTableEngine.Select(table, state.WorldSeed, _contentPack.ContentVersion, state.Player.Position, state.Expedition.ExpeditionId, state.Expedition.AcquiredItems.Count);
+        _dispatcher.Dispatch(new AcquireTreasureCommand(0, [item]));
     }
 
     private static int TargetFloor(GameState state, ChangeFloorCommand command) =>
@@ -294,16 +366,21 @@ public sealed record GodotGameplayConfiguration
     public GodotGameplayConfiguration(
         AttackConfiguration attack,
         FleeConfiguration flee,
-        ThreatClassificationConfiguration threat)
+        ThreatClassificationConfiguration threat,
+        double encounterTriggerChance = 0)
     {
         Attack = attack ?? throw new ArgumentNullException(nameof(attack));
         Flee = flee ?? throw new ArgumentNullException(nameof(flee));
         Threat = threat ?? throw new ArgumentNullException(nameof(threat));
+        if (double.IsNaN(encounterTriggerChance) || encounterTriggerChance is < 0 or > 1)
+            throw new ArgumentOutOfRangeException(nameof(encounterTriggerChance));
+        EncounterTriggerChance = encounterTriggerChance;
     }
 
     public AttackConfiguration Attack { get; }
     public FleeConfiguration Flee { get; }
     public ThreatClassificationConfiguration Threat { get; }
+    public double EncounterTriggerChance { get; }
 }
 
 public sealed record SessionFrame(object frame, long tick);

@@ -2884,3 +2884,14 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
   ./eng/verify.ps1 -Mode Full` passed; 452 Release tests passed.
 - Pending acceptance: a real interactive Godot run exercising up/down stair
   input and movement after the transition.
+# 2026-08-26 — TEL-130 production-host ecology composition
+
+- Composed the production encounter tables, authored feature definitions, and
+  loot tables into the hosted Godot session through existing Core/content
+  resolvers.
+- Added deterministic authored feature placement, explicit MVP encounter
+  trigger configuration, normal treasure collection input, and renderer-safe
+  event cues.
+- Focused host tests and the canonical Full verification gate pass (454 Release
+  tests, zero build warnings/errors). Godot 4.7.2 headless initialization and
+  host-frame smoke checks pass; interactive ecology observation remains pending.

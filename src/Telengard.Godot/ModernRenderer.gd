@@ -162,7 +162,7 @@ func _draw_hud() -> void:
 		draw_string(font, Vector2(916, 466), "Threat   %s" % combat.get("threat_level", "unknown"), HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("d9ad62"))
 	if _client_state == "INN" or _client_state == "DUNGEON":
 		if _client_state == "DUNGEON":
-			draw_string(font, Vector2(916, 522), "F  Interact   R/T  Stairs down/up   L  Leave", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("8295b5"))
+			draw_string(font, Vector2(916, 522), "F  Interact   G  Treasure   R/T  Stairs   L  Leave", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("8295b5"))
 		else:
 			draw_string(font, Vector2(916, 522), "E  Enter dungeon   M  Map   Esc  Pause", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("8295b5"))
 		draw_string(font, Vector2(916, 544), "I  Inventory   K  Spells   Esc  Pause", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("8295b5"))

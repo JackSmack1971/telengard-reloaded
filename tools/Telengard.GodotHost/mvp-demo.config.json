@@ -1,0 +1,8 @@
+{
+  "attack_damage": 3,
+  "flee_success_chance": 1.0,
+  "trivial_maximum_level_difference": 0,
+  "deadly_minimum_level_difference": 2,
+  "known_monster_definition_ids": ["cave-rat"],
+  "encounter_trigger_chance": 1.0
+}

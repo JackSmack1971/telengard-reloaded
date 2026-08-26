@@ -20,6 +20,7 @@ var _current_frame: Dictionary = {}
 const DOTNET_EXECUTABLE := "../../.dotnet/dotnet.exe"
 const HOST_ASSEMBLY := "../../tools/Telengard.GodotHost/bin/Debug/net8.0/Telengard.GodotHost.dll"
 const CONTENT_ROOT := "../../content"
+const GAMEPLAY_CONFIG := "../../tools/Telengard.GodotHost/mvp-demo.config.json"
 const MAX_INITIAL_FRAME_ATTEMPTS := 20
 
 func _ready() -> void:
@@ -27,7 +28,7 @@ func _ready() -> void:
 	_http = HTTPRequest.new()
 	add_child(_http)
 	_http.request_completed.connect(_on_request_completed)
-	_host_pid = OS.create_process(ProjectSettings.globalize_path(DOTNET_EXECUTABLE), ["exec", ProjectSettings.globalize_path(HOST_ASSEMBLY), "--serve", "--content-root", ProjectSettings.globalize_path(CONTENT_ROOT)])
+	_host_pid = OS.create_process(ProjectSettings.globalize_path(DOTNET_EXECUTABLE), ["exec", ProjectSettings.globalize_path(HOST_ASSEMBLY), "--serve", "--content-root", ProjectSettings.globalize_path(CONTENT_ROOT), "--gameplay-config", ProjectSettings.globalize_path(GAMEPLAY_CONFIG)])
 	_request_frame.call_deferred()
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -87,6 +88,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if _client_state == ClientState.DUNGEON and event.is_action_pressed("interact"):
 		_send_intent({"type": "interact"})
+	elif _client_state == ClientState.DUNGEON and event.is_action_pressed("collect_treasure"):
+		_send_intent({"type": "collect_treasure"})
 	elif _client_state == ClientState.DUNGEON and event.is_action_pressed("leave_dungeon"):
 		_send_intent({"type": "leave_dungeon"})
 	elif _client_state == ClientState.DUNGEON and event.is_action_pressed("stairs_down"):
@@ -150,6 +153,7 @@ func _register_input_actions() -> void:
 	_register_key("open_inventory", KEY_I)
 	_register_key("open_spells", KEY_K)
 	_register_key("interact", KEY_F)
+	_register_key("collect_treasure", KEY_G)
 	_register_key("leave_dungeon", KEY_L)
 	_register_key("stairs_down", KEY_R)
 	_register_key("stairs_up", KEY_T)
