@@ -185,10 +185,7 @@
         "required": ["correctness"],
         "conditional": ["tests", "architecture", "presentation"]
       },
-      "verification": { "headless": true, "godot_manual": true },
-      "decision_state": "blocked",
-      "blocker": "Queued behind the accepted TEL-129 slice for the next implementation run.",
-      "blocker_kind": "decision"
+      "verification": { "headless": true, "godot_manual": true }
     },
     "TEL-131": {
       "track": "presentation",
