@@ -2869,66 +2869,29 @@ The complete ordered implementation ledger is documented in [docs/tasks/README.m
 - Full gate: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File
   ./eng/verify.ps1 -Mode Full` passed; 447 Release tests passed.
 
-## TEL-125 continuation evidence — 2026-08-24
+## TEL-129 verification
 
-- Implemented explicit Godot presentation contexts (`INN`, `EXPLORATION`,
-  `COMBAT`, `MENU`, and `DEATH`) with deterministic modal selection, confirm,
-  cancel/back, pause resume, and gameplay-input isolation. Spell selection now
-  submits the selected stable spell ID through the existing combat/Core path;
-  the implicit first-spell quick cast was removed.
-- Map, journal, inventory, spell, and equipment panels now expose selection and
-  empty-state feedback. Equipment slots were added to the renderer-safe frame
-  solely to support authoritative unequip; no item-instance ownership or save
-  state was added. Exact monster current HP was removed from the modern
-  renderer/host projection; committed damage cues remain available.
-- Godot 4.7.2 headless editor/runtime checks passed. Focused tests passed:
-  `ModernRendererTests` (7), `GodotHostCompositionTests` (2), and
-  `RendererSaveCompatibilityTests` (1). Canonical
-  `powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./eng/verify.ps1
-  -Mode Full` passed with 450 Release tests, 0 warnings, and 0 errors.
-- Non-headless Godot 4.7.2 acceptance was launched from
-  `src/Telengard.Godot` and keyboard navigation visibly opened the dungeon,
-  map modal, and responsive HUD. A runtime null-projection defect found during
-  that run was corrected and rechecked headlessly.
-- TEL-125 remains in progress. At this checkpoint manual acceptance could not
-  cover combat, features, or spell flow because the host bootstrap produced a
-  living character with 0/0 HP, 0/0 spell capacity, and no known spells/items;
-  that baseline evidence is superseded by the explicit acceptance bootstrap
-  recorded below.
-  Equip is similarly limited to projected occupied slots because inventory
-  entries currently lack authoritative item-instance identities. No recognized
-  controller device was present, so controller observation is not claimed.
-- No save schema/version change. TEL-126 save/suspend/load work and TEL-127
-  broader playable-client acceptance remain separate and incomplete.
+- 2026-08-25 — Implemented deterministic floor-aware Godot host composition.
+  The host now caches layouts by world seed, generator version, and floor,
+  routes movement against the authoritative current floor, dispatches Core
+  stair transitions and floor-1 leave, and bounds the MVP client to floors 1–5.
+- Save impact: none; the cache is transient host state and Core remains the
+  authority for position, legality, floor history, and events.
+- Focused evidence: 4 `GodotHostCompositionTests` passed, including repeated
+  deterministic lookup, the floor-6 boundary, and authoritative destination
+  floor selection. Godot 4.7.2 headless editor/runtime smoke checks passed.
+- Full gate: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File
+  ./eng/verify.ps1 -Mode Full` passed; 452 Release tests passed.
+- Pending acceptance: a real interactive Godot run exercising up/down stair
+  input and movement after the transition.
+# 2026-08-26 — TEL-130 production-host ecology composition
 
-## TEL-125 bootstrap and interaction update — 2026-08-24
-
-- Added the explicit `tools/Telengard.GodotHost/first-slice.config.json`
-  acceptance bootstrap for authored spells/items, player capacities,
-  deterministic feature placements, and encounter triggering. The host routes
-  feature outcomes and threat assessment through existing Core/content
-  resolvers; Godot remains presentation-only.
-- Added a bootstrap regression test. Godot 4.7.2 doctor/headless checks,
-  non-headless launch smoke, and the canonical Full gate passed with 453
-  Release tests, 0 warnings, and 0 errors.
-- TEL-125 remains in progress: the existing inventory model still lacks
-  authoritative item-instance ownership for equip, and no recognized
-  controller device was available for manual controller acceptance. Bootstrap
-  values are explicit application acceptance configuration, not product tuning.
-
-## TEL-125 combat and live keyboard update — 2026-08-24
-
-- The host application boundary now advances only the transient Core combat
-  lifecycle phases (`Contact`, threat assessment, enemy turn, and state
-  check); Core still validates and resolves every command and emits the phase
-  events. The Godot shell therefore receives a usable `PlayerAction` frame
-  instead of stalling after movement or a resolved action.
-- Modern cues now carry committed feature outcome details and damage/result
-  values without exposing hidden monster statistics. The renderer displays
-  those details as last-result feedback.
-- A real non-headless Godot 4.7.2 Windows keyboard route exercised startup,
-  dungeon entry, map input isolation, fountain interaction, attack, defend,
-  flee, qualitative threat, and explicit second-spell selection/cast. No
-  recognized controller device was available; controller acceptance remains
-  unclaimed. Item-instance ownership/equip remains a separate authoritative
-  dependency and TEL-126/TEL-127 remain separate.
+- Composed the production encounter tables, authored feature definitions, and
+  loot tables into the hosted Godot session through existing Core/content
+  resolvers.
+- Added deterministic authored feature placement, explicit MVP encounter
+  trigger configuration, normal treasure collection input, and renderer-safe
+  event cues.
+- Focused host tests and the canonical Full verification gate pass (454 Release
+  tests, zero build warnings/errors). Godot 4.7.2 headless initialization and
+  host-frame smoke checks pass; interactive ecology observation remains pending.

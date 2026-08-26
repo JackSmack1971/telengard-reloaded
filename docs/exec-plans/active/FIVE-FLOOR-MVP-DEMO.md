@@ -168,8 +168,10 @@ Godot acceptance run; a headless-only proof cannot pass the MVP gate.
   gaps that prevent legitimate five-floor play despite completed foundations.
 - [x] 2026-08-25 — Five-Floor MVP Demo milestone, gate, task sequence, and
   scheduling priority documented.
-- [ ] TEL-129 — deterministic floors 1–5 hosted session composition.
-- [ ] TEL-130 — production encounter/feature/treasure composition.
+-- [x] TEL-129 — deterministic floors 1–5 hosted session composition implemented,
+  verified, and accepted after the Godot 4.7.2 five-floor traversal.
+- [x] TEL-130 — production encounter/feature/treasure composition implemented;
+  interactive Godot observation remains pending.
 - [ ] TEL-131 — demo setup and combat playthrough closure.
 - [ ] TEL-132 — fixed-seed five-floor Godot acceptance.
 
