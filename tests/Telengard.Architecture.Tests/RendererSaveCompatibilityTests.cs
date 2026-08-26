@@ -137,7 +137,6 @@ public sealed class RendererSaveCompatibilityTests
         Assert.Equal(expectedModern.Combat, actualModern.Combat);
         Assert.Equal(expectedModern.Cues, actualModern.Cues);
         Assert.Equal(state.Combat!.Monster.DefinitionId, actualModern.Combat!.Monster.DefinitionId);
-        Assert.Equal(state.Combat.Monster.CurrentHitPoints, actualModern.Combat.Monster.CurrentHitPoints);
         Assert.Equal(state.Combat.Monster.Position, actualModern.Combat.Monster.Position);
         Assert.Equal(
             [ModernCueKind.DungeonEntered, ModernCueKind.PlayerMoved, ModernCueKind.CombatStarted],
@@ -147,6 +146,7 @@ public sealed class RendererSaveCompatibilityTests
         Assert.Equal(new ModernCue(ModernCueKind.CombatStarted), actualModern.Cues[2]);
         Assert.DoesNotContain(typeof(ModernMonsterMarker).GetProperties(), property =>
             property.Name is nameof(MonsterInstance.Level) or
+                nameof(MonsterInstance.CurrentHitPoints) or
                 nameof(MonsterInstance.TemporaryEffects) or
                 nameof(MonsterInstance.CurrentBehaviorState));
         Assert.Contains("EVENT dungeon_entered", actualTerminal);

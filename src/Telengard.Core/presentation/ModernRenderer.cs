@@ -61,7 +61,10 @@ public static class ModernRenderer
             events.Select(CreateCue).Where(cue => cue is not null).Cast<ModernCue>().ToArray(),
             state.Player.Inventory,
             state.Player.Spells,
-            state.Knowledge.Select(entry => entry.SubjectId));
+            state.Knowledge.Select(entry => entry.SubjectId),
+            state.Player.EquipmentSlots.Select(slot => new ModernEquipmentSlot(
+                slot.SlotId,
+                slot.ItemInstanceId)));
     }
 
     private static IReadOnlyList<ModernTileMarker> CreateTiles(PresentationState state)
@@ -116,6 +119,36 @@ public static class ModernRenderer
             activated.Position,
             activated.FeatureId,
             activated.ActivationCount),
+        FeatureOutcomeResolvedEvent outcome => new ModernCue(
+            ModernCueKind.FeatureOutcomeResolved,
+            outcome.Position,
+            outcome.FeatureId,
+            outcome.ActivationCount,
+            outcome.Effects.Concat(outcome.Observations)),
+        FountainOutcomeResolvedEvent outcome => new ModernCue(
+            ModernCueKind.FeatureOutcomeResolved,
+            outcome.Position,
+            outcome.FeatureId,
+            outcome.ActivationCount,
+            outcome.Effects.Concat(outcome.Observations)),
+        AltarOutcomeResolvedEvent outcome => new ModernCue(
+            ModernCueKind.FeatureOutcomeResolved,
+            outcome.Position,
+            outcome.FeatureId,
+            outcome.ActivationCount,
+            outcome.Effects.Concat(outcome.Observations)),
+        PitOutcomeResolvedEvent outcome => new ModernCue(
+            ModernCueKind.FeatureOutcomeResolved,
+            outcome.Position,
+            outcome.FeatureId,
+            outcome.ActivationCount,
+            outcome.Effects.Concat(outcome.Observations)),
+        TeleporterOutcomeResolvedEvent outcome => new ModernCue(
+            ModernCueKind.FeatureOutcomeResolved,
+            outcome.From,
+            outcome.FeatureId,
+            outcome.ActivationCount,
+            outcome.Effects.Concat(outcome.Observations)),
         EncounterStartedEvent => new ModernCue(ModernCueKind.CombatStarted),
         EncounterEndedEvent ended => new ModernCue(ModernCueKind.CombatEnded, EntityId: ended.EncounterId),
         CombatPhaseChangedEvent phaseChanged => new ModernCue(
@@ -168,6 +201,7 @@ public enum ModernCueKind
     DungeonLeft,
     FeatureDiscovered,
     FeatureActivated,
+    FeatureOutcomeResolved,
     CombatStarted,
     CombatEnded,
     CombatPhaseChanged,
@@ -255,22 +289,44 @@ public sealed record ModernMonsterMarker
 
         InstanceId = monster.InstanceId;
         DefinitionId = monster.DefinitionId;
-        CurrentHitPoints = monster.CurrentHitPoints;
         Position = monster.Position;
     }
 
     public Guid InstanceId { get; }
     public string DefinitionId { get; }
-    public int CurrentHitPoints { get; }
     public DungeonPosition Position { get; }
     public string PresentationKey => DefinitionId;
 }
 
-public sealed record ModernCue(
-    ModernCueKind Kind,
-    DungeonPosition? Position = null,
-    Guid? EntityId = null,
-    int? Value = null);
+public sealed record ModernCue
+{
+    public ModernCue(
+        ModernCueKind Kind,
+        DungeonPosition? Position = null,
+        Guid? EntityId = null,
+        int? Value = null,
+        IEnumerable<string>? Details = null)
+    {
+        this.Kind = Kind;
+        this.Position = Position;
+        this.EntityId = EntityId;
+        this.Value = Value;
+        this.Details = Details is null
+            ? null
+            : Array.AsReadOnly(Details.ToArray());
+    }
+
+    public ModernCueKind Kind { get; }
+    public DungeonPosition? Position { get; }
+    public Guid? EntityId { get; }
+    public int? Value { get; }
+    public IReadOnlyList<string>? Details { get; }
+}
+
+public sealed record ModernEquipmentSlot(string SlotId, Guid? ItemInstanceId)
+{
+    public bool Equipped => ItemInstanceId.HasValue;
+}
 
 public sealed record ModernRenderFrame
 {
@@ -285,7 +341,8 @@ public sealed record ModernRenderFrame
         IEnumerable<ModernCue> cues,
         IEnumerable<string>? inventory = null,
         IEnumerable<string>? spells = null,
-        IEnumerable<string>? journal = null)
+        IEnumerable<string>? journal = null,
+        IEnumerable<ModernEquipmentSlot>? equipment = null)
     {
         ArgumentNullException.ThrowIfNull(environment);
         ArgumentNullException.ThrowIfNull(hud);
@@ -304,6 +361,7 @@ public sealed record ModernRenderFrame
         Inventory = Copy(inventory ?? [], nameof(inventory));
         Spells = Copy(spells ?? [], nameof(spells));
         Journal = Copy(journal ?? [], nameof(journal));
+        Equipment = Copy(equipment ?? [], nameof(equipment));
     }
 
     public ModernScene Scene { get; }
@@ -317,6 +375,7 @@ public sealed record ModernRenderFrame
     public IReadOnlyList<string> Inventory { get; }
     public IReadOnlyList<string> Spells { get; }
     public IReadOnlyList<string> Journal { get; }
+    public IReadOnlyList<ModernEquipmentSlot> Equipment { get; }
 
     private static IReadOnlyList<T> Copy<T>(IEnumerable<T> values, string parameterName)
     {

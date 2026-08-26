@@ -115,6 +115,26 @@ public sealed class ModernRendererTests
     }
 
     [Fact]
+    public void Create_projects_committed_feature_outcome_details_without_hidden_state()
+    {
+        var position = new DungeonPosition(1, 2, 3);
+        var featureId = Guid.Parse("00000000-0000-0000-0000-000000000021");
+        var frame = ModernRenderer.Create(
+            PresentationStateAdapter.Create(GameState.Create(1234)),
+            [new FountainOutcomeResolvedEvent(
+                featureId,
+                position,
+                ActivationCount: 1,
+                Effects: [FountainEffectIds.RestoreSpellPower],
+                Observations: ["cold_water"])]);
+
+        var cue = Assert.Single(frame.Cues);
+        Assert.Equal(ModernCueKind.FeatureOutcomeResolved, cue.Kind);
+        Assert.Equal(featureId, cue.EntityId);
+        Assert.Equal([FountainEffectIds.RestoreSpellPower, "cold_water"], cue.Details);
+    }
+
+    [Fact]
     public void Create_returns_read_only_frame_collections_and_rejects_null_inputs()
     {
         var state = GameState.Create(1234);
@@ -298,7 +318,6 @@ public sealed class ModernRendererTests
         Assert.Equal(monsterId, frame.Combat.Monster.InstanceId);
         Assert.Equal("rat", frame.Combat.Monster.DefinitionId);
         Assert.Equal("rat", frame.Combat.Monster.PresentationKey);
-        Assert.Equal(9, frame.Combat.Monster.CurrentHitPoints);
         Assert.Equal(position, frame.Combat.Monster.Position);
     }
 
