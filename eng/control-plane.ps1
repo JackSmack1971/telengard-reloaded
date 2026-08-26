@@ -17,8 +17,17 @@ function Resolve-RepoPath([string]$RelativePath) {
     return Join-Path $script:RepositoryRoot $clean
 }
 
-function Assert-PathExists([string]$Reference, [string]$Source) {
-    $path = Resolve-RepoPath $Reference
+function Resolve-ReferencePath([string]$Reference, [string]$SourcePath) {
+    $rootPath = Resolve-RepoPath $Reference
+    if ($null -ne $SourcePath -and $Reference -notmatch '^(?:\.\.?[\\/]|[\\/])' -and $Reference -notmatch '^(?:\.codex|\.agents|docs|eng|src|tests|tools|content)[\\/]') {
+        $relativePath = Join-Path (Split-Path $SourcePath -Parent) ($Reference -split '#', 2)[0].Trim().Replace('/', '\\')
+        if (Test-Path -LiteralPath $relativePath) { return $relativePath }
+    }
+    return $rootPath
+}
+
+function Assert-PathExists([string]$Reference, [string]$Source, [string]$SourcePath = '') {
+    $path = Resolve-ReferencePath $Reference $SourcePath
     if ($null -ne $path -and -not (Test-Path -LiteralPath $path)) {
         throw "$Source references missing path '$Reference'."
     }
@@ -37,11 +46,11 @@ function Get-Anchor([string]$Path, [string]$Anchor) {
     return $false
 }
 
-function Assert-Reference([string]$Reference, [string]$Source) {
-    Assert-PathExists $Reference $Source
+function Assert-Reference([string]$Reference, [string]$Source, [string]$SourcePath = '') {
+    Assert-PathExists $Reference $Source $SourcePath
     if ($Reference.Contains('#')) {
         $parts = $Reference -split '#', 2
-        $path = Resolve-RepoPath $parts[0]
+        $path = Resolve-ReferencePath $parts[0] $SourcePath
         if ($null -ne $path -and (Test-Path -LiteralPath $path -PathType Leaf) -and -not (Get-Anchor $path $parts[1])) {
             throw "$Source references missing anchor '$Reference'."
         }
@@ -181,10 +190,10 @@ function Test-PlansAndGates {
                 if ($owners.ContainsKey($ticket)) { throw "TEL owner '$ticket' has multiple active plans." }
                 $owners[$ticket] = $plan.Name
             }
-            foreach ($reference in Get-LocalReferences $plan.FullName) { Assert-Reference $reference $plan.Name }
+            foreach ($reference in Get-LocalReferences $plan.FullName) { Assert-Reference $reference $plan.Name $plan.FullName }
         }
     }
-    foreach ($gate in Get-ChildItem (Join-Path $script:RepositoryRoot 'docs/gates') -Filter '*.md' -File) { foreach ($reference in Get-LocalReferences $gate.FullName) { Assert-Reference $reference $gate.Name } }
+    foreach ($gate in Get-ChildItem (Join-Path $script:RepositoryRoot 'docs/gates') -Filter '*.md' -File) { foreach ($reference in Get-LocalReferences $gate.FullName) { Assert-Reference $reference $gate.Name $gate.FullName } }
     Write-Host "Plans and gates valid ($($owners.Count) active plan owners)."
 }
 
