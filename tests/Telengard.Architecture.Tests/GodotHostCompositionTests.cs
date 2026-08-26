@@ -22,6 +22,10 @@ public sealed class GodotHostCompositionTests
         Assert.Same(first.Get(3), first.Get(3));
         Assert.Equal(first.Get(3).StairsUp, second.Get(3).StairsUp);
         Assert.Equal(first.Get(3).StairsDown, second.Get(3).StairsDown);
+        Assert.Equal(first.Get(3).Rooms, second.Get(3).Rooms);
+        for (var x = 0; x < first.Get(3).Width; x++)
+            for (var y = 0; y < first.Get(3).Height; y++)
+                Assert.Equal(first.Get(3).GetTile(new DungeonPosition(3, x, y)), second.Get(3).GetTile(new DungeonPosition(3, x, y)));
         Assert.Throws<InvalidOperationException>(() => first.Get(6));
     }
 
@@ -42,6 +46,76 @@ public sealed class GodotHostCompositionTests
 
         Assert.Equal(2, session.CurrentState.Player.Position.Floor);
         Assert.Equal(layouts.Get(2).StairsUp, session.CurrentState.Player.Position);
+    }
+
+    [Fact]
+    public void Host_traverses_and_revisits_all_mvp_floors_using_each_cached_layout()
+    {
+        var layouts = new FloorLayoutCache(1234, "generator-1");
+        var floorOne = layouts.Get(1);
+        var state = GameState.Create(1234) with
+        {
+            Inn = new InnState { IsAtInn = false },
+            Expedition = new ExpeditionState { Active = true, FloorsVisited = [1] },
+            Player = new PlayerState { Alive = true, Position = floorOne.StairsDown }
+        };
+        var session = CreateSession(state, layouts);
+
+        for (var floor = 1; floor < 5; floor++)
+        {
+            session.Dispatch(Request("{\"type\":\"change_floor\",\"direction\":\"Down\"}"));
+            Assert.Equal(layouts.Get(floor + 1).StairsUp, session.CurrentState.Player.Position);
+            MoveTo(session, layouts.Get(floor + 1), layouts.Get(floor + 1).StairsDown);
+        }
+
+        for (var floor = 5; floor > 1; floor--)
+        {
+            MoveTo(session, layouts.Get(floor), layouts.Get(floor).StairsUp);
+            session.Dispatch(Request("{\"type\":\"change_floor\",\"direction\":\"Up\"}"));
+            Assert.Equal(layouts.Get(floor - 1).StairsDown, session.CurrentState.Player.Position);
+        }
+
+        Assert.Contains(layouts.Get(2).StairsDown, session.CurrentState.Legacy.PersistentMap.VisitedPositions);
+        var beforeInvalidTransition = session.CurrentState;
+        Assert.Throws<InvalidOperationException>(() => session.Dispatch(Request("{\"type\":\"change_floor\",\"direction\":\"Up\"}")));
+        Assert.Equal(beforeInvalidTransition, session.CurrentState);
+    }
+
+    [Fact]
+    public void Host_rejects_mvp_boundary_transition_before_loading_an_out_of_range_layout()
+    {
+        var layouts = new FloorLayoutCache(1234, "generator-1");
+        var floorFive = layouts.Get(5);
+        var initial = GameState.Create(1234) with
+        {
+            Inn = new InnState { IsAtInn = false },
+            Expedition = new ExpeditionState { Active = true, FloorsVisited = [1, 5] },
+            Player = new PlayerState { Alive = true, Position = floorFive.StairsDown }
+        };
+        var session = CreateSession(initial, layouts);
+
+        Assert.Throws<InvalidOperationException>(() => session.Dispatch(Request("{\"type\":\"change_floor\",\"direction\":\"Down\"}")));
+        Assert.Equal(initial, session.CurrentState);
+    }
+
+    [Fact]
+    public void Host_composes_floor_one_leave_boundary()
+    {
+        var layouts = new FloorLayoutCache(1234, "generator-1");
+        var floorOne = layouts.Get(1);
+        var initial = GameState.Create(1234) with
+        {
+            Inn = new InnState { IsAtInn = false },
+            Expedition = new ExpeditionState { Active = true, FloorsVisited = [1], CarriedGold = 7 },
+            Player = new PlayerState { Alive = true, Position = floorOne.StairsDown, CarriedGold = 7 }
+        };
+        var session = CreateSession(initial, layouts);
+
+        session.Dispatch(Request("{\"type\":\"leave_dungeon\"}"));
+
+        Assert.True(session.CurrentState.Inn.IsAtInn);
+        Assert.False(session.CurrentState.Expedition.Active);
+        Assert.Equal(7, session.CurrentState.SecuredProgress.SecuredGold);
     }
 
     [Fact]
@@ -156,6 +230,42 @@ public sealed class GodotHostCompositionTests
     {
         using var document = JsonDocument.Parse(json);
         return document.RootElement.Clone();
+    }
+
+    private static void MoveTo(GodotSession session, FloorLayout layout, DungeonPosition destination)
+    {
+        var start = session.CurrentState.Player.Position;
+        var queue = new Queue<(DungeonPosition Position, IReadOnlyList<MovementDirection> Path)>();
+        var visited = new HashSet<DungeonPosition> { start };
+        queue.Enqueue((start, []));
+        while (queue.Count > 0)
+        {
+            var (position, path) = queue.Dequeue();
+            if (position == destination)
+            {
+                foreach (var direction in path)
+                    session.Dispatch(Request($"{{\"type\":\"move\",\"direction\":\"{direction}\"}}"));
+                Assert.Equal(destination, session.CurrentState.Player.Position);
+                return;
+            }
+
+            foreach (var (direction, next) in Neighbors(position))
+            {
+                if (next.X < 0 || next.X >= layout.Width || next.Y < 0 || next.Y >= layout.Height || !layout.IsWalkable(next) || !visited.Add(next))
+                    continue;
+                queue.Enqueue((next, [.. path, direction]));
+            }
+        }
+
+        throw new InvalidOperationException($"No walkable path to {destination}.");
+    }
+
+    private static IEnumerable<(MovementDirection Direction, DungeonPosition Position)> Neighbors(DungeonPosition position)
+    {
+        yield return (MovementDirection.North, new DungeonPosition(position.Floor, position.X, position.Y - 1));
+        yield return (MovementDirection.South, new DungeonPosition(position.Floor, position.X, position.Y + 1));
+        yield return (MovementDirection.East, new DungeonPosition(position.Floor, position.X + 1, position.Y));
+        yield return (MovementDirection.West, new DungeonPosition(position.Floor, position.X - 1, position.Y));
     }
 
     private static string RepositoryContentRoot() =>
