@@ -42,6 +42,13 @@ user explicitly changes the milestone.
 - Production-art tickets remain blocked until `docs/gates/ART-PRODUCTION-READY.md`
   passes.
 
+## Shared ticket implementation contract
+
+All TEL tickets use the following command-boundary rule: consume or add only
+commands required by the slice; validate commands inside the simulation; and
+allow presentation adapters only to create them. Individual ticket files link
+here instead of repeating this cross-cutting contract.
+
 ## Ordered ledger
 
 ### Foundation

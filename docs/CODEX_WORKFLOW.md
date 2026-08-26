@@ -93,7 +93,7 @@ moving.
 
 ## Durable status
 
-`docs/tasks/README.md` remains the human TEL status ledger. Ticket files define
+As established by the repository contract in [`AGENTS.md`](../AGENTS.md), `docs/tasks/README.md` remains the human TEL status ledger. Ticket files define
 scope and acceptance. `docs/tasks/index.json` is the compact scheduling
 projection. `docs/MVP_DEMO.md` defines the immediate product checkpoint.
 `docs/BUILD_STATUS.md` remains append-only historical evidence. Generated

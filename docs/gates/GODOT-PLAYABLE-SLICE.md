@@ -2,7 +2,7 @@
 
 > [!IMPORTANT]
 > **This is a post-MVP gate.** The immediate product milestone is the narrower
-> [`FIVE-FLOOR-MVP-DEMO.md`](docs/gates/FIVE-FLOOR-MVP-DEMO.md) gate owned by TEL-132.
+> [`FIVE-FLOOR-MVP-DEMO.md`](FIVE-FLOOR-MVP-DEMO.md) gate owned by TEL-132.
 > Do not use this broader checklist to pull save/load, full controller parity,
 > death/Legacy breadth, or other TEL-127 requirements ahead of TEL-129–TEL-132.
 
