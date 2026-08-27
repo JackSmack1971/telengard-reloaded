@@ -13,7 +13,7 @@ When a selected ticket belongs to an active umbrella plan, update only the durab
 The current highest-priority umbrella plan is
 `docs/exec-plans/active/FIVE-FLOOR-MVP-DEMO.md`, which coordinates TEL-129
 through TEL-132 toward the fixed-seed floor-1-through-floor-5 Godot MVP. The
-older `GODOT-PLAYABLE-VERTICAL-SLICE.md` plan remains active as a **post-MVP
+older `docs/exec-plans/active/GODOT-PLAYABLE-VERTICAL-SLICE.md` plan remains active as a **post-MVP
 continuation** for TEL-126/TEL-127/TEL-128 and should not pre-empt an eligible
 MVP ticket.
 
