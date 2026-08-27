@@ -414,7 +414,7 @@ integration and should not be frozen until TEL-128 passes.
 5. keep production-art work blocked until TEL-128 passes;
 6. require presentation observation for Godot-visible changes when the selected
    ticket requires it;
-7. use `godot-doctor.ps1` before claiming the runtime is unavailable; and
+7. use `eng/godot-doctor.ps1` before claiming the runtime is unavailable; and
 8. stop on unresolved tuning/visual/repository policy rather than inventing a
    permanent policy to keep automation moving.
 

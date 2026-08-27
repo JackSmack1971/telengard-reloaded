@@ -50,8 +50,8 @@ In scope after MVP completion:
 - remaining TEL-121/TEL-122 manual acceptance evidence where still outstanding;
 - remaining TEL-125 HUD/interaction acceptance breadth;
 - TEL-126 save/suspend/resume and application lifecycle integration;
-- TEL-127 full `GODOT-PLAYABLE-SLICE.md` acceptance;
-- TEL-128 `ART-PRODUCTION-READY.md` acceptance; and
+- TEL-127 full `docs/gates/GODOT-PLAYABLE-SLICE.md` acceptance;
+- TEL-128 `docs/gates/ART-PRODUCTION-READY.md` acceptance; and
 - coordination of production-art readiness only after client behavior is stable.
 
 Non-goals:

@@ -2,8 +2,7 @@
 
 ## Scope and environment
 
-- Checkout state: no committed `HEAD`; repository files are untracked in the
-  current workspace.
+- Checkout state: committed `HEAD` at the anchored repository revision.
 - SDK pin: `global.json` specifies `8.0.100`.
 - Observed SDK: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File
   .\eng\dotnet.ps1 --version` → `8.0.100`.
@@ -20,7 +19,7 @@ Focused test checkpoint:
 
 `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\eng\dotnet.ps1 test tests\Telengard.Architecture.Tests\Telengard.Architecture.Tests.csproj --configuration Release --no-restore --logger "console;verbosity=minimal"`
 
-Result: 266 passed, 0 failed.
+Result: 458 passed, 0 failed.
 
 Coverage checkpoint:
 
